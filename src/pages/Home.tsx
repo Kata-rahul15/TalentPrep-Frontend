@@ -1,16 +1,9 @@
-import { useEffect } from 'react'
 import { LogOut, Sparkles, ShieldCheck, CheckCircle2 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useAuth } from '@/services/authService'
 
 export default function Home() {
-  const { user, logout, fetchProfile } = useAuth()
-
-  useEffect(() => {
-    fetchProfile().catch((err) => {
-      console.error('Failed to fetch user profile:', err)
-    })
-  }, [])
+  const { user, logout } = useAuth()
 
   const handleLogout = async () => {
     try {

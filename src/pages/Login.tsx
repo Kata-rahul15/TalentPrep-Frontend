@@ -7,11 +7,11 @@ import PasswordField from '@/components/auth/PasswordField'
 import SocialLoginButtons from '@/components/auth/SocialLoginButtons'
 import ValidationMessage from '@/components/auth/ValidationMessage'
 import axios from 'axios'
-import { loginUser, useAuth, getErrorMessage, resendOtp } from '@/services/authService'
+import { useAuth, getErrorMessage, resendOtp } from '@/services/authService'
 
 export default function Login() {
   const navigate = useNavigate()
-  const { fetchProfile, showToast } = useAuth()
+  const { login, showToast } = useAuth()
   
   // Form state
   const [email, setEmail] = useState('')
@@ -87,8 +87,7 @@ export default function Login() {
     abortControllerRef.current = controller
 
     try {
-      await loginUser(email, password, controller.signal)
-      await fetchProfile()
+      await login({ type: 'local', email, password, signal: controller.signal })
       navigate('/home')
     } catch (error: any) {
       if (axios.isCancel(error)) return

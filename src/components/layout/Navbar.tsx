@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react'
 import { Menu, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
+import { useAuth } from '@/services/authService'
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
+  const { user, logout } = useAuth()
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10)
@@ -23,6 +25,14 @@ export default function Navbar() {
   const handleLinkClick = (href: string) => {
     setIsOpen(false)
     document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  const handleLogout = async () => {
+    try {
+      await logout()
+    } catch {
+      // handled in authService
+    }
   }
 
   return (
@@ -68,19 +78,44 @@ export default function Navbar() {
           </div>
 
           {/* Desktop Auth */}
-          <div className="hidden md:flex items-center gap-1">
-            <Link
-              to="/login"
-              className="font-medium text-[13.5px] text-gray-500 hover:text-gray-900 transition-colors px-4 py-2 rounded-lg hover:bg-gray-50"
-            >
-              Login
-            </Link>
-            <Link
-              to="/signup"
-              className="font-semibold text-[13.5px] text-gray-700 hover:text-gray-950 transition-colors px-4 py-2 rounded-lg hover:bg-gray-50"
-            >
-              Sign Up
-            </Link>
+          <div className="hidden md:flex items-center gap-2">
+            {user ? (
+              <div className="flex items-center gap-3">
+                <Link
+                  to="/home"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-secondary-bg hover:bg-secondary-bg/80 border border-border transition-colors"
+                >
+                  <div className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-[11px] uppercase">
+                    {user.username?.slice(0, 2) || 'US'}
+                  </div>
+                  <div className="flex flex-col text-left">
+                    <span className="text-xs font-bold text-foreground leading-tight">{user.username}</span>
+                    <span className="text-[10px] font-medium text-muted-foreground">{user.email}</span>
+                  </div>
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="font-medium text-[13.5px] text-gray-500 hover:text-danger transition-colors px-3 py-2 rounded-lg hover:bg-gray-50 cursor-pointer"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className="font-medium text-[13.5px] text-gray-500 hover:text-gray-900 transition-colors px-4 py-2 rounded-lg hover:bg-gray-50"
+                >
+                  Login
+                </Link>
+                <Link
+                  to="/signup"
+                  className="font-semibold text-[13.5px] text-gray-700 hover:text-gray-950 transition-colors px-4 py-2 rounded-lg hover:bg-gray-50"
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Toggle */}
@@ -115,22 +150,49 @@ export default function Navbar() {
                   {link.name}
                 </a>
               ))}
-              <div className="pt-4 border-t border-gray-100 grid grid-cols-2 gap-3 px-3">
-                <Link
-                  to="/login"
-                  onClick={() => setIsOpen(false)}
-                  className="font-semibold text-gray-700 py-3 rounded-xl border border-gray-200 bg-white text-center hover:bg-gray-50 transition-colors text-sm"
-                >
-                  Login
-                </Link>
-                <Link
-                  to="/signup"
-                  onClick={() => setIsOpen(false)}
-                  className="font-semibold text-white py-3 rounded-xl bg-primary hover:bg-primary-hover text-center transition-colors text-sm shadow-sm"
-                >
-                  Sign Up
-                </Link>
-              </div>
+              {user ? (
+                <div className="pt-4 border-t border-gray-100 flex flex-col gap-2 px-3">
+                  <Link
+                    to="/home"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center gap-3 p-3 rounded-xl bg-secondary-bg border border-border"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs uppercase">
+                      {user.username?.slice(0, 2) || 'US'}
+                    </div>
+                    <div className="flex flex-col text-left">
+                      <span className="text-xs font-bold text-foreground leading-tight">{user.username}</span>
+                      <span className="text-[10px] font-medium text-muted-foreground">{user.email}</span>
+                    </div>
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setIsOpen(false)
+                      handleLogout()
+                    }}
+                    className="w-full font-semibold text-danger py-2.5 rounded-xl border border-danger/20 bg-danger/5 text-center hover:bg-danger/10 transition-colors text-sm cursor-pointer"
+                  >
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <div className="pt-4 border-t border-gray-100 grid grid-cols-2 gap-3 px-3">
+                  <Link
+                    to="/login"
+                    onClick={() => setIsOpen(false)}
+                    className="font-semibold text-gray-700 py-3 rounded-xl border border-gray-200 bg-white text-center hover:bg-gray-50 transition-colors text-sm"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    to="/signup"
+                    onClick={() => setIsOpen(false)}
+                    className="font-semibold text-white py-3 rounded-xl bg-primary hover:bg-primary-hover text-center transition-colors text-sm shadow-sm"
+                  >
+                    Sign Up
+                  </Link>
+                </div>
+              )}
             </div>
           </motion.div>
         )}

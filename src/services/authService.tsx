@@ -26,17 +26,27 @@ api.interceptors.response.use(
 // DTO and Profile Interfaces
 export interface UserProfile {
   username: string
-  userId: number
+  userId: string | number
   email: string
   isAccountVerified: boolean
 }
 
+export type LoginOptions =
+  | { type: 'local'; email?: string; password?: string; signal?: AbortSignal }
+  | { type: 'oauth'; provider?: string; signal?: AbortSignal }
+
 interface AuthContextType {
   user: UserProfile | null
   loginState: (profile: UserProfile) => void
+  login: (
+    optionsOrEmail: string | LoginOptions,
+    passwordParam?: string,
+    signalParam?: AbortSignal
+  ) => Promise<UserProfile | void>
   logout: () => Promise<void>
   loading: boolean
-  fetchProfile: () => Promise<UserProfile>
+  getProfile: (signal?: AbortSignal) => Promise<UserProfile>
+  fetchProfile: (signal?: AbortSignal) => Promise<UserProfile>
   showToast: (message: string, type: 'success' | 'error') => void
 }
 
@@ -48,21 +58,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const navigate = useNavigate()
 
-  const fetchProfile = async () => {
-    const response = await getUserProfile()
+  // Fetch profile via getProfile() endpoint (used for OAuth flow & initial session restoration)
+  const getProfile = async (signal?: AbortSignal) => {
+    const response = await getUserProfile(signal)
     const { username, userId, email, isAccountVerified } = response.data
-    const profile = { username, userId, email, isAccountVerified }
+    const profile: UserProfile = { username, userId, email, isAccountVerified }
     setUser(profile)
     localStorage.setItem('tf_user', JSON.stringify(profile))
     return profile
   }
 
-  // Initialize state by calling /profile or falling back to localStorage
+  const fetchProfile = getProfile
+
+  // Initialize state during app load / after OAuth redirect to restore session from backend HTTP-only cookie
   useEffect(() => {
     let active = true
     const initializeAuth = async () => {
       try {
-        await fetchProfile()
+        await getProfile()
       } catch (err: any) {
         if (active) {
           if (err?.response?.status === 404) {
@@ -104,8 +117,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const loginState = (profile: UserProfile) => {
-    setUser(profile)
-    localStorage.setItem('tf_user', JSON.stringify(profile))
+    const { username, userId, email, isAccountVerified } = profile
+    const userProfile: UserProfile = { username, userId, email, isAccountVerified }
+    setUser(userProfile)
+    localStorage.setItem('tf_user', JSON.stringify(userProfile))
+  }
+
+  // Unified login method: handles LOCAL vs OAuth login flows automatically
+  const login = async (
+    optionsOrEmail: string | LoginOptions,
+    passwordParam?: string,
+    signalParam?: AbortSignal
+  ) => {
+    if (typeof optionsOrEmail === 'object') {
+      if (optionsOrEmail.type === 'oauth') {
+        // OAuth flow (Google / GitHub): call getProfile() exactly once after OAuth redirect/login
+        return await getProfile(optionsOrEmail.signal || signalParam)
+      } else {
+        // LOCAL login flow: email/password backend response returns user fields directly
+        const response = await loginUser(optionsOrEmail.email!, optionsOrEmail.password!, optionsOrEmail.signal || signalParam)
+        const { username, userId, email, isAccountVerified } = response.data
+        const profile: UserProfile = { username, userId, email, isAccountVerified }
+        setUser(profile)
+        localStorage.setItem('tf_user', JSON.stringify(profile))
+        return profile
+      }
+    } else {
+      // Direct string call: login(email, password, signal) for LOCAL login
+      const response = await loginUser(optionsOrEmail, passwordParam!, signalParam)
+      const { username, userId, email, isAccountVerified } = response.data
+      const profile: UserProfile = { username, userId, email, isAccountVerified }
+      setUser(profile)
+      localStorage.setItem('tf_user', JSON.stringify(profile))
+      return profile
+    }
   }
 
   const showToast = (message: string, type: 'success' | 'error') => {
@@ -131,7 +176,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loginState, logout, loading, fetchProfile, showToast }}>
+    <AuthContext.Provider value={{ user, loginState, login, logout, loading, getProfile, fetchProfile, showToast }}>
       {children}
       <AnimatePresence>
         {toast && (
@@ -187,6 +232,8 @@ export const resetPassword = (email: string, otp: string, newPassword: string, s
 export const getUserProfile = (signal?: AbortSignal) => {
   return api.get('/profile', { signal })
 }
+
+export const getProfile = getUserProfile
 
 export const logoutUser = () => api.post('/logout')
 
