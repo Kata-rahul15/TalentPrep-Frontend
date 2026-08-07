@@ -18,6 +18,8 @@ import ResumeEvaluation from '@/features/resume/pages/ResumeEvaluation'
 import JobMatch from '@/features/resume/pages/JobMatch'
 import ResumeChat from '@/features/resume/pages/ResumeChat'
 
+import OAuthCallback from '@/pages/OAuthCallback'
+
 // Guard for authenticated screens
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -70,6 +72,8 @@ export default function AppRoutes() {
           <Route path="/verify-otp" element={<PublicRoute><VerifyOtp /></PublicRoute>} />
           <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
           <Route path="/reset-password" element={<PublicRoute><ResetPassword /></PublicRoute>} />
+          <Route path="/oauth/success" element={<OAuthCallback />} />
+          <Route path="/oauth/callback" element={<OAuthCallback />} />
 
           {/* Dashboard/Home Route */}
           <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />

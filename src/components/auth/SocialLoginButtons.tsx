@@ -15,6 +15,7 @@ export default function SocialLoginButtons({ onSuccess: _onSuccess }: SocialLogi
         type="button"
         disabled={loadingProvider !== null}
         onClick={() => {
+          sessionStorage.setItem('oauth_pending', 'true')
           window.location.href = `${API.AUTH_BASE_URL}/oauth2/authorization/google`
         }}
         className="relative w-full flex items-center justify-center gap-2 px-3 py-2 bg-card hover:bg-secondary-bg border border-border text-foreground text-sm font-semibold rounded-lg transition-all duration-200 hover:-translate-y-0.5 cursor-pointer"
@@ -49,6 +50,7 @@ export default function SocialLoginButtons({ onSuccess: _onSuccess }: SocialLogi
         type="button"
         disabled={loadingProvider !== null}
         onClick={() => {
+          sessionStorage.setItem('oauth_pending', 'true')
           window.location.href = `${API.AUTH_BASE_URL}/oauth2/authorization/github`
         }}
         className="relative w-full flex items-center justify-center gap-2 px-3 py-2 bg-card hover:bg-secondary-bg border border-border text-foreground text-sm font-semibold rounded-lg transition-all duration-200 hover:-translate-y-0.5 cursor-pointer"

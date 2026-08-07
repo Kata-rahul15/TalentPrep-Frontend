@@ -70,7 +70,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchProfile = getProfile
 
-  // Initialize state on app startup from localStorage without automatic backend call to /profile
+  // Initialize state on app startup from localStorage or OAuth redirect
   useEffect(() => {
     const storedUser = localStorage.getItem('tf_user')
     if (storedUser) {
@@ -81,7 +81,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.removeItem('tf_user')
       }
     }
-    setLoading(false)
+
+    // Detect if returning from OAuth authentication flow
+    const isOAuthReturn =
+      sessionStorage.getItem('oauth_pending') === 'true' ||
+      window.location.search.includes('oauth') ||
+      window.location.search.includes('code=') ||
+      window.location.pathname.startsWith('/oauth')
+
+    if (isOAuthReturn) {
+      sessionStorage.removeItem('oauth_pending')
+      getProfile()
+        .then(() => {
+          setLoading(false)
+          navigate('/home', { replace: true })
+        })
+        .catch(() => {
+          setUser(null)
+          localStorage.removeItem('tf_user')
+          setLoading(false)
+        })
+    } else {
+      setLoading(false)
+    }
   }, [])
 
   // Listen to unauthorized interceptor event
