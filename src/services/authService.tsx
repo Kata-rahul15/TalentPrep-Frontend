@@ -70,39 +70,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchProfile = getProfile
 
-  // Initialize state during app load / after OAuth redirect to restore session from backend HTTP-only cookie
+  // Initialize state on app startup from localStorage without automatic backend call to /profile
   useEffect(() => {
-    let active = true
-    const initializeAuth = async () => {
+    const storedUser = localStorage.getItem('tf_user')
+    if (storedUser) {
       try {
-        await getProfile()
-      } catch (err: any) {
-        if (active) {
-          if (err?.response?.status === 404) {
-            const storedUser = localStorage.getItem('tf_user')
-            if (storedUser) {
-              try {
-                setUser(JSON.parse(storedUser))
-              } catch (e) {
-                localStorage.removeItem('tf_user')
-              }
-            }
-          } else {
-            setUser(null)
-            localStorage.removeItem('tf_user')
-          }
-        }
-      } finally {
-        if (active) {
-          setLoading(false)
-        }
+        const parsedUser = JSON.parse(storedUser)
+        setUser(parsedUser)
+      } catch (e) {
+        localStorage.removeItem('tf_user')
       }
     }
-
-    initializeAuth()
-    return () => {
-      active = false
-    }
+    setLoading(false)
   }, [])
 
   // Listen to unauthorized interceptor event
