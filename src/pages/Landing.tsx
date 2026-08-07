@@ -8,8 +8,19 @@ import Testimonials from '@/components/sections/Testimonials'
 import FAQ from '@/components/sections/FAQ'
 import CTA from '@/components/sections/CTA'
 import Footer from '@/components/layout/Footer'
+import OAuthCallback from '@/pages/OAuthCallback'
 
 export default function Landing() {
+  const isOAuthReturn =
+    typeof window !== 'undefined' &&
+    (sessionStorage.getItem('oauth_pending') === 'true' ||
+     window.location.search.includes('oauth') ||
+     window.location.search.includes('code='))
+
+  if (isOAuthReturn) {
+    return <OAuthCallback />
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary">
       {/* Sticky Top Navigation Bar */}
