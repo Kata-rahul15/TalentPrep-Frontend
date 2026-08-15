@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import AuthLayout from '@/components/auth/AuthLayout'
 import AuthCard from '@/components/auth/AuthCard'
 import InputField from '@/components/auth/InputField'
@@ -11,6 +11,7 @@ import { useAuth, getErrorMessage, resendOtp } from '@/services/authService'
 
 export default function Login() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { login, showToast } = useAuth()
   
   // Form state
@@ -29,6 +30,24 @@ export default function Login() {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const abortControllerRef = useRef<AbortController | null>(null)
+
+  // Handle OAuth cancellation or failure query parameters
+  useEffect(() => {
+    const oauthStatus = searchParams.get('oauth')
+    const errorStatus = searchParams.get('error')
+
+    if (oauthStatus === 'cancelled' || errorStatus === 'oauth') {
+      sessionStorage.removeItem('oauth_pending')
+
+      if (oauthStatus === 'cancelled') {
+        setFormError('Google sign-in was cancelled. Please try again.')
+      } else {
+        setFormError('Google authentication failed. Please try again.')
+      }
+
+      navigate('/login', { replace: true })
+    }
+  }, [searchParams, navigate])
 
   // Validate email format
   const validateEmailStr = (val: string) => {
