@@ -1,63 +1,1062 @@
+import { api } from '@/services/authService'
 import { mockApi } from '../mock/resumeMock'
+
 import type {
   ResumeFile,
+  JobMatchInput,
   ResumeDetails,
   ResumeEvaluation,
   JobMatchResult,
+  JobMatchStatusResponse,
   ChatMessage,
   UploadResumeResponse,
 } from '../types/resume.types'
+// ─────────────────────────────────────────────────────────────
+// TalentPrep Resume API
+//
+// Architecture:
+//
+// Upload
+//   → Tika extraction
+//   → ONE Resume AI analysis
+//   → structured resume data + ATS evaluation
+//   → PostgreSQL
+//   → embeddings → PGVector
+//
+// After upload:
+//
+// Overview      → DB
+// Details       → DB
+// ATS Analysis  → DB
+//
+// Dynamic AI:
+//
+// Job Match     → ChatClient
+// RAG Chat      → ChatClient
+//
+// Frontend sends NO user identity headers.
+// Authentication/session is handled by the auth cookie + gateway.
+// ─────────────────────────────────────────────────────────────
 
-// ─── Resume API ───────────────────────────────────────────────────────────────
-// This is the only layer that talks to the data source.
-// Swapping mock → real backend only requires changing this file.
+
+/**
+ * Convert backend resume status into the frontend status model.
+ */
+function normalizeResumeStatus(
+  rawStatus: unknown
+): 'ready' | 'processing' | 'error' {
+  const status = String(rawStatus || '').toUpperCase()
+
+  if (
+    [
+      'FAILED',
+      'ERROR',
+      'FAILED_PARSING',
+      'FAILED_ANALYSIS',
+      'INVALID',
+    ].includes(status)
+  ) {
+    return 'error'
+  }
+
+  if (
+    [
+      'PROCESSING',
+      'IN_PROGRESS',
+      'PENDING',
+    ].includes(status)
+  ) {
+    return 'processing'
+  }
+
+  return 'ready'
+}
+
+
+/**
+ * Convert the backend resume metadata response into the
+ * frontend ResumeFile structure.
+ */
+function normalizeResumeRecord(raw: any): ResumeFile {
+  return {
+    id: raw?.id || raw?.resumeId || 'resume-001',
+
+    fileName:
+      raw?.resumeName ||
+      raw?.fileName ||
+      raw?.originalFilename ||
+      'Resume.pdf',
+
+    fileSize:
+      raw?.fileSize ??
+      raw?.size ??
+      350000,
+
+    fileType:
+      raw?.fileType ||
+      raw?.mimeType ||
+      (
+        raw?.resumeName?.toLowerCase().endsWith('.docx')
+          ? 'DOCX'
+          : 'PDF'
+      ),
+
+    uploadedAt:
+      raw?.createdAt ||
+      raw?.uploadedAt ||
+      new Date().toISOString(),
+
+    status: normalizeResumeStatus(raw?.status),
+  }
+}
+
+
+/**
+ * Determine whether the backend response represents
+ * a usable resume.
+ */
+function isUsableResumeStatus(status: unknown): boolean {
+  const statusUpper =
+    String(status || '').toUpperCase()
+
+  return ![
+    'FAILED',
+    'ERROR',
+    'FAILED_PARSING',
+    'FAILED_ANALYSIS',
+    'INVALID',
+  ].includes(statusUpper)
+}
+
 
 export const resumeApi = {
+
+  // ═══════════════════════════════════════════════════════════
+  // RESUME METADATA
+  // ═══════════════════════════════════════════════════════════
+
   /**
-   * GET /resume
-   * Returns the user's uploaded resume metadata, or null if none exists.
+   * GET /api/resumes/me
+   *
+   * Returns the user's uploaded resumes.
+   *
+   * This endpoint does NOT perform AI analysis.
    */
   getResume: async (): Promise<ResumeFile | null> => {
-    return mockApi.getResume()
+
+    console.log(
+      '[Resume] Checking whether user has a resume'
+    )
+
+    try {
+
+      const response =
+        await api.get('/api/resumes/me')
+
+      const data =
+        response.data
+
+      if (
+        !data ||
+        (
+          Array.isArray(data) &&
+          data.length === 0
+        ) ||
+        (
+          typeof data === 'object' &&
+          !Array.isArray(data) &&
+          Object.keys(data).length === 0
+        )
+      ) {
+
+        console.log(
+          '[Resume] No resume found'
+        )
+
+        return null
+      }
+
+
+      /*
+       * Backend currently returns a list from /me.
+       *
+       * We select the newest resume.
+       */
+      let item: any = null
+
+      if (Array.isArray(data)) {
+
+        const sorted =
+          [...data].sort((a, b) => {
+
+            const timeA =
+              new Date(
+                a?.createdAt ||
+                a?.uploadedAt ||
+                0
+              ).getTime()
+
+            const timeB =
+              new Date(
+                b?.createdAt ||
+                b?.uploadedAt ||
+                0
+              ).getTime()
+
+            return timeB - timeA
+          })
+
+        item = sorted[0]
+
+      } else {
+
+        item = data
+      }
+
+
+      if (!item) {
+        return null
+      }
+
+
+      const normalized =
+        normalizeResumeRecord(item)
+
+      console.log(
+        '[Resume] Resume found:',
+        normalized
+      )
+
+      return normalized
+
+    } catch (error: any) {
+
+      const status =
+        error?.response?.status
+
+      if (
+        status === 404 ||
+        status === 204
+      ) {
+
+        console.log(
+          '[Resume] No resume found'
+        )
+
+        return null
+      }
+
+      console.error(
+        '[Resume] Error fetching resume metadata',
+        error
+      )
+
+      throw error
+    }
   },
 
-  /**
-   * POST /resume/upload
-   * Uploads a resume file and returns upload metadata.
-   */
-  uploadResume: async (file: File): Promise<UploadResumeResponse> => {
-    return mockApi.uploadResume(file)
-  },
+
+  // ═══════════════════════════════════════════════════════════
+  // RESUME UPLOAD
+  // ═══════════════════════════════════════════════════════════
 
   /**
-   * GET /resume/details
-   * Returns the structured, parsed content of the resume.
+   * POST /api/resumes/upload
+   *
+   * IMPORTANT:
+   *
+   * This is now the main AI ingestion operation.
+   *
+   * Backend:
+   *
+   * File
+   *   ↓
+   * Tika
+   *   ↓
+   * text cleaning
+   *   ↓
+   * ONE ChatClient call
+   *   ↓
+   * complete structured resume analysis
+   *   ↓
+   * PostgreSQL
+   *   ↓
+   * embeddings → PGVector
    */
-  getResumeDetails: async (): Promise<ResumeDetails> => {
-    return mockApi.getResumeDetails()
+  uploadResume: async (
+    file: File,
+    resumeName?: string
+  ): Promise<UploadResumeResponse> => {
+
+    try {
+
+      const formData =
+        new FormData()
+
+      formData.append(
+        'resumeName',
+        resumeName || file.name
+      )
+
+      formData.append(
+        'file',
+        file
+      )
+
+
+      const response =
+        await api.post(
+          '/api/resumes/upload',
+          formData,
+          {
+            headers: {
+              'Content-Type':
+                'multipart/form-data',
+            },
+          }
+        )
+
+
+      console.log(
+        '[Resume] Upload successful'
+      )
+
+      return response.data
+
+    } catch (error: any) {
+
+      /*
+       * Keep mock fallback for local frontend development.
+       *
+       * Remove this later if you want network failures
+       * to always surface as real errors.
+       */
+      if (
+        error?.code === 'ERR_NETWORK'
+      ) {
+
+        console.warn(
+          '[Resume] Backend unavailable — using mock upload'
+        )
+
+        return mockApi.uploadResume(file)
+      }
+
+      throw error
+    }
   },
 
-  /**
-   * POST /resume/evaluate
-   * Triggers AI evaluation of the resume and returns scores/suggestions.
-   */
-  evaluateResume: async (): Promise<ResumeEvaluation> => {
-    return mockApi.evaluateResume()
-  },
+
+  // ═══════════════════════════════════════════════════════════
+  // RESUME DETAILS
+  // ═══════════════════════════════════════════════════════════
 
   /**
-   * POST /resume/job-match
-   * Matches resume against a pasted job description.
+   * GET /api/resumes/details
+   *
+   * Returns the complete structured resume for the user's
+   * latest/active resume.
+   *
+   * NO AI CALL.
+   *
+   * Data was already extracted during upload.
    */
-  matchJob: async (jobDescription: string): Promise<JobMatchResult> => {
-    return mockApi.matchJob(jobDescription)
+  getResumeDetails: async (
+    resumeId?: string
+  ): Promise<ResumeDetails> => {
+
+    try {
+
+      const url =
+        resumeId
+          ? `/api/resumes/${resumeId}/details`
+          : '/api/resumes/details'
+
+
+      const response =
+        await api.get(url)
+
+
+      console.log(
+        '[Resume] Resume details loaded from backend'
+      )
+
+      return response.data
+
+    } catch (error: any) {
+
+      console.error(
+        '[Resume] Error fetching resume details',
+        error
+      )
+
+      throw error
+    }
   },
 
+
+  // ═══════════════════════════════════════════════════════════
+  // RESUME OVERVIEW
+  // ═══════════════════════════════════════════════════════════
+
   /**
-   * POST /resume/chat
-   * Sends a message to the resume AI chat assistant.
+   * GET /api/resumes/overview
+   *
+   * Returns the dashboard data shown in the Resume Overview page.
+   *
+   * NO AI CALL.
+   *
+   * Example:
+   *
+   * ATS score
+   * Overall score
+   * Keyword match
+   * Technical skills score
+   * AI insight
+   * Highlights
+   * Recommendations
+   * Project count
+   * Experience count
+   * Education count
    */
-  chat: async (message: string, history: ChatMessage[]): Promise<ChatMessage> => {
-    return mockApi.chat(message, history)
+  getResumeOverview: async (
+    resumeId?: string
+  ): Promise<any> => {
+
+    try {
+
+      const url =
+        resumeId
+          ? `/api/resumes/${resumeId}/overview`
+          : '/api/resumes/overview'
+
+
+      const response =
+        await api.get(url)
+
+
+      console.log(
+        '[Resume] Overview loaded from backend'
+      )
+
+      return response.data
+
+    } catch (error: any) {
+
+      console.error(
+        '[Resume] Error fetching resume overview',
+        error
+      )
+
+      throw error
+    }
+  },
+
+
+  // ═══════════════════════════════════════════════════════════
+  // ATS ANALYSIS
+  // ═══════════════════════════════════════════════════════════
+
+  /**
+   * GET /api/resumes/ats-analysis
+   *
+   * IMPORTANT:
+   *
+   * This endpoint does NOT trigger ChatClient.
+   *
+   * The ATS evaluation was already generated during
+   * resume upload and persisted in PostgreSQL.
+   *
+   * Therefore:
+   *
+   * Frontend
+   *   ↓
+   * GET
+   *   ↓
+   * DB
+   *   ↓
+   * ATS response
+   */
+  getAtsAnalysis: async (
+    resumeId?: string
+  ): Promise<ResumeEvaluation> => {
+
+    try {
+
+      const url =
+        resumeId
+          ? `/api/resumes/${resumeId}/ats-analysis`
+          : '/api/resumes/ats-analysis'
+
+
+      const response =
+        await api.get(url)
+
+
+      console.log(
+        '[Resume] ATS evaluation loaded from backend'
+      )
+
+      return response.data
+
+    } catch (error: any) {
+
+      if (
+        error?.code === 'ERR_NETWORK'
+      ) {
+
+        console.warn(
+          '[Resume] Backend unavailable — using mock ATS evaluation'
+        )
+
+        return mockApi.evaluateResume()
+      }
+
+      console.error(
+        '[Resume] Error fetching ATS evaluation',
+        error
+      )
+
+      throw error
+    }
+  },
+
+
+  /**
+   * Backward-compatible alias.
+   *
+   * Existing React components may still call:
+   *
+   * resumeApi.evaluateResume()
+   *
+   * We keep the method so you don't have to immediately
+   * change every component.
+   *
+   * IMPORTANT:
+   * This no longer "evaluates" anything.
+   * It simply retrieves the already-generated evaluation.
+   */
+  evaluateResume: async (
+    resumeId?: string
+  ): Promise<ResumeEvaluation> => {
+
+    return resumeApi.getAtsAnalysis(
+      resumeId
+    )
+  },
+
+
+  // ═══════════════════════════════════════════════════════════
+  // JOB MATCHING
+  // ═══════════════════════════════════════════════════════════
+
+  /**
+   * POST /api/resumes/job-match
+   *
+   * This DOES use AI.
+   *
+   * Reason:
+   *
+   * The job description changes every time.
+   *
+   * Resume
+   *   +
+   * Job Description
+   *   ↓
+   * AI matching
+   *   ↓
+   * Match result
+   *//**
+* Job matching flow
+*
+* Step 1:
+* Create and persist the job description.
+*
+* POST /api/job-descriptions
+*
+* Step 2:
+* Match the user's resume against the saved job description.
+*
+* POST /api/resumes/{resumeId}/match
+*
+* Authentication:
+* - Frontend sends no user ID.
+* - API Gateway authenticates the request.
+* - API Gateway forwards the authenticated user details.
+* - Resume Service validates resume ownership.
+*/
+  /**
+   * Job matching flow
+   *
+   * Step 1:
+   * Create and persist the job description.
+   *
+   * Step 2:
+   * Match the selected resume against the saved job description.
+   *
+   * Important:
+   * - resumeId comes from the currently loaded resume.
+   * - Frontend does NOT send userId.
+   * - API Gateway handles authentication.
+   * - Missing optional JD fields are allowed.
+   */
+  // matchJob: async (
+  //   input: JobMatchInput,
+  //   resumeId: string
+  // ): Promise<JobMatchResult> => {
+  //   try {
+  //     // ─────────────────────────────────────────────────────────────
+  //     // Validate resume
+  //     // ─────────────────────────────────────────────────────────────
+
+  //     if (!resumeId?.trim()) {
+  //       throw new Error('Resume ID is required for job matching.')
+  //     }
+
+  //     // ─────────────────────────────────────────────────────────────
+  //     // Build a clean job description
+  //     //
+  //     // Only fields that actually contain information are included.
+  //     // ─────────────────────────────────────────────────────────────
+
+  //     const sections: string[] = []
+
+  //     const addSection = (
+  //       label: string,
+  //       value?: string | string[]
+  //     ) => {
+  //       if (Array.isArray(value)) {
+  //         const items = value
+  //           .map((item) => item?.trim())
+  //           .filter(Boolean)
+
+  //         if (items.length > 0) {
+  //           sections.push(`${label}:\n${items.join('\n')}`)
+  //         }
+
+  //         return
+  //       }
+
+  //       if (typeof value === 'string' && value.trim()) {
+  //         sections.push(`${label}:\n${value.trim()}`)
+  //       }
+  //     }
+
+  //     addSection('Job Title', input.title)
+  //     addSection('Company', input.companyName)
+  //     addSection('Location', input.location)
+  //     addSection('Employment Type', input.employmentType)
+  //     addSection('Work Mode', input.workMode)
+  //     addSection('Experience Level', input.experienceLevel)
+  //     addSection('Department', input.department)
+
+  //     addSection('Job Description', input.description)
+  //     addSection('Responsibilities', input.responsibilities)
+  //     addSection(
+  //       'Required Qualifications',
+  //       input.requiredQualifications
+  //     )
+  //     addSection(
+  //       'Preferred Qualifications',
+  //       input.preferredQualifications
+  //     )
+
+  //     addSection('Required Skills', input.requiredSkills)
+  //     addSection('Preferred Skills', input.preferredSkills)
+
+  //     addSection(
+  //       'Experience Required',
+  //       input.experienceRequired
+  //     )
+  //     addSection(
+  //       'Education Requirements',
+  //       input.educationRequirements
+  //     )
+  //     addSection('Certifications', input.certifications)
+
+  //     addSection('Salary', input.salary)
+  //     addSection('Benefits', input.benefits)
+
+  //     addSection(
+  //       'Additional Requirements',
+  //       input.additionalRequirements
+  //     )
+
+  //     const normalizedJobDescription = sections.join('\n\n')
+
+  //     // ─────────────────────────────────────────────────────────────
+  //     // Validate JD
+  //     //
+  //     // We allow missing individual fields.
+  //     // But completely empty input should not be submitted.
+  //     // ─────────────────────────────────────────────────────────────
+
+  //     if (!normalizedJobDescription.trim()) {
+  //       throw new Error(
+  //         'Please provide at least some job information before matching.'
+  //       )
+  //     }
+
+  //     // ─────────────────────────────────────────────────────────────
+  //     // STEP 1
+  //     // Create and persist the job description
+  //     // ─────────────────────────────────────────────────────────────
+
+  //     console.log('[Job Match] Creating job description')
+
+  //     const jobDescriptionResponse = await api.post(
+  //       '/api/job-descriptions',
+  //       {
+  //         // These are optional.
+  //         title: input.title?.trim() || null,
+  //         companyName: input.companyName?.trim() || null,
+
+  //         // Complete normalized JD.
+  //         description: normalizedJobDescription,
+  //       }
+  //     )
+
+  //     const jobDescriptionId =
+  //       jobDescriptionResponse.data?.id ||
+  //       jobDescriptionResponse.data?.jobDescriptionId
+
+  //     if (!jobDescriptionId) {
+  //       console.error(
+  //         '[Job Match] Job description was created but no ID was returned',
+  //         jobDescriptionResponse.data
+  //       )
+
+  //       throw new Error(
+  //         'Job description was created but the server did not return an ID.'
+  //       )
+  //     }
+
+  //     console.log(
+  //       '[Job Match] Job description created:',
+  //       jobDescriptionId
+  //     )
+
+  //     // ─────────────────────────────────────────────────────────────
+  //     // STEP 2
+  //     // Match resume against the saved job description
+  //     // ─────────────────────────────────────────────────────────────
+
+  //     console.log('[Job Match] Starting resume-job matching:', {
+  //       resumeId,
+  //       jobDescriptionId,
+  //     })
+
+  //     const matchResponse = await api.post(
+  //       `/api/resumes/${resumeId}/match`,
+  //       {
+  //         jobDescriptionId,
+  //       }
+  //     )
+
+  //     console.log('[Job Match] Matching completed')
+
+  //     return matchResponse.data
+  //   } catch (error: any) {
+  //     console.error('[Job Match] Job matching failed', error)
+
+  //     throw error
+  //   }
+  // },
+  matchJob: async (
+    input: JobMatchInput,
+    resumeId: string
+  ): Promise<JobMatchStatusResponse> => {
+    try {
+      if (!resumeId?.trim()) {
+        throw new Error('Resume ID is required for job matching.')
+      }
+
+      const sections: string[] = []
+
+      const addSection = (
+        label: string,
+        value?: string | string[]
+      ) => {
+        if (Array.isArray(value)) {
+          const items = value
+            .map((item) => item?.trim())
+            .filter(Boolean)
+
+          if (items.length > 0) {
+            sections.push(`${label}:\n${items.join('\n')}`)
+          }
+
+          return
+        }
+
+        if (typeof value === 'string' && value.trim()) {
+          sections.push(`${label}:\n${value.trim()}`)
+        }
+      }
+
+      addSection('Job Title', input.title)
+      addSection('Company', input.companyName)
+      addSection('Location', input.location)
+      addSection('Employment Type', input.employmentType)
+      addSection('Work Mode', input.workMode)
+      addSection('Experience Level', input.experienceLevel)
+      addSection('Department', input.department)
+
+      addSection('Job Description', input.description)
+      addSection('Responsibilities', input.responsibilities)
+
+      addSection(
+        'Required Qualifications',
+        input.requiredQualifications
+      )
+
+      addSection(
+        'Preferred Qualifications',
+        input.preferredQualifications
+      )
+
+      addSection(
+        'Required Skills',
+        input.requiredSkills
+      )
+
+      addSection(
+        'Preferred Skills',
+        input.preferredSkills
+      )
+
+      addSection(
+        'Experience Required',
+        input.experienceRequired
+      )
+
+      addSection(
+        'Education Requirements',
+        input.educationRequirements
+      )
+
+      addSection(
+        'Certifications',
+        input.certifications
+      )
+
+      addSection('Salary', input.salary)
+      addSection('Benefits', input.benefits)
+
+      addSection(
+        'Additional Requirements',
+        input.additionalRequirements
+      )
+
+      const normalizedJobDescription =
+        sections.join('\n\n')
+
+      if (!normalizedJobDescription.trim()) {
+        throw new Error(
+          'Please provide at least some job information before matching.'
+        )
+      }
+
+      // ---------------------------------------------------------
+      // STEP 1
+      // Create and persist job description
+      // ---------------------------------------------------------
+
+      console.log(
+        '[Job Match] Creating job description'
+      )
+
+      const jobDescriptionResponse =
+        await api.post(
+          '/api/job-descriptions',
+          {
+            title:
+              input.title?.trim() || null,
+
+            companyName:
+              input.companyName?.trim() || null,
+
+            description:
+              normalizedJobDescription,
+          }
+        )
+
+      const jobDescriptionId =
+        jobDescriptionResponse.data?.id ||
+        jobDescriptionResponse.data?.jobDescriptionId
+
+      if (!jobDescriptionId) {
+        throw new Error(
+          'Job description was created but the server did not return an ID.'
+        )
+      }
+
+      console.log(
+        '[Job Match] Job description created:',
+        jobDescriptionId
+      )
+
+      // ---------------------------------------------------------
+      // STEP 2
+      // START async matching
+      // ---------------------------------------------------------
+
+      console.log(
+        '[Job Match] Starting async matching:',
+        {
+          resumeId,
+          jobDescriptionId,
+        }
+      )
+
+      const matchResponse =
+        await api.post(
+          `/api/resumes/${resumeId}/match`,
+          {
+            jobDescriptionId,
+          }
+        )
+
+      console.log(
+        '[Job Match] Async matching started:',
+        matchResponse.data
+      )
+
+      return matchResponse.data
+
+    } catch (error: any) {
+      console.error(
+        '[Job Match] Job matching failed',
+        error
+      )
+
+      throw error
+    }
+  },
+
+  getJobMatchStatus: async (
+    resumeId: string,
+    matchId: string
+  ): Promise<JobMatchStatusResponse> => {
+    if (!resumeId?.trim()) {
+      throw new Error(
+        'Resume ID is required.'
+      )
+    }
+
+    if (!matchId?.trim()) {
+      throw new Error(
+        'Match ID is required.'
+      )
+    }
+
+    const response =
+      await api.get(
+        `/api/resumes/${resumeId}/match/${matchId}`
+      )
+
+    return response.data
+  },
+  // ═══════════════════════════════════════════════════════════
+  // RAG CHAT
+  // ═══════════════════════════════════════════════════════════
+  chat: async (
+    question: string
+  ): Promise<ChatMessage> => {
+
+    if (!question?.trim()) {
+      throw new Error('Chat message cannot be empty.')
+    }
+
+    const response = await api.post(
+      '/api/resumes/chat',
+      {
+        question: question.trim(),
+      }
+    )
+
+    return {
+      id: `assistant-${Date.now()}`,
+      role: 'assistant',
+      content: response.data.answer,
+      timestamp: new Date().toISOString(),
+    }
+  },
+  // ═══════════════════════════════════════════════════════════
+  // GET SINGLE RESUME
+  // ═══════════════════════════════════════════════════════════
+
+  /**
+   * GET /api/resumes/{resumeId}
+   *
+   * Returns resume metadata.
+   *
+   * NO AI CALL.
+   */
+  getResumeById: async (
+    resumeId: string
+  ): Promise<any> => {
+
+    const response =
+      await api.get(
+        `/api/resumes/${resumeId}`
+      )
+
+    return response.data
+  },
+
+
+  // ═══════════════════════════════════════════════════════════
+  // UPDATE RESUME
+  // ═══════════════════════════════════════════════════════════
+
+  /**
+   * PATCH /api/resumes/{resumeId}
+   *
+   * Updates stored resume data.
+   *
+   * IMPORTANT:
+   *
+   * If this endpoint modifies data that is also cached later,
+   * the backend should invalidate/update its cache.
+   */
+  updateResume: async (
+    resumeId: string,
+    data: Partial<ResumeDetails>
+  ): Promise<ResumeDetails> => {
+
+    const response =
+      await api.patch(
+        `/api/resumes/${resumeId}`,
+        data
+      )
+
+    return response.data
+  },
+
+
+  // ═══════════════════════════════════════════════════════════
+  // DELETE RESUME
+  // ═══════════════════════════════════════════════════════════
+
+  /**
+   * DELETE /api/resumes/{resumeId}
+   *
+   * Deletes the resume.
+   *
+   * Backend should also delete/invalidate:
+   *
+   * - resume sections
+   * - evaluation
+   * - vectors
+   * - cached data
+   */
+  deleteResume: async (
+    resumeId: string
+  ): Promise<void> => {
+
+    await api.delete(
+      `/api/resumes/${resumeId}`
+    )
   },
 }

@@ -7,7 +7,10 @@ import VerifyOtp from '@/pages/VerifyOtp'
 import ForgotPassword from '@/pages/ForgotPassword'
 import ResetPassword from '@/pages/ResetPassword'
 import Home from '@/pages/Home'
+import Interview from '@/pages/Interview'
+import Profile from '@/pages/Profile'
 import { AuthProvider, useAuth } from '@/services/authService'
+import AuthenticatedLayout from '@/components/layout/AuthenticatedLayout'
 
 // Resume module
 import ResumeLayout from '@/features/resume/components/ResumeLayout'
@@ -36,7 +39,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
     return <Navigate to="/login" replace />
   }
 
-  return <>{children}</>
+  return <AuthenticatedLayout>{children}</AuthenticatedLayout>
 }
 
 // Guard for guest-only screens (Login, Signup, etc.)
@@ -75,8 +78,10 @@ export default function AppRoutes() {
           <Route path="/oauth/success" element={<OAuthCallback />} />
           <Route path="/oauth/callback" element={<OAuthCallback />} />
 
-          {/* Dashboard/Home Route */}
+          {/* Authenticated Routes */}
           <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+          <Route path="/interview" element={<ProtectedRoute><Interview /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
 
           {/* Resume Module Routes */}
           <Route

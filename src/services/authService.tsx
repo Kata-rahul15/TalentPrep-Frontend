@@ -1,25 +1,126 @@
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { AnimatePresence } from 'framer-motion'
 import Toast from '@/components/layout/Toast'
 import { API } from '@/config/api'
 
-// Centralized API client pointing to Spring Boot backend
+// Centralized API client pointing to API Gateway backend with credentials enabled
 export const api = axios.create({
-  baseURL: API.AUTH_BASE_URL,
-  withCredentials: true, // Crucial for sending HttpOnly JWT cookie
+  baseURL: API.BASE_URL,
+  withCredentials: true, // Crucial for sending HttpOnly JWT cookies with all requests
 })
 
-// Setup Axios response interceptor for automatic logout on unauthorized responses
+// Request Interceptor: Map legacy relative auth endpoints to /api/auth/* routes
+api.interceptors.request.use((config) => {
+  if (config.url) {
+    const legacyAuthEndpoints = [
+      '/login',
+      '/register',
+      '/send-verify-otp',
+      '/resend-otp',
+      '/forgot-password',
+      '/send-reset-otp',
+      '/reset-password',
+      '/profile',
+      '/logout',
+      '/refresh',
+    ]
+    if (legacyAuthEndpoints.includes(config.url)) {
+      config.url = `/api/auth${config.url}`
+    }
+  }
+  return config
+})
+
+// Single-refresh mechanism state for concurrent 401 requests
+interface FailedQueueItem {
+  resolve: (value?: unknown) => void
+  reject: (reason?: any) => void
+}
+
+let isRefreshing = false
+let failedQueue: FailedQueueItem[] = []
+
+const processQueue = (error: any = null) => {
+  failedQueue.forEach((promise) => {
+    if (error) {
+      promise.reject(error)
+    } else {
+      promise.resolve()
+    }
+  })
+  failedQueue = []
+}
+
+// Axios Response Interceptor for automatic 401 token refresh & queueing
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+  async (error) => {
+    const originalRequest = error.config
+
+    // Only process HTTP 401 Unauthorized errors.
+    // Do NOT refresh for 400 Bad Request, 403 Forbidden, 404 Not Found, 409 Conflict, 422, 500, etc.
+    if (!error.response || error.response.status !== 401) {
+      return Promise.reject(error)
+    }
+
+    const requestUrl = originalRequest?.url || ''
+
+    // Prevent infinite loops by excluding auth endpoints from refresh logic
+    const isAuthEndpoint =
+      requestUrl.includes('/auth/refresh') ||
+      requestUrl.includes('/auth/login') ||
+      requestUrl.includes('/auth/register') ||
+      requestUrl.includes('/auth/logout') ||
+      requestUrl.includes('/send-verify-otp') ||
+      requestUrl.includes('/forgot-password') ||
+      requestUrl.includes('/reset-password')
+
+    if (isAuthEndpoint || originalRequest?._retry) {
+      if (requestUrl.includes('/auth/refresh') || originalRequest?._retry) {
+        localStorage.removeItem('tf_user')
+        window.dispatchEvent(new Event('auth-unauthorized'))
+      }
+      return Promise.reject(error)
+    }
+
+    // Handle concurrent requests: queue requests if a refresh is already in progress
+    if (isRefreshing) {
+      return new Promise((resolve, reject) => {
+        failedQueue.push({ resolve, reject })
+      })
+        .then(() => {
+          return api(originalRequest)
+        })
+        .catch((err) => {
+          return Promise.reject(err)
+        })
+    }
+
+    originalRequest._retry = true
+    isRefreshing = true
+
+    try {
+      // Send refresh request to Auth Service via API Gateway
+      await api.post('/api/auth/refresh', {}, { withCredentials: true })
+
+      // Refresh succeeded: new HttpOnly access token cookie set by backend
+      isRefreshing = false
+      processQueue(null)
+
+      // Retry original request once (browser automatically includes new HttpOnly cookie)
+      return api(originalRequest)
+    } catch (refreshError: any) {
+      // Refresh failed: session expired or invalid
+      isRefreshing = false
+      processQueue(refreshError)
+
       localStorage.removeItem('tf_user')
       window.dispatchEvent(new Event('auth-unauthorized'))
+
+      return Promise.reject(refreshError)
     }
-    return Promise.reject(error)
   }
 )
 
@@ -55,9 +156,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
+  const authInitialized = useRef(false)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const navigate = useNavigate()
-
   // Fetch profile via getProfile() endpoint (used for OAuth flow & initial session restoration)
   const getProfile = async (signal?: AbortSignal) => {
     const response = await getUserProfile(signal)
@@ -70,52 +171,56 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchProfile = getProfile
 
-  // Initialize state on app startup from localStorage or OAuth redirect
+  // Initialize authentication state
   useEffect(() => {
-    const storedUser = localStorage.getItem('tf_user')
-    if (storedUser) {
+    // Prevent duplicate initialization in React StrictMode
+    if (authInitialized.current) {
+      return
+    }
+
+    authInitialized.current = true
+
+    const initializeAuth = async () => {
       try {
-        const parsedUser = JSON.parse(storedUser)
-        setUser(parsedUser)
-      } catch (e) {
+        const storedUser = localStorage.getItem('tf_user')
+
+        if (storedUser) {
+          try {
+            const parsedUser = JSON.parse(storedUser)
+            setUser(parsedUser)
+          } catch {
+            localStorage.removeItem('tf_user')
+          }
+        }
+
+        const profile = await getProfile()
+
+        setUser(profile)
+        localStorage.setItem('tf_user', JSON.stringify(profile))
+      } catch {
+        setUser(null)
         localStorage.removeItem('tf_user')
+      } finally {
+        setLoading(false)
       }
     }
 
-    // Detect if returning from OAuth authentication flow
-    const isOAuthReturn =
-      sessionStorage.getItem('oauth_pending') === 'true' ||
-      window.location.search.includes('oauth') ||
-      window.location.search.includes('code=') ||
-      window.location.pathname.startsWith('/oauth')
-
-    if (isOAuthReturn) {
-      sessionStorage.removeItem('oauth_pending')
-      getProfile()
-        .then(() => {
-          setLoading(false)
-          navigate('/home', { replace: true })
-        })
-        .catch(() => {
-          setUser(null)
-          localStorage.removeItem('tf_user')
-          setLoading(false)
-        })
-    } else {
-      setLoading(false)
-    }
+    initializeAuth()
   }, [])
-
   // Listen to unauthorized interceptor event
   useEffect(() => {
     const handleUnauthorized = () => {
       setUser(null)
+      localStorage.removeItem('tf_user')
+      navigate('/login')
     }
+
     window.addEventListener('auth-unauthorized', handleUnauthorized)
+
     return () => {
       window.removeEventListener('auth-unauthorized', handleUnauthorized)
     }
-  }, [])
+  }, [navigate])
 
   const loginState = (profile: UserProfile) => {
     const { username, userId, email, isAccountVerified } = profile
@@ -132,7 +237,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   ) => {
     if (typeof optionsOrEmail === 'object') {
       if (optionsOrEmail.type === 'oauth') {
-        // OAuth flow (Google / GitHub): call getProfile() exactly once after OAuth redirect/login
+        // OAuth flow (Google / GitHub): call getProfile() after OAuth redirect
         return await getProfile(optionsOrEmail.signal || signalParam)
       } else {
         // LOCAL login flow: email/password backend response returns user fields directly
@@ -161,18 +266,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     try {
       await logoutUser()
-      setUser(null)
-      localStorage.removeItem('tf_user')
-      setToast({ message: 'Logout successful.', type: 'success' })
-      navigate('/')
     } catch (error: any) {
       if (axios.isCancel(error)) {
         return
       }
-      const backendMessage = error?.response?.data?.message || (typeof error?.response?.data === 'string' ? error.response.data : null)
-      const errorMsg = backendMessage || 'Failed to logout. Please try again.'
-      setToast({ message: errorMsg, type: 'error' })
-      throw error
+      console.error('Logout error:', error)
+    } finally {
+      setUser(null)
+      localStorage.removeItem('tf_user')
+      setToast({ message: 'Logout successful.', type: 'success' })
+      navigate('/')
     }
   }
 
@@ -200,59 +303,59 @@ export function useAuth() {
   return context
 }
 
-// API Contract Endpoints
+// API Contract Endpoints routed through Gateway
 
 export const registerUser = (username: string, email: string, password: string, signal?: AbortSignal) => {
-  return api.post('/register', { username, email, password }, { signal })
+  return api.post('/api/auth/register', { username, email, password }, { signal })
 }
 
 export const verifySignupOtp = (email: string, otp: string, signal?: AbortSignal) => {
-  return api.post('/send-verify-otp', { email, otp }, { signal })
+  return api.post('/api/auth/send-verify-otp', { email, otp }, { signal })
 }
 
 export const resendOtp = (email: string, signal?: AbortSignal) => {
-  return api.post('/resend-otp', { email }, { signal })
+  return api.post('/api/auth/resend-otp', { email }, { signal })
 }
 
 export const loginUser = (email: string, password: string, signal?: AbortSignal) => {
-  return api.post('/login', { email, password }, { signal })
+  return api.post('/api/auth/login', { email, password }, { signal })
 }
 
 export const forgotPassword = (email: string, signal?: AbortSignal) => {
-  return api.post('/forgot-password', { email }, { signal })
+  return api.post('/api/auth/forgot-password', { email }, { signal })
 }
 
 export const verifyResetOtp = (email: string, otp: string, signal?: AbortSignal) => {
-  return api.post('/send-reset-otp', { email, otp }, { signal })
+  return api.post('/api/auth/send-reset-otp', { email, otp }, { signal })
 }
 
 export const resetPassword = (email: string, otp: string, newPassword: string, signal?: AbortSignal) => {
-  return api.post('/reset-password', { email, otp, newPassword }, { signal })
+  return api.post('/api/auth/reset-password', { email, otp, newPassword }, { signal })
 }
 
 export const getUserProfile = (signal?: AbortSignal) => {
-  return api.get('/profile', { signal })
+  return api.get('/api/auth/profile', { signal })
 }
 
 export const getProfile = getUserProfile
 
-export const logoutUser = () => api.post('/logout')
+export const logoutUser = () => api.post('/api/auth/logout', {}, { withCredentials: true })
+
+export const refreshToken = () => api.post('/api/auth/refresh', {}, { withCredentials: true })
 
 // Reusable standard API error handling utility
 export function getErrorMessage(error: any): string {
   if (axios.isCancel(error)) {
-    return '' // Cancelled requests don't need UI feedback
+    return ''
   }
 
   if (error?.response?.data) {
     const data = error.response.data
 
-    // Check for validation / global exception messages from Spring Boot backend
     if (data.message) {
       return data.message
     }
 
-    // Support mapped global exceptions shape { error: true, message: "..." }
     if (data.error === true && data.message) {
       return data.message
     }
@@ -262,14 +365,12 @@ export function getErrorMessage(error: any): string {
     }
   }
 
-  // Handle generic network error (e.g. backend down)
   if (error?.message) {
     if (error.message === 'Network Error' || error.code === 'ERR_NETWORK') {
-      return 'Network connection error. Please verify the Spring Boot backend server is running.'
+      return 'Network connection error. Please verify the API Gateway backend server is running.'
     }
     return error.message
   }
 
   return 'An unexpected error occurred. Please try again.'
 }
-

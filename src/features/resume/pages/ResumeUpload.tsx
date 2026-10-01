@@ -33,9 +33,10 @@ export default function ResumeUpload() {
     if (!selectedFile) return
     try {
       await uploadMutation.mutateAsync(selectedFile)
+      console.log('[Resume] Resume upload successful')
       setUploadProgress(100)
       setUploadDone(true)
-      setTimeout(() => navigate('/resume/details'), 1500)
+      setTimeout(() => navigate('/resume', { replace: true }), 1500)
     } catch {
       // error handled by mutation
     }

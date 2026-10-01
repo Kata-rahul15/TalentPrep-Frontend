@@ -46,20 +46,38 @@ export interface Certification {
   credentialId?: string
 }
 
+export interface ProjectResponse {
+  name: string | null
+  description: string | null
+  technologies: string[] | null
+  highlights: string[] | null
+}
+
 export interface ResumeDetails {
   resumeId: string
-  name: string
-  email: string
-  phone: string
-  location: string
-  linkedIn?: string
-  github?: string
-  professionalSummary: string
-  skills: string[]
-  workExperience: WorkExperience[]
-  projects: Project[]
-  education: Education[]
-  certifications: Certification[]
+
+  resumeName: string
+  originalFilename: string
+
+  fileSize: number | null
+  mimeType: string | null
+
+  status: string
+  version: number | null
+  active: boolean | null
+
+  createdAt: string
+  updatedAt: string
+
+  summary: string | null
+  education: string | null
+  experience: string | null
+  projects: ProjectResponse[] | null
+  skills: string | null
+  certifications: string | null
+  achievements: string | null
+  languages: string | null
+  contactInformation: string | null
 }
 
 // ─── Evaluation DTOs ─────────────────────────────────────────────────────────
@@ -92,6 +110,32 @@ export interface ResumeEvaluation {
 
 // ─── Job Match DTOs ──────────────────────────────────────────────────────────
 
+export interface JobMatchInput {
+  title?: string
+  companyName?: string
+  location?: string
+  employmentType?: string
+  workMode?: string
+  experienceLevel?: string
+  department?: string
+
+  description?: string
+  responsibilities?: string
+  requiredQualifications?: string
+  preferredQualifications?: string
+
+  requiredSkills?: string[]
+  preferredSkills?: string[]
+
+  experienceRequired?: string
+  educationRequirements?: string
+  certifications?: string
+
+  salary?: string
+  benefits?: string
+
+  additionalRequirements?: string
+}
 export interface JobMatchRequest {
   jobDescription: string
 }
@@ -99,6 +143,31 @@ export interface JobMatchRequest {
 export interface SkillMatch {
   skill: string
   matched: boolean
+}
+
+export type JobMatchStatus =
+  | 'QUEUED'
+  | 'ANALYZING_JOB'
+  | 'RETRIEVING_EVIDENCE'
+  | 'EVALUATING_MATCH'
+  | 'CALCULATING_SCORE'
+  | 'COMPLETED'
+  | 'FAILED'
+
+export interface JobMatchStatusResponse {
+  matchId: string
+  resumeId: string
+  jobDescriptionId: string
+  status: JobMatchStatus
+
+  overallMatch: number | null
+  matchedSkills: string[]
+  missingSkills: string[]
+  missingKeywords: string[]
+  recommendations: string[]
+  summary?: string | null
+  evidence?: unknown[]
+  errorMessage?: string | null
 }
 
 export interface JobMatchResult {
@@ -113,22 +182,20 @@ export interface JobMatchResult {
 
 export type ChatRole = 'user' | 'assistant'
 
-export interface ChatMessage {
-  id: string
-  role: ChatRole
-  content: string
-  timestamp: string
-}
-
 export interface ChatRequest {
-  message: string
-  conversationHistory: ChatMessage[]
+  question: string
 }
 
 export interface ChatResponse {
-  message: ChatMessage
+  answer: string
+  sources?: ChatSource[]
 }
 
+export interface ChatSource {
+  section: string
+  chunkIndex: number
+  score: number
+}
 // ─── API Response Wrappers ───────────────────────────────────────────────────
 
 export interface ApiResponse<T> {

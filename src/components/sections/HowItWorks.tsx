@@ -1,91 +1,201 @@
-import { Sliders, Play, Award } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { Upload, Bot, TrendingUp } from 'lucide-react'
+import { motion, useInView } from 'framer-motion'
+import { useRef } from 'react'
+
+const steps = [
+  {
+    num: 1,
+    title: 'Upload & Analyze Your Resume',
+    desc: 'Drop your PDF or DOCX. TalentPrep parses every section and delivers an instant ATS evaluation — keyword coverage, formatting quality, and actionable improvement tips.',
+    Icon: Upload,
+    circleClass: 'bg-primary text-white shadow-[0_2px_14px_rgba(37,99,235,0.30)]',
+    iconClass:   'bg-primary/10 text-primary border border-primary/20',
+  },
+  {
+    num: 2,
+    title: 'Match Jobs & Practice with AI',
+    desc: 'Paste any job description for a precise match score. Then enter the AI interview room — choose your track (technical, HR, or behavioral) and practice with context-aware follow-up questions.',
+    Icon: Bot,
+    circleClass: 'bg-info text-white shadow-[0_2px_14px_rgba(14,165,233,0.30)]',
+    iconClass:   'bg-info/10 text-info border border-info/20',
+  },
+  {
+    num: 3,
+    title: 'Receive Feedback & Improve',
+    desc: 'Get performance metrics right after each session: STAR compliance, speech pace, filler words, and high-scoring alternative answers. Track your ATS score over time and arrive at every interview confident.',
+    Icon: TrendingUp,
+    circleClass: 'bg-success text-white shadow-[0_2px_14px_rgba(22,163,74,0.30)]',
+    iconClass:   'bg-success/10 text-success border border-success/20',
+  },
+]
 
 export default function HowItWorks() {
-  const steps = [
-    {
-      step: '01',
-      title: 'Choose Interview Type',
-      subtitle: 'Customize Your Practice',
-      desc: 'Select from front-end, back-end, HR screening, or behavioral interview tracks. Enter details about your targeted job role to generate contextual questions.',
-      icon: Sliders,
-      bgClass: 'bg-primary/5 text-primary border-primary/20',
-    },
-    {
-      step: '02',
-      title: 'Practice with AI Interviewer',
-      subtitle: 'Simulate the Environment',
-      desc: 'Engage with our interactive AI coach. Respond verbally using your mic or type answers. The AI will ask follow-up questions depending on your inputs.',
-      icon: Play,
-      bgClass: 'bg-primary/5 text-primary border-primary/20',
-    },
-    {
-      step: '03',
-      title: 'Receive Detailed Feedback',
-      subtitle: 'Review & Improve',
-      desc: 'Get immediate performance metrics. Review speech pace, fillers, STAR method compliance, and see alternative, high-scoring answer suggestions.',
-      icon: Award,
-      bgClass: 'bg-success/5 text-success border-success/20',
-    },
-  ]
+  const ref = useRef<HTMLDivElement>(null)
+  const inView = useInView(ref, { once: true, margin: '-80px' })
 
   return (
-    <section id="how-it-works" className="py-20 bg-background scroll-mt-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <p className="text-xs font-bold uppercase tracking-wider text-primary mb-2">Platform Flow</p>
-          <h2 className="font-heading font-extrabold text-3xl sm:text-4xl text-foreground tracking-tight mb-4">
+    <section
+      id="how-it-works"
+      className="py-20 md:py-28 bg-secondary-bg scroll-mt-20"
+    >
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        {/* ── Section header ─────────────────────────────── */}
+        {/* No kicker/eyebrow — the heading carries its own weight */}
+        <div className="text-center max-w-2xl mx-auto mb-16 md:mb-20">
+          <h2 className="font-heading font-black text-3xl sm:text-[2.25rem] md:text-[2.75rem] text-foreground tracking-tight leading-tight mb-4">
             How TalentPrep Works
           </h2>
           <p className="text-secondary-foreground text-base sm:text-lg leading-relaxed">
-            Get interview-ready in three straightforward steps. Practice regularly to reduce performance anxiety and master difficult questions.
+            From resume upload to offer-ready in three focused steps. Practice
+            regularly to cut interview anxiety and master every question type.
           </p>
         </div>
 
-        {/* Steps Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 relative">
-          
-          {/* Connector Line for Desktop */}
-          <div className="hidden lg:block absolute top-[28%] left-[10%] right-[10%] border-t border-dashed border-border -z-10" />
+        {/* ── Timeline ───────────────────────────────────── */}
+        <div ref={ref}>
 
-          {steps.map((item, idx) => {
-            const Icon = item.icon
-            return (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-50px' }}
-                transition={{ duration: 0.5, delay: idx * 0.15 }}
-                className="relative bg-card rounded-3xl border border-border p-8 shadow-sm hover:shadow-md transition-all flex flex-col items-center text-center gap-6 group hover:border-primary/20"
+          {/* ── DESKTOP: horizontal connected rail ──────── */}
+          <div className="hidden lg:block">
+
+            {/* Circle rail — circles centered over content columns below */}
+            <div className="relative flex justify-between items-center px-[calc(100%/6)] mb-8">
+
+              {/* Connector line — spans from circle 1 to circle 3 */}
+              <div
+                className="absolute inset-y-1/2 -translate-y-1/2 h-px bg-border overflow-hidden"
+                style={{ left: 'calc(100% / 6)', right: 'calc(100% / 6)' }}
               >
-                {/* Step badge */}
-                <span className="absolute top-4 right-6 font-heading font-extrabold text-4xl text-secondary-bg group-hover:text-primary/10 transition-colors">
-                  {item.step}
-                </span>
+                <motion.div
+                  className="h-full bg-primary/30"
+                  initial={{ scaleX: 0 }}
+                  animate={inView ? { scaleX: 1 } : { scaleX: 0 }}
+                  style={{ transformOrigin: '0% 50%' }}
+                  transition={{
+                    duration: 0.8,
+                    delay: 0.15,
+                    ease: [0.16, 1, 0.3, 1],
+                  }}
+                />
+              </div>
 
-                {/* Icon Circle */}
-                <div className={`w-16 h-16 rounded-2xl border flex items-center justify-center transition-all duration-300 ${item.bgClass} group-hover:scale-110 group-hover:shadow-sm`}>
-                  <Icon className="w-7 h-7" />
-                </div>
+              {steps.map((step, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, scale: 0.55 }}
+                  animate={inView ? { opacity: 1, scale: 1 } : {}}
+                  transition={{
+                    type: 'spring',
+                    stiffness: 140,
+                    damping: 14,
+                    delay: i * 0.22,
+                  }}
+                  className={`relative z-10 w-12 h-12 rounded-full flex items-center justify-center font-heading font-black text-lg flex-shrink-0 ${step.circleClass}`}
+                >
+                  {step.num}
+                </motion.div>
+              ))}
+            </div>
 
-                {/* Texts */}
-                <div className="flex flex-col gap-2">
-                  <span className="text-xs font-bold text-primary uppercase tracking-widest">
-                    {item.subtitle}
-                  </span>
-                  <h3 className="font-heading font-extrabold text-xl text-foreground">
-                    {item.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed mt-1">
-                    {item.desc}
-                  </p>
-                </div>
-              </motion.div>
-            )
-          })}
+            {/* Content cards — 3-col grid aligned under circles */}
+            <div className="grid grid-cols-3 gap-5">
+              {steps.map((step, i) => {
+                const Icon = step.Icon
+                return (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={inView ? { opacity: 1, y: 0 } : {}}
+                    transition={{
+                      duration: 0.5,
+                      delay: i * 0.18 + 0.42,
+                      ease: [0.16, 1, 0.3, 1],
+                    }}
+                    className="group flex flex-col gap-4 p-6 rounded-2xl bg-card border border-border hover:border-primary/25 hover:shadow-md transition-all duration-300"
+                  >
+                    {/* Icon */}
+                    <div
+                      className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-105 ${step.iconClass}`}
+                    >
+                      <Icon className="w-5 h-5" />
+                    </div>
+
+                    {/* Heading */}
+                    <h3 className="font-heading font-extrabold text-[1.05rem] text-foreground leading-snug">
+                      {step.title}
+                    </h3>
+
+                    {/* Description */}
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {step.desc}
+                    </p>
+                  </motion.div>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* ── MOBILE / TABLET: vertical connected timeline ── */}
+          <div className="lg:hidden flex flex-col">
+            {steps.map((step, i) => {
+              const Icon = step.Icon
+              return (
+                <motion.div
+                  key={`m-${i}`}
+                  initial={{ opacity: 0, x: -14 }}
+                  animate={inView ? { opacity: 1, x: 0 } : {}}
+                  transition={{
+                    duration: 0.45,
+                    delay: i * 0.14,
+                    ease: [0.16, 1, 0.3, 1],
+                  }}
+                  className="flex gap-5"
+                >
+                  {/* Left: circle + vertical line */}
+                  <div className="flex flex-col items-center flex-shrink-0 pt-0.5">
+                    <div
+                      className={`w-11 h-11 rounded-full flex items-center justify-center font-heading font-black text-base flex-shrink-0 ${step.circleClass}`}
+                    >
+                      {step.num}
+                    </div>
+                    {i < steps.length - 1 && (
+                      <motion.div
+                        className="w-px flex-1 bg-border mt-2 min-h-[48px]"
+                        initial={{ scaleY: 0 }}
+                        animate={inView ? { scaleY: 1 } : { scaleY: 0 }}
+                        style={{ transformOrigin: '50% 0%' }}
+                        transition={{
+                          duration: 0.45,
+                          delay: i * 0.14 + 0.25,
+                          ease: [0.16, 1, 0.3, 1],
+                        }}
+                      />
+                    )}
+                  </div>
+
+                  {/* Right: content */}
+                  <div
+                    className={`flex-1 flex flex-col gap-3 ${
+                      i < steps.length - 1 ? 'pb-8' : 'pb-0'
+                    }`}
+                  >
+                    <div
+                      className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${step.iconClass}`}
+                    >
+                      <Icon className="w-4 h-4" />
+                    </div>
+                    <h3 className="font-heading font-extrabold text-[1.05rem] text-foreground leading-snug">
+                      {step.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {step.desc}
+                    </p>
+                  </div>
+                </motion.div>
+              )
+            })}
+          </div>
+
         </div>
       </div>
     </section>

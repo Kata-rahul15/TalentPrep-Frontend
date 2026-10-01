@@ -1,154 +1,166 @@
-import { LogOut, Sparkles, ShieldCheck, CheckCircle2 } from 'lucide-react'
+import React from 'react'
 import { motion } from 'framer-motion'
+import { useNavigate } from 'react-router-dom'
+import { FileText, Briefcase, ArrowRight, Sparkles } from 'lucide-react'
 import { useAuth } from '@/services/authService'
+import homeIllustration from '@/assets/home-illustration.png'
 
 export default function Home() {
-  const { user, logout } = useAuth()
+  const navigate = useNavigate()
+  const { user } = useAuth()
 
-  const handleLogout = async () => {
-    try {
-      await logout()
-    } catch (err) {
-      console.error('Logout failed:', err)
-    }
-  }
-
-  // Animation configurations
-  const cardAnimation = {
-    hidden: { opacity: 0, scale: 0.95 },
-    visible: { opacity: 1, scale: 1, transition: { type: 'spring' as const, stiffness: 100, damping: 15 } }
-  }
-
+  // Clean user display name (e.g. "Rahul1213" -> "Rahul")
+  const displayName = React.useMemo(() => {
+    if (!user?.username) return 'User'
+    const cleaned = user.username.replace(/[0-9_.]/g, ' ').trim()
+    const firstWord = cleaned.split(/\s+/)[0]
+    if (!firstWord) return user.username
+    return firstWord.charAt(0).toUpperCase() + firstWord.slice(1)
+  }, [user?.username])
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col font-sans select-none">
-      
-      {/* ── Dashboard Top Header Navbar ── */}
-      <header className="bg-navbar-bg backdrop-blur-md border-b border-border shadow-sm relative z-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          {/* Logo */}
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white shadow-sm">
-              <svg className="w-[15px] h-[15px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M12 2L2 7l10 5 10-5-10-5z" />
-                <path d="M2 17l10 5 10-5" />
-                <path d="M2 12l10 5 10-5" />
-              </svg>
-            </div>
-            <span className="font-heading font-extrabold text-[1.15rem] tracking-tight text-foreground">
-              TalentPrep
-            </span>
-            <span className="ml-2.5 px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-extrabold uppercase tracking-wide border border-primary/20">
-              Console
-            </span>
-          </div>
+    <div className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-8 lg:px-12 py-6 sm:py-10 flex flex-col justify-between">
+      {/* ── Hero Section (2 Columns) ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+        {/* Left Side: Greeting & Description */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="lg:col-span-6 space-y-2 sm:space-y-3"
+        >
+          <h2 className="font-heading font-extrabold text-2xl sm:text-3xl lg:text-4xl text-slate-900 dark:text-white tracking-tight">
+            Welcome back,
+          </h2>
 
-          {/* User actions / logout */}
-          <div className="flex items-center gap-4">
-            {/* Avatar placeholder */}
-            <div className="flex items-center gap-2.5 cursor-pointer p-1.5 hover:bg-secondary-bg rounded-xl transition-all">
-              <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shadow-inner font-bold text-xs uppercase">
-                {user?.username?.slice(0, 2) || 'US'}
-              </div>
-              <div className="hidden sm:flex flex-col text-left">
-                <span className="text-xs font-bold text-foreground leading-tight">{user?.username || 'User'}</span>
-                <span className="text-[10px] font-medium text-muted-foreground">{user?.email || ''}</span>
-              </div>
-            </div>
-
-            {/* Logout button */}
-            <button
-              onClick={handleLogout}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-secondary-foreground hover:text-danger hover:bg-danger/10 rounded-xl transition-all"
-              title="Logout from console"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Logout</span>
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* ── Main Dashboard Body ── */}
-      <main className="flex-1 max-w-4xl mx-auto w-full px-4 py-10 sm:py-16 flex flex-col justify-center items-center">
-        
-        <div className="relative z-10 w-full flex flex-col items-center">
-          {/* Welcome Card Container */}
-          <motion.div
-            variants={cardAnimation}
-            initial="hidden"
-            animate="visible"
-            className="w-full bg-card border border-border rounded-3xl shadow-sm p-8 sm:p-12 text-center"
-          >
-            
-            {/* Success Shield Icon */}
-            <div className="w-16 h-16 rounded-full bg-success/10 text-success flex items-center justify-center shadow-sm mb-6 mx-auto">
-              <CheckCircle2 className="w-9 h-9" />
-            </div>
-
-            {/* Title / Hero message */}
-            <h1 className="font-heading font-black text-2xl sm:text-4xl text-foreground tracking-tight leading-tight">
-              Welcome to TalentPrep
+          <div className="relative inline-flex items-center gap-3">
+            <h1 className="font-heading font-black text-6xl sm:text-7xl lg:text-[88px] text-blue-600 dark:text-blue-500 tracking-tight leading-none">
+              {displayName}
             </h1>
-            
-            <p className="mt-3 text-sm sm:text-base text-muted-foreground max-w-md mx-auto leading-relaxed">
-              You have successfully logged in to the AI-powered prep center. Your journey to interview excellence is ready.
+            <Sparkles className="w-8 h-8 sm:w-10 sm:h-10 text-blue-500 fill-blue-500 flex-shrink-0 -mt-6" />
+          </div>
+
+          <div className="pt-2 sm:pt-3">
+            <p className="text-base sm:text-lg lg:text-xl text-slate-500 dark:text-slate-400 font-medium leading-relaxed max-w-md">
+              Let's continue your interview preparation journey and achieve your dream job.
             </p>
 
-            {/* Info cards row */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8 text-left">
-              {/* Card 1 */}
-              <div className="p-5 rounded-2xl bg-secondary-bg/30 border border-border flex gap-3.5">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
-                  <Sparkles className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-foreground">AI Roleplays</h4>
-                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                    Practice realistic interactive conversational roleplays with customized bots.
-                  </p>
-                </div>
+            {/* Subtle decorative brush stroke */}
+            <svg
+              className="w-24 sm:w-32 h-3 text-blue-500/80 stroke-current mt-3"
+              viewBox="0 0 120 12"
+              fill="none"
+              strokeWidth="3"
+              strokeLinecap="round"
+            >
+              <path d="M3,9 C30,3 70,11 117,4" />
+            </svg>
+          </div>
+        </motion.div>
+
+        {/* Right Side: Illustration Asset */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.96 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="lg:col-span-6 flex justify-center lg:justify-end"
+        >
+          <img
+            src={homeIllustration}
+            alt="Interview Preparation Illustration"
+            className="w-full max-w-[480px] lg:max-w-[560px] h-auto object-contain pointer-events-none select-none drop-shadow-xs"
+          />
+        </motion.div>
+      </div>
+
+      {/* ── Action Section (Resume & Interview Cards) ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.2 }}
+        className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 mt-10 sm:mt-14"
+      >
+        {/* 1. Resume Action Card */}
+        <div
+          onClick={() => navigate('/resume')}
+          className="bg-gradient-to-br from-blue-50/70 via-blue-50/30 to-indigo-50/40 dark:from-slate-900 dark:to-blue-950/30 border border-blue-100/90 dark:border-blue-900/40 rounded-3xl p-6 sm:p-8 relative overflow-hidden group hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 cursor-pointer flex flex-col justify-between min-h-[160px]"
+        >
+          <div className="flex items-center justify-between gap-4 z-10 relative">
+            <div className="flex items-center gap-5">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-blue-100/90 dark:bg-blue-900/60 text-blue-600 dark:text-blue-400 flex items-center justify-center flex-shrink-0 border border-blue-200/50 dark:border-blue-800/50 shadow-xs">
+                <FileText className="w-7 h-7 sm:w-8 sm:h-8" />
               </div>
 
-              {/* Card 2 */}
-              <div className="p-5 rounded-2xl bg-secondary-bg/30 border border-border flex gap-3.5">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
-                  <ShieldCheck className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-foreground">Performance Metrics</h4>
-                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                    Instantly view technical competence, communication score, and behavioral insights.
-                  </p>
-                </div>
+              <div>
+                <h3 className="font-heading font-extrabold text-xl sm:text-2xl text-slate-900 dark:text-white">
+                  Resume
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed max-w-xs">
+                  Optimize your resume, get AI feedback, and improve your ATS score.
+                </p>
               </div>
             </div>
 
-            {/* Launch button */}
-            <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center items-center">
-              <button
-                onClick={() => alert('Mock: Opening interview simulator...')}
-                className="w-full sm:w-auto px-8 py-3.5 bg-primary hover:bg-primary-hover text-white font-bold text-sm rounded-xl shadow-sm transition-all duration-200 hover:-translate-y-0.5 cursor-pointer"
-              >
-                Go to Simulator
-              </button>
-              
-              <button
-                onClick={handleLogout}
-                className="w-full sm:w-auto px-8 py-3.5 border border-border hover:bg-secondary-bg text-secondary-foreground hover:text-foreground text-sm font-bold rounded-xl transition-all duration-200 cursor-pointer"
-              >
-                Logout Account
-              </button>
+            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-xs border border-slate-200/80 dark:border-slate-700 flex items-center justify-center group-hover:scale-105 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all duration-200 flex-shrink-0">
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
             </div>
-            
-          </motion.div>
-          
-          <p className="text-xs text-muted-foreground mt-6 select-none">
-            TalentPrep v1.0.0 • Premium Dashboard Preview
-          </p>
+          </div>
+
+          {/* Decorative wave graphic at card bottom */}
+          <svg
+            className="absolute bottom-0 left-0 right-0 w-full h-10 text-blue-200/35 dark:text-blue-900/20 pointer-events-none"
+            viewBox="0 0 500 80"
+            preserveAspectRatio="none"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+          >
+            <path d="M0,40 Q125,70 250,30 T500,40" />
+            <path d="M0,55 Q125,25 250,55 T500,50" opacity="0.6" />
+          </svg>
         </div>
 
-      </main>
+        {/* 2. Interview Action Card */}
+        <div
+          onClick={() => navigate('/interview')}
+          className="bg-gradient-to-br from-purple-50/70 via-purple-50/30 to-indigo-50/40 dark:from-slate-900 dark:to-purple-950/30 border border-purple-100/90 dark:border-purple-900/40 rounded-3xl p-6 sm:p-8 relative overflow-hidden group hover:border-purple-300 dark:hover:border-purple-700 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 cursor-pointer flex flex-col justify-between min-h-[160px]"
+        >
+          <div className="flex items-center justify-between gap-4 z-10 relative">
+            <div className="flex items-center gap-5">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-purple-100/90 dark:bg-purple-900/60 text-purple-600 dark:text-purple-400 flex items-center justify-center flex-shrink-0 border border-purple-200/50 dark:border-purple-800/50 shadow-xs">
+                <Briefcase className="w-7 h-7 sm:w-8 sm:h-8" />
+              </div>
+
+              <div>
+                <h3 className="font-heading font-extrabold text-xl sm:text-2xl text-slate-900 dark:text-white">
+                  Interview
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed max-w-xs">
+                  Practice interviews with AI, improve your answers, and build confidence.
+                </p>
+              </div>
+            </div>
+
+            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white dark:bg-slate-800 text-purple-600 dark:text-purple-400 shadow-xs border border-slate-200/80 dark:border-slate-700 flex items-center justify-center group-hover:scale-105 group-hover:bg-purple-600 group-hover:text-white group-hover:border-purple-600 transition-all duration-200 flex-shrink-0">
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
+            </div>
+          </div>
+
+          {/* Decorative wave graphic at card bottom */}
+          <svg
+            className="absolute bottom-0 left-0 right-0 w-full h-10 text-purple-200/35 dark:text-purple-900/20 pointer-events-none"
+            viewBox="0 0 500 80"
+            preserveAspectRatio="none"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+          >
+            <path d="M0,40 Q125,70 250,30 T500,40" />
+            <path d="M0,55 Q125,25 250,55 T500,50" opacity="0.6" />
+          </svg>
+        </div>
+      </motion.div>
     </div>
   )
 }
+

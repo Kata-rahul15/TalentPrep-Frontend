@@ -1,22 +1,20 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { useAuth } from '@/services/authService'
 import {
   LayoutDashboard,
   FileText,
   BarChart3,
   Briefcase,
   MessageSquare,
-  LogOut,
-  ChevronRight,
+  RefreshCw,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-const navItems = [
-  { to: '/resume', label: 'Dashboard', icon: LayoutDashboard, end: true },
-  { to: '/resume/details', label: 'Resume Details', icon: FileText },
-  { to: '/resume/evaluation', label: 'ATS Evaluation', icon: BarChart3 },
+const resumeNavItems = [
+  { to: '/resume', label: 'Overview', icon: LayoutDashboard, end: true },
+  { to: '/resume/details', label: 'Details', icon: FileText },
+  { to: '/resume/evaluation', label: 'ATS Analysis', icon: BarChart3 },
   { to: '/resume/job-match', label: 'Job Match', icon: Briefcase },
-  { to: '/resume/chat', label: 'Resume Chat', icon: MessageSquare },
+  { to: '/resume/chat', label: 'AI Chat', icon: MessageSquare },
 ]
 
 interface ResumeLayoutProps {
@@ -24,127 +22,62 @@ interface ResumeLayoutProps {
 }
 
 export default function ResumeLayout({ children }: ResumeLayoutProps) {
-  const { user, logout } = useAuth()
   const navigate = useNavigate()
 
-  const handleLogout = async () => {
-    try {
-      await logout()
-    } catch {
-      // handled by auth service
-    }
-  }
-
   return (
-    <div className="min-h-screen bg-background flex">
-      {/* ── Sidebar ── */}
-      <aside className="hidden lg:flex w-60 flex-shrink-0 flex-col border-r border-border bg-sidebar-bg fixed top-0 left-0 h-full z-30">
-        {/* Logo */}
-        <div className="h-16 flex items-center gap-2.5 px-5 border-b border-border">
-          <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center text-white shadow-sm flex-shrink-0">
-            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path d="M12 2L2 7l10 5 10-5-10-5z" />
-              <path d="M2 17l10 5 10-5" />
-              <path d="M2 12l10 5 10-5" />
-            </svg>
-          </div>
-          <span className="font-heading font-extrabold text-[1rem] tracking-tight text-foreground">TalentPrep</span>
-        </div>
-
-        {/* Nav */}
-        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-          <p className="px-2 pb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-            Resume Module
+    <div className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      {/* ── 1. Resume Workspace Header ── */}
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <h1 className="font-heading font-extrabold text-2xl sm:text-3xl text-gray-900 dark:text-white tracking-tight">
+            Resume Workspace
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+            Analyze, evaluate, and optimize your resume
           </p>
-          {navItems.map((item) => (
+        </div>
+        <button
+          onClick={() => navigate('/resume/upload')}
+          className="inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all shadow-xs cursor-pointer"
+        >
+          <RefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-500" />
+          <span>Replace Resume</span>
+        </button>
+      </div>
+
+      {/* ── 2. Horizontal Secondary Resume Navbar ── */}
+      <div className="border-b border-slate-200 dark:border-slate-800">
+        <nav className="flex space-x-6 sm:space-x-8 overflow-x-auto scrollbar-none pb-0">
+          {resumeNavItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               end={item.end}
               className={({ isActive }) =>
                 cn(
-                  'flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all',
+                  'flex items-center gap-2 py-3 px-1 text-sm font-medium border-b-2 whitespace-nowrap transition-all flex-shrink-0',
                   isActive
-                    ? 'bg-primary/10 text-primary font-semibold'
-                    : 'text-secondary-foreground hover:bg-secondary-bg hover:text-foreground'
+                    ? 'border-blue-600 text-blue-600 dark:text-blue-400 font-semibold'
+                    : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:border-slate-300'
                 )
               }
             >
               {({ isActive }) => (
                 <>
-                  <item.icon className={cn('w-4 h-4 flex-shrink-0', isActive ? 'text-primary' : 'text-muted-foreground')} />
-                  <span className="flex-1">{item.label}</span>
-                  {isActive && <ChevronRight className="w-3.5 h-3.5 text-primary/60" />}
+                  <item.icon className={cn('w-4 h-4', isActive ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400')} />
+                  <span>{item.label}</span>
                 </>
               )}
             </NavLink>
           ))}
         </nav>
-
-        {/* User footer */}
-        <div className="border-t border-border p-3 space-y-1">
-          <div
-            onClick={() => navigate('/home')}
-            className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-secondary-bg cursor-pointer transition-colors"
-          >
-            <div className="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs uppercase flex-shrink-0">
-              {user?.username?.slice(0, 2) || 'US'}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-foreground truncate">{user?.username || 'User'}</p>
-              <p className="text-[10px] text-muted-foreground truncate">{user?.email || ''}</p>
-            </div>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-secondary-foreground hover:text-danger hover:bg-danger/10 transition-all"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            Logout
-          </button>
-        </div>
-      </aside>
-
-      {/* ── Main content ── */}
-      <div className="flex-1 lg:ml-60 flex flex-col min-h-screen">
-        {/* Mobile Top Bar */}
-        <header className="lg:hidden h-14 bg-navbar-bg backdrop-blur-md border-b border-border px-4 flex items-center justify-between z-20 sticky top-0">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center text-white">
-              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M12 2L2 7l10 5 10-5-10-5z" />
-                <path d="M2 17l10 5 10-5" />
-                <path d="M2 12l10 5 10-5" />
-              </svg>
-            </div>
-            <span className="font-heading font-bold text-sm text-foreground">TalentPrep</span>
-          </div>
-          {/* Mobile nav links */}
-          <nav className="flex items-center gap-1">
-            {navItems.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.end}
-                className={({ isActive }) =>
-                  cn(
-                    'p-2 rounded-lg transition-all',
-                    isActive ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground'
-                  )
-                }
-                title={item.label}
-              >
-                <item.icon className="w-4 h-4" />
-              </NavLink>
-            ))}
-          </nav>
-        </header>
-
-        {/* Page content */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto w-full">
-          {children}
-        </main>
       </div>
+
+      {/* ── 3. Subsection Content ── */}
+      <main className="w-full pt-1">
+        {children}
+      </main>
     </div>
   )
 }
+
