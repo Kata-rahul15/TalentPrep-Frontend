@@ -196,6 +196,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     authInitialized.current = true
 
     const initializeAuth = async () => {
+      console.log('[Auth] Initializing session authentication check...')
       try {
         const storedUser = localStorage.getItem('tf_user')
 
@@ -203,24 +204,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           try {
             const parsedUser = JSON.parse(storedUser)
             setUser(parsedUser)
+            console.log('[Auth] Restored optimistic user from localStorage:', parsedUser.email || parsedUser.username)
           } catch {
             localStorage.removeItem('tf_user')
           }
-        } else {
-          // If no stored user exists in localStorage, skip initial profile request for guest load
-          setLoading(false)
-          return
         }
 
+        // ALWAYS verify active cookie session with backend on initialization
+        console.log('[Auth] Verifying session with backend via /api/auth/profile...')
         const profile = await getProfile()
-
+        console.log('[Auth] Backend session verified successfully for user:', profile.email || profile.username)
         setUser(profile)
         localStorage.setItem('tf_user', JSON.stringify(profile))
-      } catch {
+      } catch (err: any) {
+        console.log('[Auth] Session check result: unauthenticated or guest user.')
         setUser(null)
         localStorage.removeItem('tf_user')
       } finally {
         setLoading(false)
+        console.log('[Auth] Authentication initialization complete. loading = false')
       }
     }
 

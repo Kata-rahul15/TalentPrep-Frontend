@@ -4,14 +4,22 @@ import { useAuth } from '@/services/authService'
 
 export default function OAuthCallback() {
   const navigate = useNavigate()
-  const { user, getProfile } = useAuth()
+  const { user, getProfile, loading } = useAuth()
   const hasRequestedRef = useRef(false)
 
   useEffect(() => {
     // Clear pending sessionStorage flag immediately to prevent repeat triggers
     sessionStorage.removeItem('oauth_pending')
 
+    console.log(`[OAuthCallback] Evaluating OAuth return state. loading=${loading}, user=${user ? user.email || user.username : 'null'}`)
+
+    if (loading) {
+      // AuthProvider session check is currently running, wait for it to settle
+      return
+    }
+
     if (user) {
+      console.log('[OAuthCallback] Active user session confirmed. Navigating to /home...')
       navigate('/home', { replace: true })
       return
     }
@@ -21,16 +29,18 @@ export default function OAuthCallback() {
 
     const processOAuth = async () => {
       try {
-        await getProfile()
+        console.log('[OAuthCallback] Explicitly calling getProfile() after OAuth return...')
+        const profile = await getProfile()
+        console.log('[OAuthCallback] getProfile() succeeded for:', profile.email || profile.username)
         navigate('/home', { replace: true })
-      } catch {
-        // If authentication fails (401/403/network error), safely redirect to public landing page
-        navigate('/', { replace: true })
+      } catch (err: any) {
+        console.error('[OAuthCallback] Failed to fetch profile after OAuth:', err?.message || err)
+        navigate('/login', { replace: true })
       }
     }
 
     processOAuth()
-  }, [user, getProfile, navigate])
+  }, [user, loading, getProfile, navigate])
 
   return (
     <div className="min-h-screen w-full bg-background flex flex-col items-center justify-center p-6 select-none">

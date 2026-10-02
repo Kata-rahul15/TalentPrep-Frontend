@@ -33,6 +33,8 @@ import ServiceWakeupScreen from '@/components/ServiceWakeupScreen'
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
 
+  console.log(`[RouteGuard:ProtectedRoute] loading=${loading}, user=${user ? user.email || user.username : 'null'}`)
+
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
@@ -42,6 +44,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   }
 
   if (!user) {
+    console.log('[RouteGuard:ProtectedRoute] Unauthenticated access to protected route. Redirecting to /login...')
     return <Navigate to="/login" replace />
   }
 
@@ -52,6 +55,8 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function PublicRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
 
+  console.log(`[RouteGuard:PublicRoute] loading=${loading}, user=${user ? user.email || user.username : 'null'}`)
+
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
@@ -61,6 +66,7 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   }
 
   if (user) {
+    console.log('[RouteGuard:PublicRoute] Authenticated user on guest route. Redirecting to /home...')
     return <Navigate to="/home" replace />
   }
 
