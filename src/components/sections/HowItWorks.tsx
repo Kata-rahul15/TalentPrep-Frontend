@@ -36,17 +36,16 @@ export default function HowItWorks() {
   return (
     <section
       id="how-it-works"
-      className="py-20 md:py-28 bg-secondary-bg scroll-mt-20"
+      className="py-14 sm:py-16 md:py-20 bg-secondary-bg scroll-mt-20"
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* ── Section header ─────────────────────────────── */}
-        {/* No kicker/eyebrow — the heading carries its own weight */}
-        <div className="text-center max-w-2xl mx-auto mb-16 md:mb-20">
-          <h2 className="font-heading font-black text-3xl sm:text-[2.25rem] md:text-[2.75rem] text-foreground tracking-tight leading-tight mb-4">
+        <div className="text-center max-w-2xl mx-auto mb-10 md:mb-12">
+          <h2 className="font-heading font-black text-2xl sm:text-3xl lg:text-4xl text-foreground tracking-tight leading-tight mb-3">
             How TalentPrep Works
           </h2>
-          <p className="text-secondary-foreground text-base sm:text-lg leading-relaxed">
+          <p className="text-secondary-foreground text-sm sm:text-base leading-relaxed">
             From resume upload to offer-ready in three focused steps. Practice
             regularly to cut interview anxiety and master every question type.
           </p>

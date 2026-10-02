@@ -39,37 +39,37 @@ export default function Navbar() {
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled
-          ? 'bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border-b border-gray-200/60 dark:border-gray-800/60 shadow-xs py-3.5'
-          : 'bg-transparent py-5'
+          ? 'bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border-b border-gray-200/60 dark:border-gray-800/60 shadow-xs py-2.5'
+          : 'bg-transparent py-3.5'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-10">
+        <div className="flex items-center justify-between h-9 sm:h-10">
           {/* Logo */}
           <div
-            className="flex-shrink-0 flex items-center gap-2.5 cursor-pointer group"
+            className="flex-shrink-0 flex items-center gap-2 cursor-pointer group"
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           >
-            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white shadow-sm transition-transform group-hover:scale-105">
-              <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center text-white shadow-sm transition-transform group-hover:scale-105">
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 2L2 7l10 5 10-5-10-5z" />
                 <path d="M2 17l10 5 10-5" />
                 <path d="M2 12l10 5 10-5" />
               </svg>
             </div>
-            <span className="font-heading font-extrabold text-[1.35rem] tracking-tight text-gray-900">
+            <span className="font-heading font-extrabold text-xl tracking-tight text-gray-900 dark:text-white">
               TalentPrep
             </span>
           </div>
 
           {/* Desktop Nav Links */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-6 lg:gap-8">
             {navLinks.map((link) => (
               <a
                 key={link.name}
                 href={link.href}
                 onClick={(e) => { e.preventDefault(); handleLinkClick(link.href) }}
-                className="relative font-medium text-[13.5px] text-gray-500 hover:text-gray-900 transition-colors duration-200 py-1 group"
+                className="relative font-medium text-sm text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors duration-200 py-1 group"
               >
                 {link.name}
                 <span className="absolute -bottom-0.5 left-0 w-0 h-[2px] rounded-full bg-primary transition-all duration-300 group-hover:w-full" />
@@ -95,7 +95,7 @@ export default function Navbar() {
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="font-medium text-[13.5px] text-gray-500 hover:text-danger transition-colors px-3 py-2 rounded-lg hover:bg-gray-50 cursor-pointer"
+                  className="font-medium text-sm text-gray-500 hover:text-danger transition-colors px-3 py-1.5 rounded-lg hover:bg-gray-50 cursor-pointer"
                 >
                   Logout
                 </button>
@@ -104,13 +104,13 @@ export default function Navbar() {
               <>
                 <Link
                   to="/login"
-                  className="font-medium text-[13.5px] text-gray-500 hover:text-gray-900 transition-colors px-4 py-2 rounded-lg hover:bg-gray-50"
+                  className="font-medium text-sm text-gray-500 hover:text-gray-900 transition-colors px-3.5 py-1.5 rounded-lg hover:bg-gray-50"
                 >
                   Login
                 </Link>
                 <Link
                   to="/signup"
-                  className="font-semibold text-[13.5px] text-gray-700 hover:text-gray-950 transition-colors px-4 py-2 rounded-lg hover:bg-gray-50"
+                  className="font-semibold text-sm text-gray-700 hover:text-gray-950 transition-colors px-3.5 py-1.5 rounded-lg hover:bg-gray-50"
                 >
                   Sign Up
                 </Link>

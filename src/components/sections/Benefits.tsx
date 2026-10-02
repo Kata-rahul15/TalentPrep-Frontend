@@ -42,22 +42,22 @@ export default function Benefits() {
   ]
 
   return (
-    <section id="benefits" className="py-20 bg-secondary-bg/30 scroll-mt-20">
+    <section id="benefits" className="py-14 sm:py-16 md:py-20 bg-secondary-bg/30 scroll-mt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
+        <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-12">
           <p className="text-xs font-bold uppercase tracking-wider text-primary mb-2">Value Proposition</p>
-          <h2 className="font-heading font-extrabold text-3xl sm:text-4xl text-foreground tracking-tight mb-4">
+          <h2 className="font-heading font-extrabold text-2xl sm:text-3xl lg:text-4xl text-foreground tracking-tight mb-3">
             Why Prepare with TalentPrep?
           </h2>
-          <p className="text-secondary-foreground text-base sm:text-lg leading-relaxed">
+          <p className="text-secondary-foreground text-sm sm:text-base leading-relaxed">
             Standard prep sites give you list of questions. We give you an interactive training gym to build muscle memory.
           </p>
         </div>
 
         {/* Benefits Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {benefitsList.map((benefit, idx) => {
             const Icon = benefit.icon
             return (
@@ -67,7 +67,7 @@ export default function Benefits() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true, margin: '-50px' }}
                 transition={{ duration: 0.4, delay: idx * 0.08 }}
-                className="bg-card rounded-3xl border border-border p-8 shadow-sm hover:shadow-md transition-all flex gap-5 items-start text-left hover:border-primary/20"
+                className="bg-card rounded-3xl border border-border p-6 sm:p-7 shadow-sm hover:shadow-md transition-all flex gap-4 sm:gap-5 items-start text-left hover:border-primary/20"
               >
                 {/* Icon Wrapper */}
                 <div className={`p-3 rounded-2xl border flex items-center justify-center flex-shrink-0 ${benefit.color}`}>

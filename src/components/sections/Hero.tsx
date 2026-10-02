@@ -273,7 +273,7 @@ export default function Hero() {
   return (
     <section
       ref={ref}
-      className="relative min-h-[90vh] pt-28 pb-20 md:pt-36 md:pb-28 overflow-hidden bg-background"
+      className="relative min-h-[85vh] pt-20 pb-14 md:pt-28 md:pb-20 overflow-hidden bg-background"
       aria-label="Hero"
     >
       {/* ── Background field ──────────────────────────── */}
@@ -294,7 +294,7 @@ export default function Hero() {
 
       {/* ── Content ───────────────────────────────────── */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:gap-16 xl:gap-20">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:gap-12 xl:gap-16">
 
           {/* ── LEFT: Editorial column ─────────────────── */}
           <motion.div
@@ -306,7 +306,7 @@ export default function Hero() {
             {/* Headline */}
             <motion.h1
               variants={itemVariants}
-              className="font-heading font-black text-[2.6rem] sm:text-5xl md:text-6xl lg:text-[3.75rem] xl:text-[4rem] tracking-tight text-foreground leading-[1.08] sm:leading-[1.1]"
+              className="font-heading font-black text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] xl:text-[3.5rem] tracking-tight text-foreground leading-[1.1] sm:leading-[1.12]"
             >
               Land Your Dream Job —
               <br className="hidden sm:block" />
@@ -318,7 +318,7 @@ export default function Hero() {
             {/* Subtitle */}
             <motion.p
               variants={itemVariants}
-              className="mt-6 text-base sm:text-lg md:text-xl text-secondary-foreground leading-relaxed max-w-[52ch] mx-auto lg:mx-0"
+              className="mt-4 sm:mt-5 text-sm sm:text-base md:text-lg text-secondary-foreground leading-relaxed max-w-[50ch] mx-auto lg:mx-0"
             >
               Analyze your resume with AI, match it to any job description, and
               practice realistic interviews — all in one focused platform built
@@ -328,15 +328,15 @@ export default function Hero() {
             {/* CTA row */}
             <motion.div
               variants={itemVariants}
-              className="mt-8 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3"
+              className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3"
             >
               <Link
                 to="/signup"
                 id="hero-cta-primary"
-                className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-primary hover:bg-primary-hover active:bg-primary-active text-white font-semibold text-base rounded-xl shadow-[0_4px_20px_rgba(37,99,235,0.35)] hover:shadow-[0_6px_28px_rgba(37,99,235,0.45)] hover:-translate-y-0.5 transition-all duration-200 group cursor-pointer w-full sm:w-auto justify-center"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary-hover active:bg-primary-active text-white font-semibold text-sm sm:text-base rounded-xl shadow-[0_4px_20px_rgba(37,99,235,0.35)] hover:shadow-[0_6px_28px_rgba(37,99,235,0.45)] hover:-translate-y-0.5 transition-all duration-200 group cursor-pointer w-full sm:w-auto justify-center"
               >
                 <span>Get Started Free</span>
-                <ArrowRight className="w-4.5 h-4.5 transition-transform duration-200 group-hover:translate-x-0.5" />
+                <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
               </Link>
 
               <a
@@ -346,7 +346,7 @@ export default function Hero() {
                   e.preventDefault()
                   document.querySelector('#how-it-works')?.scrollIntoView({ behavior: 'smooth' })
                 }}
-                className="inline-flex items-center gap-2 px-6 py-3.5 text-secondary-foreground hover:text-foreground font-semibold text-base rounded-xl border border-border hover:border-primary/30 hover:bg-secondary-bg transition-all duration-200 cursor-pointer w-full sm:w-auto justify-center"
+                className="inline-flex items-center gap-2 px-5 py-3 text-secondary-foreground hover:text-foreground font-semibold text-sm sm:text-base rounded-xl border border-border hover:border-primary/30 hover:bg-secondary-bg transition-all duration-200 cursor-pointer w-full sm:w-auto justify-center"
               >
                 <ChevronDown className="w-4 h-4" />
                 <span>See How It Works</span>

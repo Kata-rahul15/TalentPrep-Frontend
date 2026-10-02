@@ -42,13 +42,13 @@ export default function FAQ() {
   }
 
   return (
-    <section id="faq" className="py-20 bg-secondary-bg/30 scroll-mt-20">
+    <section id="faq" className="py-14 sm:py-16 md:py-20 bg-secondary-bg/30 scroll-mt-20">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
+        <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-12">
           <p className="text-xs font-bold uppercase tracking-wider text-primary mb-2">Support & Assistance</p>
-          <h2 className="font-heading font-extrabold text-3xl sm:text-4xl text-foreground tracking-tight mb-4">
+          <h2 className="font-heading font-extrabold text-2xl sm:text-3xl lg:text-4xl text-foreground tracking-tight mb-3">
             Frequently Asked Questions
           </h2>
           <p className="text-secondary-foreground text-sm sm:text-base">
@@ -57,7 +57,7 @@ export default function FAQ() {
         </div>
 
         {/* Accordions List */}
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3.5">
           {faqs.map((faq, idx) => {
             const isActive = activeIndex === idx
             return (
@@ -72,10 +72,10 @@ export default function FAQ() {
                 {/* Header Button */}
                 <button
                   onClick={() => toggleAccordion(idx)}
-                  className="w-full px-6 py-5 flex items-center justify-between gap-4 text-left font-semibold text-foreground focus:outline-none"
+                  className="w-full px-5 py-4 flex items-center justify-between gap-4 text-left font-semibold text-foreground focus:outline-none"
                   aria-expanded={isActive}
                 >
-                  <span className="text-base sm:text-lg">{faq.question}</span>
+                  <span className="text-sm sm:text-base">{faq.question}</span>
                   <div className={`p-1.5 rounded-lg border flex items-center justify-center flex-shrink-0 transition-colors ${
                     isActive ? 'bg-primary/10 border-primary/20 text-primary' : 'bg-secondary-bg border-border text-muted-foreground'
                   }`}>

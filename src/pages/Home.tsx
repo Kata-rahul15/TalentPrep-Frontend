@@ -21,33 +21,33 @@ export default function Home() {
   return (
     <div className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-8 lg:px-12 py-6 sm:py-10 flex flex-col justify-between">
       {/* ── Hero Section (2 Columns) ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
         {/* Left Side: Greeting & Description */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="lg:col-span-6 space-y-2 sm:space-y-3"
+          className="lg:col-span-6 space-y-1.5 sm:space-y-2"
         >
-          <h2 className="font-heading font-extrabold text-2xl sm:text-3xl lg:text-4xl text-slate-900 dark:text-white tracking-tight">
+          <h2 className="font-heading font-extrabold text-xl sm:text-2xl lg:text-3xl text-slate-900 dark:text-white tracking-tight">
             Welcome back,
           </h2>
 
-          <div className="relative inline-flex items-center gap-3">
-            <h1 className="font-heading font-black text-6xl sm:text-7xl lg:text-[88px] text-blue-600 dark:text-blue-500 tracking-tight leading-none">
+          <div className="relative inline-flex items-center gap-2">
+            <h1 className="font-heading font-black text-4xl sm:text-5xl lg:text-6xl text-blue-600 dark:text-blue-500 tracking-tight leading-none">
               {displayName}
             </h1>
-            <Sparkles className="w-8 h-8 sm:w-10 sm:h-10 text-blue-500 fill-blue-500 flex-shrink-0 -mt-6" />
+            <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500 fill-blue-500 flex-shrink-0 -mt-4" />
           </div>
 
-          <div className="pt-2 sm:pt-3">
-            <p className="text-base sm:text-lg lg:text-xl text-slate-500 dark:text-slate-400 font-medium leading-relaxed max-w-md">
+          <div className="pt-1.5 sm:pt-2">
+            <p className="text-sm sm:text-base lg:text-lg text-slate-500 dark:text-slate-400 font-medium leading-relaxed max-w-md">
               Let's continue your interview preparation journey and achieve your dream job.
             </p>
 
             {/* Subtle decorative brush stroke */}
             <svg
-              className="w-24 sm:w-32 h-3 text-blue-500/80 stroke-current mt-3"
+              className="w-20 sm:w-28 h-2.5 text-blue-500/80 stroke-current mt-2"
               viewBox="0 0 120 12"
               fill="none"
               strokeWidth="3"
@@ -68,7 +68,7 @@ export default function Home() {
           <img
             src={homeIllustration}
             alt="Interview Preparation Illustration"
-            className="w-full max-w-[480px] lg:max-w-[560px] h-auto object-contain pointer-events-none select-none drop-shadow-xs"
+            className="w-full max-w-[360px] lg:max-w-[440px] h-auto object-contain pointer-events-none select-none drop-shadow-xs"
           />
         </motion.div>
       </div>
@@ -78,7 +78,7 @@ export default function Home() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.2 }}
-        className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 mt-10 sm:mt-14"
+        className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 mt-6 sm:mt-8"
       >
         {/* 1. Resume Action Card */}
         <div

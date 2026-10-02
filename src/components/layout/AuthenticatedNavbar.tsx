@@ -27,26 +27,26 @@ export default function AuthenticatedNavbar() {
 
   return (
     <header className="sticky top-0 z-40 bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border-b border-border/80 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
         
         {/* ── Left Side: Brand Logo ── */}
         <div className="flex items-center gap-3">
-          <Link to="/home" className="flex items-center gap-2.5 group">
-            <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center text-white shadow-sm transition-transform group-hover:scale-105">
-              <svg className="w-[16px] h-[16px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <Link to="/home" className="flex items-center gap-2 group">
+            <div className="w-7.5 h-7.5 rounded-xl bg-primary flex items-center justify-center text-white shadow-sm transition-transform group-hover:scale-105">
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 2L2 7l10 5 10-5-10-5z" />
                 <path d="M2 17l10 5 10-5" />
                 <path d="M2 12l10 5 10-5" />
               </svg>
             </div>
-            <span className="font-heading font-extrabold text-[1.25rem] tracking-tight text-gray-900 dark:text-white">
+            <span className="font-heading font-extrabold text-xl tracking-tight text-gray-900 dark:text-white">
               TalentPrep
             </span>
           </Link>
         </div>
 
         {/* ── Center Navigation (Clean & Borderless) ── */}
-        <nav className="hidden md:flex items-center gap-8">
+        <nav className="hidden md:flex items-center gap-6 lg:gap-8">
           {navItems.map((item) => {
             const isActive = item.activePattern(location.pathname)
             return (
@@ -54,7 +54,7 @@ export default function AuthenticatedNavbar() {
                 key={item.label}
                 to={item.to}
                 className={cn(
-                  'relative font-medium text-[14px] transition-colors duration-200 py-1 group',
+                  'relative font-medium text-sm transition-colors duration-200 py-1 group',
                   isActive
                     ? 'text-primary font-bold'
                     : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
@@ -72,10 +72,10 @@ export default function AuthenticatedNavbar() {
         </nav>
 
         {/* ── Right Side: User Profile & Logout ── */}
-        <div className="hidden md:flex items-center gap-4">
+        <div className="hidden md:flex items-center gap-3">
           <div
             onClick={() => navigate('/profile')}
-            className="flex items-center gap-2.5 p-1.5 hover:bg-secondary-bg/60 rounded-xl transition-all cursor-pointer group"
+            className="flex items-center gap-2 p-1 hover:bg-secondary-bg/60 rounded-xl transition-all cursor-pointer group"
           >
             <div className="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs uppercase shadow-xs border border-primary/20">
               {user?.username?.slice(0, 2) || 'US'}
@@ -92,7 +92,7 @@ export default function AuthenticatedNavbar() {
 
           <button
             onClick={handleLogout}
-            className="font-medium text-[13.5px] text-gray-500 hover:text-danger hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors px-3 py-1.5 rounded-lg cursor-pointer flex items-center gap-1.5"
+            className="font-medium text-sm text-gray-500 hover:text-danger hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors px-2.5 py-1 rounded-lg cursor-pointer flex items-center gap-1.5"
             title="Logout"
           >
             <LogOut className="w-3.5 h-3.5" />

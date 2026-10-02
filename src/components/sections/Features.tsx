@@ -50,13 +50,13 @@ export default function Features() {
   }
 
   return (
-    <section id="features" className="py-24 bg-secondary-bg/30 scroll-mt-20">
+    <section id="features" className="py-14 sm:py-16 md:py-20 bg-secondary-bg/30 scroll-mt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <p className="text-xs font-bold uppercase tracking-[0.15em] text-primary mb-3">Core Capabilities</p>
-          <h2 className="font-heading font-extrabold text-3xl sm:text-4xl text-foreground tracking-tight mb-4">
+        <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-12">
+          <p className="text-xs font-bold uppercase tracking-[0.15em] text-primary mb-2">Core Capabilities</p>
+          <h2 className="font-heading font-extrabold text-2xl sm:text-3xl lg:text-4xl text-foreground tracking-tight mb-3">
             Everything You Need to Succeed
           </h2>
           <p className="text-muted-foreground text-base sm:text-lg leading-relaxed">
