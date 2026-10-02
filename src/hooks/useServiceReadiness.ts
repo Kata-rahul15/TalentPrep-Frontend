@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { checkServiceReadiness } from '@/services/healthService'
 import type { ServiceReadinessResponse } from '@/services/healthService'
+import { API } from '@/config/api'
 
 export type ServiceConnectionStatus = 'connecting' | 'waking' | 'ready' | 'connected' | 'unavailable'
 
@@ -26,7 +27,7 @@ const POLLING_INTERVAL_MS = 3000 // 3 seconds
 const MAX_TIMEOUT_MS = 90000 // 90 seconds
 
 export function useServiceReadiness(autoStart = false): UseServiceReadinessReturn {
-  const [isChecking, setIsChecking] = useState<boolean>(autoStart && !globalReadinessVerified)
+  const [isChecking, setIsChecking] = useState<boolean>(false)
   const [isReady, setIsReady] = useState<boolean>(globalReadinessVerified)
   const [isTimedOut, setIsTimedOut] = useState<boolean>(false)
   const [isFailed, setIsFailed] = useState<boolean>(false)
@@ -86,6 +87,7 @@ export function useServiceReadiness(autoStart = false): UseServiceReadinessRetur
     // Check timeout limit
     const totalElapsedMs = Date.now() - startTimeRef.current
     if (totalElapsedMs >= MAX_TIMEOUT_MS) {
+      console.warn(`[ServiceReadiness] Polling timeout reached (${MAX_TIMEOUT_MS / 1000}s). Stopping readiness checks.`)
       clearTimers()
       abortPendingRequest()
       setIsChecking(false)
@@ -123,7 +125,7 @@ export function useServiceReadiness(autoStart = false): UseServiceReadinessRetur
       }
 
       if (data.ready) {
-        // Readiness confirmed!
+        console.log('[ServiceReadiness] All microservices confirmed READY! Transitioning to application...')
         globalReadinessVerified = true
         setIsReady(true)
         setIsChecking(false)
@@ -149,6 +151,7 @@ export function useServiceReadiness(autoStart = false): UseServiceReadinessRetur
 
       // Non-retryable auth error
       if (err?.message?.includes('Authentication failure')) {
+        console.error('[ServiceReadiness] Non-retryable authentication failure:', err.message)
         clearTimers()
         setIsChecking(false)
         setIsFailed(true)
@@ -169,6 +172,7 @@ export function useServiceReadiness(autoStart = false): UseServiceReadinessRetur
   const startCheck = useCallback(
     (options?: { force?: boolean }) => {
       if (globalReadinessVerified && !options?.force) {
+        console.log('[ServiceReadiness] Services already verified ready in current session.')
         setIsReady(true)
         setIsChecking(false)
         setGatewayStatus('connected')
@@ -176,6 +180,9 @@ export function useServiceReadiness(autoStart = false): UseServiceReadinessRetur
         setResumeStatus('ready')
         return
       }
+
+      console.log('[ServiceReadiness] Initializing readiness checker...')
+      console.log('[ServiceReadiness] Resolved API Gateway URL:', API.BASE_URL)
 
       clearTimers()
       abortPendingRequest()
@@ -205,14 +212,15 @@ export function useServiceReadiness(autoStart = false): UseServiceReadinessRetur
     [clearTimers, abortPendingRequest, executePollStep]
   )
 
-  // Automatically start if requested and not verified
+  // Automatically start on mount if autoStart is true and not yet verified
   useEffect(() => {
-    if (autoStart && !globalReadinessVerified && !isChecking && !isReady && !isTimedOut && !isFailed) {
+    if (autoStart && !globalReadinessVerified && !isReady && !isTimedOut && !isFailed) {
       startCheck()
     }
-  }, [autoStart, startCheck, isChecking, isReady, isTimedOut, isFailed])
+  }, [autoStart, startCheck, isReady, isTimedOut, isFailed])
 
   const retry = useCallback(() => {
+    console.log('[ServiceReadiness] Manual retry triggered.')
     globalReadinessVerified = false
     startCheck({ force: true })
   }, [startCheck])

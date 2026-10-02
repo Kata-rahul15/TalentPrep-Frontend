@@ -10,24 +10,29 @@ export interface ServiceReadinessResponse {
 
 /**
  * Calls the API Gateway readiness endpoint GET /health/ready.
- * Returns the readiness status object.
+ * Returns normalized readiness status object.
  * Handles HTTP 200, HTTP 503 (cold start), timeouts, and network errors gracefully.
  */
 export const checkServiceReadiness = async (
   signal?: AbortSignal
 ): Promise<ServiceReadinessResponse> => {
-  // Use gateway base URL from API config
-  const url = `${API.BASE_URL}/health/ready`
+  const gatewayUrl = API.BASE_URL
+  const readinessUrl = `${gatewayUrl}/health/ready`
+
+  console.log(`[ServiceReadiness] Polling request: ${readinessUrl}`)
 
   try {
-    const response = await axios.get<ServiceReadinessResponse>(url, {
+    const response = await axios.get<ServiceReadinessResponse>(readinessUrl, {
       signal,
       timeout: 8000,
+      withCredentials: true,
       headers: {
         'Cache-Control': 'no-cache',
         Pragma: 'no-cache',
       },
     })
+
+    console.log(`[ServiceReadiness] HTTP ${response.status} response from ${readinessUrl}:`, response.data)
 
     if (response.data && typeof response.data === 'object') {
       return {
@@ -46,12 +51,17 @@ export const checkServiceReadiness = async (
     }
   } catch (err: any) {
     if (axios.isCancel(err)) {
+      console.log(`[ServiceReadiness] Request to ${readinessUrl} was canceled.`)
       throw err
     }
 
+    const status = err.response?.status
+    console.warn(`[ServiceReadiness] Network exception / response status (${status || 'No Response'}):`, err.message)
+
     // HTTP 503 is a standard cold-start response when microservices are booting up
-    if (err.response?.status === 503 && err.response?.data) {
+    if (status === 503 && err.response?.data) {
       const data = err.response.data
+      console.log(`[ServiceReadiness] HTTP 503 cold start status payload:`, data)
       return {
         status: data.status || 'STARTING',
         authService: data.authService || 'STARTING',
@@ -61,8 +71,8 @@ export const checkServiceReadiness = async (
     }
 
     // 401 or 403 authorization failures are non-retryable for health checks
-    if (err.response?.status === 401 || err.response?.status === 403) {
-      throw new Error(`Authentication failure during service check (${err.response.status})`)
+    if (status === 401 || status === 403) {
+      throw new Error(`Authentication failure during service check (${status})`)
     }
 
     // Cold start network connection error, gateway timeout, or 502/503 without body
