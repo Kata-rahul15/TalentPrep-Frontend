@@ -14,12 +14,14 @@ export interface ServiceReadinessResponse {
  * Handles HTTP 200, HTTP 503 (cold start), timeouts, and network errors gracefully.
  */
 export const checkServiceReadiness = async (
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  pollAttempt: number = 1
 ): Promise<ServiceReadinessResponse> => {
-  const gatewayUrl = API.BASE_URL
+  const gatewayUrl = API.BASE_URL.replace(/\/+$/, '')
   const readinessUrl = `${gatewayUrl}/health/ready`
 
-  console.log(`[ServiceReadiness] Polling request: ${readinessUrl}`)
+  console.log(`[ServiceReadiness] Poll attempt number: ${pollAttempt}`)
+  console.log(`[ServiceReadiness] Readiness request URL: ${readinessUrl}`)
 
   try {
     const response = await axios.get<ServiceReadinessResponse>(readinessUrl, {
@@ -32,7 +34,8 @@ export const checkServiceReadiness = async (
       },
     })
 
-    console.log(`[ServiceReadiness] HTTP ${response.status} response from ${readinessUrl}:`, response.data)
+    console.log(`[ServiceReadiness] Gateway HTTP status: ${response.status}`)
+    console.log(`[ServiceReadiness] Actual response JSON:`, response.data)
 
     if (response.data && typeof response.data === 'object') {
       return {
@@ -56,12 +59,13 @@ export const checkServiceReadiness = async (
     }
 
     const status = err.response?.status
-    console.warn(`[ServiceReadiness] Network exception / response status (${status || 'No Response'}):`, err.message)
+    console.warn(`[ServiceReadiness] Network or timeout error:`, err.message, status ? `(HTTP ${status})` : '')
 
     // HTTP 503 is a standard cold-start response when microservices are booting up
     if (status === 503 && err.response?.data) {
       const data = err.response.data
-      console.log(`[ServiceReadiness] HTTP 503 cold start status payload:`, data)
+      console.log(`[ServiceReadiness] Gateway HTTP status: 503`)
+      console.log(`[ServiceReadiness] Actual response JSON:`, data)
       return {
         status: data.status || 'STARTING',
         authService: data.authService || 'STARTING',

@@ -79,10 +79,13 @@ export function useServiceReadiness(autoStart = false): UseServiceReadinessRetur
     }
   }, [clearTimers, abortPendingRequest])
 
+  const pollAttemptRef = useRef<number>(0)
+
   // Single poll execution step
   const executePollStep = useCallback(async () => {
     if (inFlightRef.current) return
     inFlightRef.current = true
+    pollAttemptRef.current += 1
 
     // Check timeout limit
     const totalElapsedMs = Date.now() - startTimeRef.current
@@ -104,7 +107,10 @@ export function useServiceReadiness(autoStart = false): UseServiceReadinessRetur
     abortControllerRef.current = controller
 
     try {
-      const data: ServiceReadinessResponse = await checkServiceReadiness(controller.signal)
+      const data: ServiceReadinessResponse = await checkServiceReadiness(
+        controller.signal,
+        pollAttemptRef.current
+      )
       inFlightRef.current = false
 
       // Gateway request succeeded (even 503 means request reached Gateway)
@@ -125,7 +131,7 @@ export function useServiceReadiness(autoStart = false): UseServiceReadinessRetur
       }
 
       if (data.ready) {
-        console.log('[ServiceReadiness] All microservices confirmed READY! Transitioning to application...')
+        console.log('[ServiceReadiness] Readiness confirmed! All microservices ready.')
         globalReadinessVerified = true
         setIsReady(true)
         setIsChecking(false)
@@ -181,11 +187,12 @@ export function useServiceReadiness(autoStart = false): UseServiceReadinessRetur
         return
       }
 
-      console.log('[ServiceReadiness] Initializing readiness checker...')
-      console.log('[ServiceReadiness] Resolved API Gateway URL:', API.BASE_URL)
+      console.log('[ServiceReadiness] Readiness polling started')
+      console.log('[ServiceReadiness] Readiness request URL:', `${API.BASE_URL.replace(/\/+$/, '')}/health/ready`)
 
       clearTimers()
       abortPendingRequest()
+      pollAttemptRef.current = 0
 
       setIsChecking(true)
       setIsReady(false)
