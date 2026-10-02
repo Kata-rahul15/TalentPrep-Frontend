@@ -1,0 +1,245 @@
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { checkServiceReadiness, ServiceReadinessResponse } from '@/services/healthService'
+
+export type ServiceConnectionStatus = 'connecting' | 'waking' | 'ready' | 'connected' | 'unavailable'
+
+// In-memory flag for the current page session lifecycle
+let globalReadinessVerified = false
+
+export interface UseServiceReadinessReturn {
+  isChecking: boolean
+  isReady: boolean
+  isTimedOut: boolean
+  isFailed: boolean
+  errorMessage: string | null
+  elapsedSeconds: number
+  gatewayStatus: ServiceConnectionStatus
+  authStatus: ServiceConnectionStatus
+  resumeStatus: ServiceConnectionStatus
+  dynamicMessage: string
+  checkReadiness: (options?: { force?: boolean }) => void
+  retry: () => void
+}
+
+const POLLING_INTERVAL_MS = 3000 // 3 seconds
+const MAX_TIMEOUT_MS = 90000 // 90 seconds
+
+export function useServiceReadiness(autoStart = false): UseServiceReadinessReturn {
+  const [isChecking, setIsChecking] = useState<boolean>(autoStart && !globalReadinessVerified)
+  const [isReady, setIsReady] = useState<boolean>(globalReadinessVerified)
+  const [isTimedOut, setIsTimedOut] = useState<boolean>(false)
+  const [isFailed, setIsFailed] = useState<boolean>(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [elapsedSeconds, setElapsedSeconds] = useState<number>(0)
+
+  const [gatewayStatus, setGatewayStatus] = useState<ServiceConnectionStatus>(
+    globalReadinessVerified ? 'connected' : 'connecting'
+  )
+  const [authStatus, setAuthStatus] = useState<ServiceConnectionStatus>(
+    globalReadinessVerified ? 'ready' : 'waking'
+  )
+  const [resumeStatus, setResumeStatus] = useState<ServiceConnectionStatus>(
+    globalReadinessVerified ? 'ready' : 'waking'
+  )
+
+  const pollingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const elapsedTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const abortControllerRef = useRef<AbortController | null>(null)
+  const inFlightRef = useRef<boolean>(false)
+  const startTimeRef = useRef<number>(0)
+
+  // Clear all running timers
+  const clearTimers = useCallback(() => {
+    if (pollingTimerRef.current) {
+      clearTimeout(pollingTimerRef.current)
+      pollingTimerRef.current = null
+    }
+    if (elapsedTimerRef.current) {
+      clearInterval(elapsedTimerRef.current)
+      elapsedTimerRef.current = null
+    }
+  }, [])
+
+  // Cancel any pending HTTP request
+  const abortPendingRequest = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+      abortControllerRef.current = null
+    }
+    inFlightRef.current = false
+  }, [])
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      clearTimers()
+      abortPendingRequest()
+    }
+  }, [clearTimers, abortPendingRequest])
+
+  // Single poll execution step
+  const executePollStep = useCallback(async () => {
+    if (inFlightRef.current) return
+    inFlightRef.current = true
+
+    // Check timeout limit
+    const totalElapsedMs = Date.now() - startTimeRef.current
+    if (totalElapsedMs >= MAX_TIMEOUT_MS) {
+      clearTimers()
+      abortPendingRequest()
+      setIsChecking(false)
+      setIsTimedOut(true)
+      setIsFailed(true)
+      setGatewayStatus('unavailable')
+      setAuthStatus('unavailable')
+      setResumeStatus('unavailable')
+      setErrorMessage('Services are taking longer than expected.')
+      return
+    }
+
+    const controller = new AbortController()
+    abortControllerRef.current = controller
+
+    try {
+      const data: ServiceReadinessResponse = await checkServiceReadiness(controller.signal)
+      inFlightRef.current = false
+
+      // Gateway request succeeded (even 503 means request reached Gateway)
+      setGatewayStatus('connected')
+
+      // Update auth service status
+      if (data.authService === 'UP' || data.ready) {
+        setAuthStatus('ready')
+      } else {
+        setAuthStatus('waking')
+      }
+
+      // Update resume service status
+      if (data.resumeService === 'UP' || data.ready) {
+        setResumeStatus('ready')
+      } else {
+        setResumeStatus('waking')
+      }
+
+      if (data.ready) {
+        // Readiness confirmed!
+        globalReadinessVerified = true
+        setIsReady(true)
+        setIsChecking(false)
+        setGatewayStatus('connected')
+        setAuthStatus('ready')
+        setResumeStatus('ready')
+        clearTimers()
+        return
+      }
+
+      // Not ready yet: schedule next poll in 3 seconds
+      if (Date.now() - startTimeRef.current < MAX_TIMEOUT_MS) {
+        pollingTimerRef.current = setTimeout(() => {
+          executePollStep()
+        }, POLLING_INTERVAL_MS)
+      }
+    } catch (err: any) {
+      inFlightRef.current = false
+
+      if (err?.name === 'CanceledError' || err?.message?.includes('canceled')) {
+        return
+      }
+
+      // Non-retryable auth error
+      if (err?.message?.includes('Authentication failure')) {
+        clearTimers()
+        setIsChecking(false)
+        setIsFailed(true)
+        setErrorMessage(err.message)
+        return
+      }
+
+      // Retry on network/503 errors if within 90s limit
+      if (Date.now() - startTimeRef.current < MAX_TIMEOUT_MS) {
+        pollingTimerRef.current = setTimeout(() => {
+          executePollStep()
+        }, POLLING_INTERVAL_MS)
+      }
+    }
+  }, [clearTimers, abortPendingRequest])
+
+  // Start polling workflow
+  const startCheck = useCallback(
+    (options?: { force?: boolean }) => {
+      if (globalReadinessVerified && !options?.force) {
+        setIsReady(true)
+        setIsChecking(false)
+        setGatewayStatus('connected')
+        setAuthStatus('ready')
+        setResumeStatus('ready')
+        return
+      }
+
+      clearTimers()
+      abortPendingRequest()
+
+      setIsChecking(true)
+      setIsReady(false)
+      setIsTimedOut(false)
+      setIsFailed(false)
+      setErrorMessage(null)
+      setElapsedSeconds(0)
+
+      setGatewayStatus('connecting')
+      setAuthStatus('waking')
+      setResumeStatus('waking')
+
+      startTimeRef.current = Date.now()
+
+      // Increment elapsed time counter every 1s
+      elapsedTimerRef.current = setInterval(() => {
+        const seconds = Math.floor((Date.now() - startTimeRef.current) / 1000)
+        setElapsedSeconds(seconds)
+      }, 1000)
+
+      // Initial immediate check
+      executePollStep()
+    },
+    [clearTimers, abortPendingRequest, executePollStep]
+  )
+
+  // Automatically start if requested and not verified
+  useEffect(() => {
+    if (autoStart && !globalReadinessVerified && !isChecking && !isReady && !isTimedOut && !isFailed) {
+      startCheck()
+    }
+  }, [autoStart, startCheck, isChecking, isReady, isTimedOut, isFailed])
+
+  const retry = useCallback(() => {
+    globalReadinessVerified = false
+    startCheck({ force: true })
+  }, [startCheck])
+
+  // Compute dynamic calm status message
+  let dynamicMessage = 'Connecting to TalentPrep...'
+  if (isReady) {
+    dynamicMessage = 'Everything is ready. Taking you to your workspace...'
+  } else if (isTimedOut || isFailed) {
+    dynamicMessage = 'Services are taking longer than expected.'
+  } else if (elapsedSeconds > 15) {
+    dynamicMessage = 'Your workspace is taking a little longer to prepare.'
+  } else if (elapsedSeconds > 5) {
+    dynamicMessage = 'Waking up your services...'
+  }
+
+  return {
+    isChecking,
+    isReady,
+    isTimedOut,
+    isFailed,
+    errorMessage,
+    elapsedSeconds,
+    gatewayStatus,
+    authStatus,
+    resumeStatus,
+    dynamicMessage,
+    checkReadiness: startCheck,
+    retry,
+  }
+}

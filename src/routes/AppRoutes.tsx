@@ -26,6 +26,8 @@ import PrivacyPolicy from '@/pages/PrivacyPolicy'
 import TermsAndConditions from '@/pages/TermsAndConditions'
 import HelpCenter from '@/pages/HelpCenter'
 import NotFound from '@/pages/NotFound'
+import { useServiceReadiness } from '@/hooks/useServiceReadiness'
+import ServiceWakeupScreen from '@/components/ServiceWakeupScreen'
 
 // Guard for authenticated screens
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -65,6 +67,28 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 
+// Service readiness guard for authentication entry routes
+function ReadinessAuthGuard({ children }: { children: React.ReactNode }) {
+  const readiness = useServiceReadiness(true)
+
+  if (!readiness.isReady) {
+    return (
+      <ServiceWakeupScreen
+        gatewayStatus={readiness.gatewayStatus}
+        authStatus={readiness.authStatus}
+        resumeStatus={readiness.resumeStatus}
+        dynamicMessage={readiness.dynamicMessage}
+        isTimedOut={readiness.isTimedOut}
+        isFailed={readiness.isFailed}
+        elapsedSeconds={readiness.elapsedSeconds}
+        onRetry={readiness.retry}
+      />
+    )
+  }
+
+  return <>{children}</>
+}
+
 export default function AppRoutes() {
   return (
     <BrowserRouter>
@@ -73,12 +97,12 @@ export default function AppRoutes() {
           {/* Landing Page Route */}
           <Route path="/" element={<Landing />} />
 
-          {/* Authentication Routes */}
-          <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-          <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
-          <Route path="/verify-otp" element={<PublicRoute><VerifyOtp /></PublicRoute>} />
-          <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
-          <Route path="/reset-password" element={<PublicRoute><ResetPassword /></PublicRoute>} />
+          {/* Authentication Routes with Service Wakeup Guard */}
+          <Route path="/login" element={<PublicRoute><ReadinessAuthGuard><Login /></ReadinessAuthGuard></PublicRoute>} />
+          <Route path="/signup" element={<PublicRoute><ReadinessAuthGuard><Signup /></ReadinessAuthGuard></PublicRoute>} />
+          <Route path="/verify-otp" element={<PublicRoute><ReadinessAuthGuard><VerifyOtp /></ReadinessAuthGuard></PublicRoute>} />
+          <Route path="/forgot-password" element={<PublicRoute><ReadinessAuthGuard><ForgotPassword /></ReadinessAuthGuard></PublicRoute>} />
+          <Route path="/reset-password" element={<PublicRoute><ReadinessAuthGuard><ResetPassword /></ReadinessAuthGuard></PublicRoute>} />
           <Route path="/oauth/success" element={<OAuthCallback />} />
           <Route path="/oauth/callback" element={<OAuthCallback />} />
 
