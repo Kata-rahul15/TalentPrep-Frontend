@@ -9,7 +9,7 @@ import {
   RefreshCw,
   Sparkles,
 } from 'lucide-react'
-import { ServiceConnectionStatus } from '@/hooks/useServiceReadiness'
+import type { ServiceConnectionStatus } from '@/hooks/useServiceReadiness'
 
 interface ServiceWakeupScreenProps {
   gatewayStatus: ServiceConnectionStatus

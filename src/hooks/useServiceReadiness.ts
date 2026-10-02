@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { checkServiceReadiness, ServiceReadinessResponse } from '@/services/healthService'
+import { checkServiceReadiness } from '@/services/healthService'
+import type { ServiceReadinessResponse } from '@/services/healthService'
 
 export type ServiceConnectionStatus = 'connecting' | 'waking' | 'ready' | 'connected' | 'unavailable'
 
