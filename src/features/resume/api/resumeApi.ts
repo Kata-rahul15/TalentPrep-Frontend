@@ -1,51 +1,22 @@
 import { api } from '@/services/authService'
-import { mockApi } from '../mock/resumeMock'
 
 import type {
   ResumeFile,
   JobMatchInput,
   ResumeDetails,
   ResumeEvaluation,
-  JobMatchResult,
   JobMatchStatusResponse,
   ChatMessage,
   UploadResumeResponse,
 } from '../types/resume.types'
-// ─────────────────────────────────────────────────────────────
-// TalentPrep Resume API
-//
-// Architecture:
-//
-// Upload
-//   → Tika extraction
-//   → ONE Resume AI analysis
-//   → structured resume data + ATS evaluation
-//   → PostgreSQL
-//   → embeddings → PGVector
-//
-// After upload:
-//
-// Overview      → DB
-// Details       → DB
-// ATS Analysis  → DB
-//
-// Dynamic AI:
-//
-// Job Match     → ChatClient
-// RAG Chat      → ChatClient
-//
-// Frontend sends NO user identity headers.
-// Authentication/session is handled by the auth cookie + gateway.
-// ─────────────────────────────────────────────────────────────
-
 
 /**
  * Convert backend resume status into the frontend status model.
  */
 function normalizeResumeStatus(
   rawStatus: unknown
-): 'ready' | 'processing' | 'error' {
-  const status = String(rawStatus || '').toUpperCase()
+): 'ready' | 'processing' | 'failed' {
+  const status = String(rawStatus || '').toUpperCase().trim()
 
   if (
     [
@@ -56,11 +27,22 @@ function normalizeResumeStatus(
       'INVALID',
     ].includes(status)
   ) {
-    return 'error'
+    return 'failed'
   }
 
   if (
     [
+      'READY',
+      'COMPLETED',
+      'SUCCESS',
+    ].includes(status)
+  ) {
+    return 'ready'
+  }
+
+  if (
+    [
+      'UPLOADING',
       'PROCESSING',
       'IN_PROGRESS',
       'PENDING',
@@ -69,7 +51,8 @@ function normalizeResumeStatus(
     return 'processing'
   }
 
-  return 'ready'
+  // Never treat unknown or missing status as ready
+  return status ? 'processing' : 'failed'
 }
 
 
@@ -78,8 +61,9 @@ function normalizeResumeStatus(
  * frontend ResumeFile structure.
  */
 function normalizeResumeRecord(raw: any): ResumeFile {
+  const canonicalId = raw?.id || raw?.resumeId || ''
   return {
-    id: raw?.id || raw?.resumeId || 'resume-001',
+    id: canonicalId,
 
     fileName:
       raw?.resumeName ||
@@ -90,7 +74,7 @@ function normalizeResumeRecord(raw: any): ResumeFile {
     fileSize:
       raw?.fileSize ??
       raw?.size ??
-      350000,
+      0,
 
     fileType:
       raw?.fileType ||
@@ -107,25 +91,10 @@ function normalizeResumeRecord(raw: any): ResumeFile {
       new Date().toISOString(),
 
     status: normalizeResumeStatus(raw?.status),
+    rawStatus: String(raw?.status || ''),
+    active: Boolean(raw?.active),
+    version: raw?.version,
   }
-}
-
-
-/**
- * Determine whether the backend response represents
- * a usable resume.
- */
-function isUsableResumeStatus(status: unknown): boolean {
-  const statusUpper =
-    String(status || '').toUpperCase()
-
-  return ![
-    'FAILED',
-    'ERROR',
-    'FAILED_PARSING',
-    'FAILED_ANALYSIS',
-    'INVALID',
-  ].includes(statusUpper)
 }
 
 
@@ -136,13 +105,20 @@ export const resumeApi = {
   // ═══════════════════════════════════════════════════════════
 
   /**
-   * GET /api/resumes/me
-   *
-   * Returns the user's uploaded resumes.
-   *
-   * This endpoint does NOT perform AI analysis.
+   * GET /api/resumes/me or GET /api/resumes/{resumeId}
    */
-  getResume: async (): Promise<ResumeFile | null> => {
+  getResume: async (resumeId?: string): Promise<ResumeFile | null> => {
+    if (resumeId) {
+      try {
+        return await resumeApi.getResumeById(resumeId)
+      } catch (err: any) {
+        if (err?.response?.status === 404) {
+          console.warn('[Resume] Specified resumeId not found, falling back to /me:', resumeId)
+        } else {
+          throw err
+        }
+      }
+    }
 
     console.log(
       '[Resume] Checking whether user has a resume'
@@ -285,63 +261,36 @@ export const resumeApi = {
    */
   uploadResume: async (
     file: File,
-    resumeName?: string
+    resumeName?: string,
+    onProgress?: (percent: number) => void
   ): Promise<UploadResumeResponse> => {
-
     try {
+      const formData = new FormData()
+      formData.append('resumeName', resumeName || file.name)
+      formData.append('file', file)
 
-      const formData =
-        new FormData()
-
-      formData.append(
-        'resumeName',
-        resumeName || file.name
+      const response = await api.post(
+        '/api/resumes/upload',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+          onUploadProgress: (progressEvent) => {
+            if (progressEvent.total && onProgress) {
+              const percentCompleted = Math.round(
+                (progressEvent.loaded * 100) / progressEvent.total
+              )
+              onProgress(percentCompleted)
+            }
+          },
+        }
       )
 
-      formData.append(
-        'file',
-        file
-      )
-
-
-      const response =
-        await api.post(
-          '/api/resumes/upload',
-          formData,
-          {
-            headers: {
-              'Content-Type':
-                'multipart/form-data',
-            },
-          }
-        )
-
-
-      console.log(
-        '[Resume] Upload successful'
-      )
-
+      console.log('[Resume] Upload successful:', response.data)
       return response.data
-
     } catch (error: any) {
-
-      /*
-       * Keep mock fallback for local frontend development.
-       *
-       * Remove this later if you want network failures
-       * to always surface as real errors.
-       */
-      if (
-        error?.code === 'ERR_NETWORK'
-      ) {
-
-        console.warn(
-          '[Resume] Backend unavailable — using mock upload'
-        )
-
-        return mockApi.uploadResume(file)
-      }
-
+      console.error('[Resume] Error uploading resume:', error)
       throw error
     }
   },
@@ -352,44 +301,21 @@ export const resumeApi = {
   // ═══════════════════════════════════════════════════════════
 
   /**
-   * GET /api/resumes/details
-   *
-   * Returns the complete structured resume for the user's
-   * latest/active resume.
-   *
-   * NO AI CALL.
-   *
-   * Data was already extracted during upload.
+   * GET /api/resumes/{resumeId}/details
    */
   getResumeDetails: async (
     resumeId?: string
   ): Promise<ResumeDetails> => {
-
     try {
+      const url = resumeId
+        ? `/api/resumes/${resumeId}/details`
+        : '/api/resumes/details'
 
-      const url =
-        resumeId
-          ? `/api/resumes/${resumeId}/details`
-          : '/api/resumes/details'
-
-
-      const response =
-        await api.get(url)
-
-
-      console.log(
-        '[Resume] Resume details loaded from backend'
-      )
-
+      const response = await api.get(url)
+      console.log('[Resume] Resume details loaded from backend')
       return response.data
-
     } catch (error: any) {
-
-      console.error(
-        '[Resume] Error fetching resume details',
-        error
-      )
-
+      console.error('[Resume] Error fetching resume details', error)
       throw error
     }
   },
@@ -400,54 +326,21 @@ export const resumeApi = {
   // ═══════════════════════════════════════════════════════════
 
   /**
-   * GET /api/resumes/overview
-   *
-   * Returns the dashboard data shown in the Resume Overview page.
-   *
-   * NO AI CALL.
-   *
-   * Example:
-   *
-   * ATS score
-   * Overall score
-   * Keyword match
-   * Technical skills score
-   * AI insight
-   * Highlights
-   * Recommendations
-   * Project count
-   * Experience count
-   * Education count
+   * GET /api/resumes/{resumeId}/overview
    */
   getResumeOverview: async (
     resumeId?: string
   ): Promise<any> => {
-
     try {
+      const url = resumeId
+        ? `/api/resumes/${resumeId}/overview`
+        : '/api/resumes/overview'
 
-      const url =
-        resumeId
-          ? `/api/resumes/${resumeId}/overview`
-          : '/api/resumes/overview'
-
-
-      const response =
-        await api.get(url)
-
-
-      console.log(
-        '[Resume] Overview loaded from backend'
-      )
-
+      const response = await api.get(url)
+      console.log('[Resume] Overview loaded from backend')
       return response.data
-
     } catch (error: any) {
-
-      console.error(
-        '[Resume] Error fetching resume overview',
-        error
-      )
-
+      console.error('[Resume] Error fetching resume overview', error)
       throw error
     }
   },
@@ -458,65 +351,21 @@ export const resumeApi = {
   // ═══════════════════════════════════════════════════════════
 
   /**
-   * GET /api/resumes/ats-analysis
-   *
-   * IMPORTANT:
-   *
-   * This endpoint does NOT trigger ChatClient.
-   *
-   * The ATS evaluation was already generated during
-   * resume upload and persisted in PostgreSQL.
-   *
-   * Therefore:
-   *
-   * Frontend
-   *   ↓
-   * GET
-   *   ↓
-   * DB
-   *   ↓
-   * ATS response
+   * GET /api/resumes/{resumeId}/ats-analysis
    */
   getAtsAnalysis: async (
     resumeId?: string
   ): Promise<ResumeEvaluation> => {
-
     try {
+      const url = resumeId
+        ? `/api/resumes/${resumeId}/ats-analysis`
+        : '/api/resumes/ats-analysis'
 
-      const url =
-        resumeId
-          ? `/api/resumes/${resumeId}/ats-analysis`
-          : '/api/resumes/ats-analysis'
-
-
-      const response =
-        await api.get(url)
-
-
-      console.log(
-        '[Resume] ATS evaluation loaded from backend'
-      )
-
+      const response = await api.get(url)
+      console.log('[Resume] ATS evaluation loaded from backend')
       return response.data
-
     } catch (error: any) {
-
-      if (
-        error?.code === 'ERR_NETWORK'
-      ) {
-
-        console.warn(
-          '[Resume] Backend unavailable — using mock ATS evaluation'
-        )
-
-        return mockApi.evaluateResume()
-      }
-
-      console.error(
-        '[Resume] Error fetching ATS evaluation',
-        error
-      )
-
+      console.error('[Resume] Error fetching ATS evaluation', error)
       throw error
     }
   },
@@ -995,14 +844,10 @@ export const resumeApi = {
    */
   getResumeById: async (
     resumeId: string
-  ): Promise<any> => {
-
-    const response =
-      await api.get(
-        `/api/resumes/${resumeId}`
-      )
-
-    return response.data
+  ): Promise<ResumeFile> => {
+    const response = await api.get(`/api/resumes/${resumeId}`)
+    const rawData = response.data?.data || response.data?.result || response.data
+    return normalizeResumeRecord(rawData)
   },
 
 

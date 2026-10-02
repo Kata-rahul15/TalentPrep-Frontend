@@ -4,9 +4,12 @@ export interface ResumeFile {
   id: string
   fileName: string
   fileSize: number // bytes
-  fileType: 'PDF' | 'DOCX'
+  fileType: string
   uploadedAt: string // ISO 8601
-  status: 'processing' | 'ready' | 'error'
+  status: 'processing' | 'ready' | 'failed'
+  rawStatus?: string
+  active?: boolean
+  version?: number
 }
 
 export interface WorkExperience {
@@ -196,6 +199,14 @@ export interface ChatSource {
   chunkIndex: number
   score: number
 }
+
+export interface ChatMessage {
+  id: string
+  role: ChatRole
+  content: string
+  timestamp: string
+  sources?: ChatSource[]
+}
 // ─── API Response Wrappers ───────────────────────────────────────────────────
 
 export interface ApiResponse<T> {
@@ -205,8 +216,19 @@ export interface ApiResponse<T> {
 }
 
 export interface UploadResumeResponse {
-  resumeId: string
-  fileName: string
-  uploadedAt: string
-  status: 'processing' | 'ready'
+  id: string
+  userId?: string
+  resumeName?: string
+  originalFilename?: string
+  fileSize?: number
+  mimeType?: string
+  status: string
+  version?: number
+  active?: boolean
+  createdAt?: string
+  updatedAt?: string
+  // Legacy aliases if any code references them
+  resumeId?: string
+  fileName?: string
+  uploadedAt?: string
 }

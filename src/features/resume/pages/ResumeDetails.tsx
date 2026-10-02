@@ -12,8 +12,10 @@ import {
   HardDrive,
   FileType,
   Calendar,
+  RefreshCw,
 } from 'lucide-react'
-import { useResumeDetails } from '../hooks/useResume'
+import { useResume, useResumeDetails } from '../hooks/useResume'
+import { useResumeContext } from '../context/ResumeContext'
 import { PageLoading, PageError } from '../components/ResumeUI'
 import ExpandableCard from '../components/ExpandableCard'
 import SkillBadge from '../components/SkillBadge'
@@ -49,7 +51,23 @@ function formatDate(dateStr: string | null): string {
 }
 
 export default function ResumeDetails() {
-  const { data: resume, isLoading, isError, refetch } = useResumeDetails()
+  const { selectedResumeId } = useResumeContext()
+  const { data: resumeFile } = useResume(selectedResumeId)
+  const { data: resume, isLoading, isError, refetch } = useResumeDetails(selectedResumeId)
+
+  if (resumeFile?.status === 'processing') {
+    return (
+      <div className="max-w-xl mx-auto py-16 text-center space-y-4">
+        <div className="w-14 h-14 rounded-2xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center mx-auto animate-pulse">
+          <RefreshCw className="w-7 h-7 animate-spin" />
+        </div>
+        <h2 className="font-heading font-bold text-xl text-foreground">Processing Resume Content...</h2>
+        <p className="text-sm text-muted-foreground">
+          We are extracting and structuring content for your resume. Details will appear once analysis completes.
+        </p>
+      </div>
+    )
+  }
 
   if (isLoading) return <PageLoading message="Loading resume details..." />
   if (isError || !resume)

@@ -7,6 +7,7 @@ import InputField from '@/components/auth/InputField'
 import PasswordField from '@/components/auth/PasswordField'
 import SocialLoginButtons from '@/components/auth/SocialLoginButtons'
 import ValidationMessage from '@/components/auth/ValidationMessage'
+import LegalConsentModal from '@/components/auth/LegalConsentModal'
 import { registerUser, getErrorMessage } from '@/services/authService'
 
 export default function Signup() {
@@ -18,6 +19,7 @@ export default function Signup() {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [agreeTerms, setAgreeTerms] = useState(false)
+  const [isLegalModalOpen, setIsLegalModalOpen] = useState(false)
 
   // Touched states
   const [nameTouched, setNameTouched] = useState(false)
@@ -128,6 +130,12 @@ export default function Signup() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!agreeTerms) {
+      setFormError('You must agree to the Terms & Conditions and Privacy Policy to create an account.')
+      setIsLegalModalOpen(true)
+      return
+    }
+
     // Prevent duplicate request submission while processing
     if (!isFormValid || isSubmitting) return;
 
@@ -199,172 +207,205 @@ export default function Signup() {
     navigate('/home')
   }
 
+  const handleOpenLegalModal = (e: React.MouseEvent) => {
+    e.preventDefault()
+    setIsLegalModalOpen(true)
+  }
+
   return (
-    <AuthLayout
-      title="Create account"
-      subtitle="Start preparing for your dream job with AI feedback"
-    >
-      <AuthCard>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-2">
-          {formError && <ValidationMessage message={formError} />}
+    <>
+      <AuthLayout
+        title="Create account"
+        subtitle="Start preparing for your dream job with AI feedback"
+      >
+        <AuthCard>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+            {formError && <ValidationMessage message={formError} />}
 
-          {/* Full Name */}
-          <InputField
-            id="name"
-            label="Full Name"
-            placeholder="John Doe"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            onBlur={() => setNameTouched(true)}
-            error={nameError}
-            required
-            disabled={isSubmitting}
-            autoComplete="name"
-          />
+            {/* Full Name */}
+            <InputField
+              id="name"
+              label="Full Name"
+              placeholder="John Doe"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              onBlur={() => setNameTouched(true)}
+              error={nameError}
+              required
+              disabled={isSubmitting}
+              autoComplete="name"
+            />
 
-          {/* Email */}
-          <InputField
-            id="email"
-            label="Email Address"
-            type="email"
-            placeholder="you@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            onBlur={() => setEmailTouched(true)}
-            error={emailError}
-            required
-            disabled={isSubmitting}
-            autoComplete="email"
-          />
+            {/* Email */}
+            <InputField
+              id="email"
+              label="Email Address"
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onBlur={() => setEmailTouched(true)}
+              error={emailError}
+              required
+              disabled={isSubmitting}
+              autoComplete="email"
+            />
 
-          {/* Password */}
-          <div className="flex flex-col gap-1">
+            {/* Password */}
+            <div className="flex flex-col gap-1">
+              <PasswordField
+                id="password"
+                label="Password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onBlur={() => setPasswordTouched(true)}
+                error={passwordError}
+                required
+                disabled={isSubmitting}
+                autoComplete="new-password"
+              />
+
+              {/* Strength meter bar */}
+              {password.length > 0 && (
+                <div className="flex flex-col gap-1 mt-0.5 select-none">
+                  <div className="flex items-center justify-between text-[10px] font-semibold text-gray-500">
+                    <span>Password Strength</span>
+                    <span className={`font-bold ${
+                      strengthScore <= 1 ? 'text-red-500' : strengthScore <= 3 ? 'text-amber-500' : 'text-emerald-500'
+                    }`}>
+                      {getStrengthLabel()}
+                    </span>
+                  </div>
+                  {/* Bar indicators */}
+                  <div className="flex gap-1 h-1 w-full bg-gray-100 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full transition-all duration-300 ${getStrengthColor()}`}
+                      style={{ width: `${(strengthScore / 4) * 100}%` }}
+                    />
+                  </div>
+                  {/* Rule checklist */}
+                  <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[9px] text-gray-400 mt-0.5">
+                    <span className={rules.length ? 'text-emerald-600 font-bold' : ''}>
+                      ✓ Min 8 chars
+                    </span>
+                    <span className={rules.hasLowerUpper ? 'text-emerald-600 font-bold' : ''}>
+                      ✓ Upper & lower
+                    </span>
+                    <span className={rules.hasNumber ? 'text-emerald-600 font-bold' : ''}>
+                      ✓ At least 1 number
+                    </span>
+                    <span className={rules.hasSpecial ? 'text-emerald-600 font-bold' : ''}>
+                      ✓ 1 symbol
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Confirm Password */}
             <PasswordField
-              id="password"
-              label="Password"
+              id="confirmPassword"
+              label="Confirm Password"
               placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onBlur={() => setPasswordTouched(true)}
-              error={passwordError}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              onBlur={() => setConfirmPasswordTouched(true)}
+              error={confirmPasswordError}
               required
               disabled={isSubmitting}
               autoComplete="new-password"
             />
 
-            {/* Strength meter bar */}
-            {password.length > 0 && (
-              <div className="flex flex-col gap-1 mt-0.5 select-none">
-                <div className="flex items-center justify-between text-[10px] font-semibold text-gray-500">
-                  <span>Password Strength</span>
-                  <span className={`font-bold ${
-                    strengthScore <= 1 ? 'text-red-500' : strengthScore <= 3 ? 'text-amber-500' : 'text-emerald-500'
-                  }`}>
-                    {getStrengthLabel()}
-                  </span>
-                </div>
-                {/* Bar indicators */}
-                <div className="flex gap-1 h-1 w-full bg-gray-100 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full transition-all duration-300 ${getStrengthColor()}`}
-                    style={{ width: `${(strengthScore / 4) * 100}%` }}
-                  />
-                </div>
-                {/* Rule checklist */}
-                <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[9px] text-gray-400 mt-0.5">
-                  <span className={rules.length ? 'text-emerald-600 font-bold' : ''}>
-                    ✓ Min 8 chars
-                  </span>
-                  <span className={rules.hasLowerUpper ? 'text-emerald-600 font-bold' : ''}>
-                    ✓ Upper & lower
-                  </span>
-                  <span className={rules.hasNumber ? 'text-emerald-600 font-bold' : ''}>
-                    ✓ At least 1 number
-                  </span>
-                  <span className={rules.hasSpecial ? 'text-emerald-600 font-bold' : ''}>
-                    ✓ 1 symbol
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Confirm Password */}
-          <PasswordField
-            id="confirmPassword"
-            label="Confirm Password"
-            placeholder="••••••••"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            onBlur={() => setConfirmPasswordTouched(true)}
-            error={confirmPasswordError}
-            required
-            disabled={isSubmitting}
-            autoComplete="new-password"
-          />
-
-          {/* Terms & Conditions Checkbox */}
-          <div className="flex items-start gap-2.5 text-xs select-none">
-            <input
-              type="checkbox"
-              id="agreeTerms"
-              checked={agreeTerms}
-              onChange={(e) => setAgreeTerms(e.target.checked)}
-              className="mt-0.5 w-4 h-4 rounded border-border text-primary focus:ring-primary/20 cursor-pointer"
-              disabled={isSubmitting}
-              required
-            />
-            <label htmlFor="agreeTerms" className="font-semibold text-secondary-foreground leading-normal cursor-pointer">
-              I agree to the crumbs of{' '}
-              <a href="#terms" className="font-bold text-primary hover:text-primary-hover transition-colors">
-                Terms
-              </a>{' '}
-              &{' '}
-              <a href="#privacy" className="font-bold text-primary hover:text-primary-hover transition-colors">
-                Privacy
-              </a>
-            </label>
-          </div>
-
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={!isFormValid || isSubmitting}
-            className="w-full flex items-center justify-center py-2.5 bg-primary hover:bg-primary-hover disabled:bg-secondary-bg disabled:text-muted-foreground text-white font-bold text-sm rounded-lg shadow-sm disabled:shadow-none transition-all duration-200 hover:-translate-y-0.5 disabled:translate-y-0 disabled:cursor-not-allowed cursor-pointer"
-          >
-            {isSubmitting ? (
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            ) : (
-              'Create Account'
-            )}
-          </button>
-
-          {/* Divider */}
-          <div className="relative my-1">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-divider" />
+            {/* Terms & Conditions Consent Checkbox */}
+            <div className="flex items-start gap-2.5 text-xs select-none py-1">
+              <input
+                type="checkbox"
+                id="agreeTerms"
+                checked={agreeTerms}
+                onChange={(e) => {
+                  e.preventDefault()
+                  setIsLegalModalOpen(true)
+                }}
+                onClick={(e) => {
+                  e.preventDefault()
+                  setIsLegalModalOpen(true)
+                }}
+                className="mt-0.5 w-4 h-4 rounded border-border text-primary focus:ring-primary/20 cursor-pointer"
+                disabled={isSubmitting}
+              />
+              <label htmlFor="agreeTerms" className="font-semibold text-secondary-foreground leading-normal cursor-pointer">
+                I agree to the{' '}
+                <button
+                  type="button"
+                  onClick={handleOpenLegalModal}
+                  className="font-bold text-primary hover:text-primary-hover transition-colors underline cursor-pointer inline"
+                >
+                  Terms & Conditions
+                </button>{' '}
+                and{' '}
+                <button
+                  type="button"
+                  onClick={handleOpenLegalModal}
+                  className="font-bold text-primary hover:text-primary-hover transition-colors underline cursor-pointer inline"
+                >
+                  Privacy Policy
+                </button>
+                .
+              </label>
             </div>
-            <div className="relative flex justify-center text-xs">
-              <span className="px-3 bg-card text-muted-foreground font-semibold uppercase tracking-wider">
-                Or sign up with
-              </span>
-            </div>
-          </div>
 
-          <SocialLoginButtons onSuccess={handleSocialSuccess} />
-
-          {/* Login link */}
-          <p className="mt-1 text-center text-xs font-semibold text-muted-foreground">
-            Already have an account?{' '}
-            <Link
-              to="/login"
-              className="font-bold text-primary hover:text-primary-hover transition-colors"
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={!isFormValid || isSubmitting}
+              className="w-full flex items-center justify-center py-2.5 bg-primary hover:bg-primary-hover disabled:bg-secondary-bg disabled:text-muted-foreground text-white font-bold text-sm rounded-lg shadow-sm disabled:shadow-none transition-all duration-200 hover:-translate-y-0.5 disabled:translate-y-0 disabled:cursor-not-allowed cursor-pointer"
             >
-              Sign in
-            </Link>
-          </p>
-        </form>
-      </AuthCard>
-    </AuthLayout>
+              {isSubmitting ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                'Create Account'
+              )}
+            </button>
+
+            {/* Divider */}
+            <div className="relative my-1">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-divider" />
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="px-3 bg-card text-muted-foreground font-semibold uppercase tracking-wider">
+                  Or sign up with
+                </span>
+              </div>
+            </div>
+
+            <SocialLoginButtons onSuccess={handleSocialSuccess} />
+
+            {/* Login link */}
+            <p className="mt-1 text-center text-xs font-semibold text-muted-foreground">
+              Already have an account?{' '}
+              <Link
+                to="/login"
+                className="font-bold text-primary hover:text-primary-hover transition-colors"
+              >
+                Sign in
+              </Link>
+            </p>
+          </form>
+        </AuthCard>
+      </AuthLayout>
+
+      {/* Mandatory Single Scrollable Legal Consent Modal */}
+      <LegalConsentModal
+        isOpen={isLegalModalOpen}
+        onClose={() => setIsLegalModalOpen(false)}
+        onConfirmConsent={() => {
+          setAgreeTerms(true)
+          setFormError('')
+        }}
+        initialConsentState={agreeTerms}
+      />
+    </>
   )
 }

@@ -8,6 +8,8 @@ import {
   RefreshCw,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { ResumeProvider } from '../context/ResumeContext'
+import ResumeProcessingModal from './ResumeProcessingModal'
 
 const resumeNavItems = [
   { to: '/resume', label: 'Overview', icon: LayoutDashboard, end: true },
@@ -17,11 +19,11 @@ const resumeNavItems = [
   { to: '/resume/chat', label: 'AI Chat', icon: MessageSquare },
 ]
 
-interface ResumeLayoutProps {
+interface ResumeLayoutContentProps {
   children: React.ReactNode
 }
 
-export default function ResumeLayout({ children }: ResumeLayoutProps) {
+function ResumeLayoutContent({ children }: ResumeLayoutContentProps) {
   const navigate = useNavigate()
 
   return (
@@ -77,7 +79,17 @@ export default function ResumeLayout({ children }: ResumeLayoutProps) {
       <main className="w-full pt-1">
         {children}
       </main>
+
+      {/* ── 4. Global Processing Modal ── */}
+      <ResumeProcessingModal />
     </div>
   )
 }
 
+export default function ResumeLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <ResumeProvider>
+      <ResumeLayoutContent>{children}</ResumeLayoutContent>
+    </ResumeProvider>
+  )
+}

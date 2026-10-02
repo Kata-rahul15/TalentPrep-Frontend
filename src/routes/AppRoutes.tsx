@@ -22,6 +22,10 @@ import JobMatch from '@/features/resume/pages/JobMatch'
 import ResumeChat from '@/features/resume/pages/ResumeChat'
 
 import OAuthCallback from '@/pages/OAuthCallback'
+import PrivacyPolicy from '@/pages/PrivacyPolicy'
+import TermsAndConditions from '@/pages/TermsAndConditions'
+import HelpCenter from '@/pages/HelpCenter'
+import NotFound from '@/pages/NotFound'
 
 // Guard for authenticated screens
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -77,6 +81,12 @@ export default function AppRoutes() {
           <Route path="/reset-password" element={<PublicRoute><ResetPassword /></PublicRoute>} />
           <Route path="/oauth/success" element={<OAuthCallback />} />
           <Route path="/oauth/callback" element={<OAuthCallback />} />
+
+          {/* Information & Legal Routes */}
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+          <Route path="/help" element={<HelpCenter />} />
+          <Route path="/faq" element={<HelpCenter />} />
 
           {/* Authenticated Routes */}
           <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
@@ -145,8 +155,8 @@ export default function AppRoutes() {
             }
           />
 
-          {/* Fallback to Landing Page */}
-          <Route path="*" element={<Navigate to="/" replace />} />
+          {/* Fallback Custom 404 Route */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

@@ -8,12 +8,12 @@ import {
   RefreshCw,
   TrendingUp,
 } from 'lucide-react'
-import { useResumeEvaluation } from '../hooks/useResume'
+import { useResume, useResumeEvaluation, useEvaluateResume } from '../hooks/useResume'
+import { useResumeContext } from '../context/ResumeContext'
 import { PageLoading, PageError, Button } from '../components/ResumeUI'
 import ScoreBar from '../components/ScoreBar'
 import { ScoreRingContainer } from '../components/ScoreRing'
 import SkillBadge from '../components/SkillBadge'
-import { useEvaluateResume } from '../hooks/useResume'
 import type { ResumeSuggestion } from '../types/resume.types'
 
 const priorityStyles = {
@@ -37,26 +37,44 @@ function SuggestionCard({ suggestion }: { suggestion: ResumeSuggestion }) {
 }
 
 export default function ResumeEvaluation() {
-  const { data: evaluation, isLoading, isError, refetch } = useResumeEvaluation()
-  const evaluateMutation = useEvaluateResume()
+  const { selectedResumeId } = useResumeContext()
+  const { data: resumeFile } = useResume(selectedResumeId)
+  const { data: evaluation, isLoading, isError, refetch } = useResumeEvaluation(selectedResumeId)
+  const evaluateMutation = useEvaluateResume(selectedResumeId)
 
   const handleReevaluate = async () => {
     await evaluateMutation.mutateAsync()
   }
 
-  if (isLoading) return <PageLoading message="Running AI evaluation..." />
-  if (isError || !evaluation) return <PageError message="Could not load evaluation." onRetry={refetch} />
+  if (resumeFile?.status === 'processing') {
+    return (
+      <div className="max-w-xl mx-auto py-16 text-center space-y-4">
+        <div className="w-14 h-14 rounded-2xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center mx-auto animate-pulse">
+          <RefreshCw className="w-7 h-7 animate-spin" />
+        </div>
+        <h2 className="font-heading font-bold text-xl text-foreground">Processing ATS Evaluation...</h2>
+        <p className="text-sm text-muted-foreground">
+          Our AI is currently performing ATS score calculation and keyword analysis. Evaluation will appear once processing completes.
+        </p>
+      </div>
+    )
+  }
 
-  const { scores, strengths, weaknesses, suggestions, missingKeywords } = evaluation
+  if (isLoading) return <PageLoading message="Running AI evaluation..." />
+  if (isError || !evaluation) return <PageError message="Could not load ATS evaluation." onRetry={refetch} />
+
+  const { scores, strengths = [], weaknesses = [], suggestions = [], missingKeywords = [] } = evaluation
 
   const scoreBreakdownItems = [
-    { label: 'ATS Score', score: scores.atsScore },
-    { label: 'Keyword Match', score: scores.keywordMatch },
-    { label: 'Formatting', score: scores.formattingScore },
-    { label: 'Technical Skills', score: scores.technicalSkillsScore },
-    { label: 'Experience', score: scores.experienceScore },
-    { label: 'Education', score: scores.educationScore },
+    { label: 'ATS Score', score: scores?.atsScore ?? 0 },
+    { label: 'Keyword Match', score: scores?.keywordMatch ?? 0 },
+    { label: 'Formatting', score: scores?.formattingScore ?? 0 },
+    { label: 'Technical Skills', score: scores?.technicalSkillsScore ?? 0 },
+    { label: 'Experience', score: scores?.experienceScore ?? 0 },
+    { label: 'Education', score: scores?.educationScore ?? 0 },
   ]
+
+  const overallScore = scores?.overallScore ?? 0
 
   return (
     <div className="space-y-6">
@@ -85,16 +103,18 @@ export default function ResumeEvaluation() {
           className="bg-card border border-border rounded-2xl p-6 flex flex-col items-center gap-4"
         >
           <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Overall Score</p>
-          <ScoreRingContainer score={scores.overallScore} size="lg" label="/ 100" />
+          <ScoreRingContainer score={overallScore} size="lg" label="/ 100" />
           <div className="text-center">
             <p className={`font-heading font-bold text-sm ${
-              scores.overallScore >= 80 ? 'text-success' : scores.overallScore >= 60 ? 'text-warning' : 'text-danger'
+              overallScore >= 80 ? 'text-success' : overallScore >= 60 ? 'text-warning' : 'text-danger'
             }`}>
-              {scores.overallScore >= 80 ? 'Strong Profile' : scores.overallScore >= 60 ? 'Needs Improvement' : 'Weak Profile'}
+              {overallScore >= 80 ? 'Strong Profile' : overallScore >= 60 ? 'Needs Improvement' : 'Weak Profile'}
             </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Evaluated {new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium' }).format(new Date(evaluation.evaluatedAt))}
-            </p>
+            {evaluation.evaluatedAt && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Evaluated {new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium' }).format(new Date(evaluation.evaluatedAt))}
+              </p>
+            )}
           </div>
         </motion.div>
 
@@ -119,14 +139,18 @@ export default function ResumeEvaluation() {
           <h3 className="font-heading font-semibold text-sm text-foreground flex items-center gap-2 mb-4">
             <CheckCircle2 className="w-4 h-4 text-success" /> Strengths
           </h3>
-          <ul className="space-y-2.5">
-            {strengths.map((s, i) => (
-              <li key={i} className="flex items-start gap-2 text-xs text-secondary-foreground leading-relaxed">
-                <span className="w-1.5 h-1.5 rounded-full bg-success mt-1.5 flex-shrink-0" />
-                {s}
-              </li>
-            ))}
-          </ul>
+          {strengths.length > 0 ? (
+            <ul className="space-y-2.5">
+              {strengths.map((s, i) => (
+                <li key={i} className="flex items-start gap-2 text-xs text-secondary-foreground leading-relaxed">
+                  <span className="w-1.5 h-1.5 rounded-full bg-success mt-1.5 flex-shrink-0" />
+                  {s}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-xs text-muted-foreground">No specific strengths highlighted.</p>
+          )}
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
@@ -135,45 +159,53 @@ export default function ResumeEvaluation() {
           <h3 className="font-heading font-semibold text-sm text-foreground flex items-center gap-2 mb-4">
             <AlertTriangle className="w-4 h-4 text-warning" /> Weaknesses
           </h3>
-          <ul className="space-y-2.5">
-            {weaknesses.map((w, i) => (
-              <li key={i} className="flex items-start gap-2 text-xs text-secondary-foreground leading-relaxed">
-                <span className="w-1.5 h-1.5 rounded-full bg-warning mt-1.5 flex-shrink-0" />
-                {w}
-              </li>
-            ))}
-          </ul>
+          {weaknesses.length > 0 ? (
+            <ul className="space-y-2.5">
+              {weaknesses.map((w, i) => (
+                <li key={i} className="flex items-start gap-2 text-xs text-secondary-foreground leading-relaxed">
+                  <span className="w-1.5 h-1.5 rounded-full bg-warning mt-1.5 flex-shrink-0" />
+                  {w}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-xs text-muted-foreground">No specific weaknesses identified.</p>
+          )}
         </motion.div>
       </div>
 
       {/* Suggestions */}
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-        className="bg-card border border-border rounded-2xl p-6"
-      >
-        <h3 className="font-heading font-semibold text-sm text-foreground flex items-center gap-2 mb-4">
-          <Lightbulb className="w-4 h-4 text-primary" /> Improvement Suggestions
-        </h3>
-        <div className="space-y-3">
-          {suggestions.map((suggestion, i) => (
-            <SuggestionCard key={i} suggestion={suggestion} />
-          ))}
-        </div>
-      </motion.div>
+      {suggestions.length > 0 && (
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
+          className="bg-card border border-border rounded-2xl p-6"
+        >
+          <h3 className="font-heading font-semibold text-sm text-foreground flex items-center gap-2 mb-4">
+            <Lightbulb className="w-4 h-4 text-primary" /> Improvement Suggestions
+          </h3>
+          <div className="space-y-3">
+            {suggestions.map((suggestion, i) => (
+              <SuggestionCard key={i} suggestion={suggestion} />
+            ))}
+          </div>
+        </motion.div>
+      )}
 
       {/* Missing Keywords */}
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
-        className="bg-card border border-border rounded-2xl p-6"
-      >
-        <h3 className="font-heading font-semibold text-sm text-foreground flex items-center gap-2 mb-4">
-          <Tag className="w-4 h-4 text-danger" /> Missing Keywords
-          <span className="ml-auto text-xs text-muted-foreground font-normal">Add these to boost your ATS score</span>
-        </h3>
-        <div className="flex flex-wrap gap-2">
-          {missingKeywords.map((kw) => (
-            <SkillBadge key={kw} label={kw} variant="missing" />
-          ))}
-        </div>
-      </motion.div>
+      {missingKeywords.length > 0 && (
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
+          className="bg-card border border-border rounded-2xl p-6"
+        >
+          <h3 className="font-heading font-semibold text-sm text-foreground flex items-center gap-2 mb-4">
+            <Tag className="w-4 h-4 text-danger" /> Missing Keywords
+            <span className="ml-auto text-xs text-muted-foreground font-normal">Add these to boost your ATS score</span>
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {missingKeywords.map((kw) => (
+              <SkillBadge key={kw} label={kw} variant="missing" />
+            ))}
+          </div>
+        </motion.div>
+      )}
 
       {/* Upgrade CTA */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
@@ -181,8 +213,8 @@ export default function ResumeEvaluation() {
       >
         <TrendingUp className="w-8 h-8 text-primary flex-shrink-0" />
         <div className="flex-1">
-          <p className="font-heading font-bold text-base mb-0.5">Improve your score to 95+</p>
-          <p className="text-slate-400 text-sm">Add the missing keywords and apply the suggestions above to significantly boost your ATS ranking.</p>
+          <p className="font-heading font-bold text-base mb-0.5">Optimize your ATS score</p>
+          <p className="text-slate-400 text-sm">Apply the suggestions above to significantly boost your resume ranking in automated tracking systems.</p>
         </div>
       </motion.div>
     </div>

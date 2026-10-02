@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+
 export default function Footer() {
   const currentYear = new Date().getFullYear()
 
@@ -5,25 +7,25 @@ export default function Footer() {
     {
       title: 'Product',
       links: [
-        { name: 'Features', href: '#features' },
-        { name: 'Pricing', href: '#pricing' },
-        { name: 'Updates', href: '#updates' },
+        { name: 'Features', href: '/#features', external: false },
+        { name: 'Resume Console', href: '/resume', external: false },
+        { name: 'AI Interview', href: '/interview', external: false },
       ],
     },
     {
       title: 'Resources',
       links: [
-        { name: 'Blog', href: '#blog' },
-        { name: 'Help Center', href: '#help' },
-        { name: 'FAQ', href: '#faq' },
+        { name: 'Help Center', href: '/help', external: false },
+        { name: 'FAQ', href: '/faq', external: false },
+        { name: 'Privacy Policy', href: '/privacy-policy', external: false },
       ],
     },
     {
-      title: 'Company',
+      title: 'Legal & Company',
       links: [
-        { name: 'About Us', href: '#about' },
-        { name: 'Contact', href: '#contact' },
-        { name: 'Careers', href: '#careers' },
+        { name: 'Terms & Conditions', href: '/terms-and-conditions', external: false },
+        { name: 'Privacy Policy', href: '/privacy-policy', external: false },
+        { name: 'Contact Support', href: '/help#contact', external: false },
       ],
     },
   ]
@@ -62,13 +64,13 @@ export default function Footer() {
   ]
 
   return (
-    <footer className="bg-secondary-bg border-t border-border">
+    <footer className="bg-secondary-bg border-t border-border mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12">
           {/* Brand Column */}
           <div className="col-span-1 md:col-span-4 flex flex-col gap-4">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white shadow-sm">
+            <Link to="/" className="flex items-center gap-2.5 group">
+              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white shadow-sm transition-transform group-hover:scale-105">
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 2L2 7l10 5 10-5-10-5z" />
                   <path d="M2 17l10 5 10-5" />
@@ -78,7 +80,7 @@ export default function Footer() {
               <span className="font-heading font-extrabold text-lg tracking-tight text-foreground">
                 TalentPrep
               </span>
-            </div>
+            </Link>
             <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
               Empowering job seekers with realistic AI interview simulations, real-time analytics, and actionable behavioral coaching to master any interview.
             </p>
@@ -112,12 +114,12 @@ export default function Footer() {
                 <ul className="flex flex-col gap-3">
                   {group.links.map((link) => (
                     <li key={link.name}>
-                      <a
-                        href={link.href}
+                      <Link
+                        to={link.href}
                         className="text-sm text-muted-foreground hover:text-primary transition-colors"
                       >
                         {link.name}
-                      </a>
+                      </Link>
                     </li>
                   ))}
                 </ul>
@@ -132,12 +134,15 @@ export default function Footer() {
             &copy; {currentYear} TalentPrep. All rights reserved.
           </p>
           <div className="flex gap-6">
-            <a href="#privacy" className="text-xs text-muted-foreground hover:text-primary transition-colors">
+            <Link to="/privacy-policy" className="text-xs text-muted-foreground hover:text-primary transition-colors">
               Privacy Policy
-            </a>
-            <a href="#terms" className="text-xs text-muted-foreground hover:text-primary transition-colors">
-              Terms of Service
-            </a>
+            </Link>
+            <Link to="/terms-and-conditions" className="text-xs text-muted-foreground hover:text-primary transition-colors">
+              Terms & Conditions
+            </Link>
+            <Link to="/help" className="text-xs text-muted-foreground hover:text-primary transition-colors">
+              Help Center
+            </Link>
           </div>
         </div>
       </div>

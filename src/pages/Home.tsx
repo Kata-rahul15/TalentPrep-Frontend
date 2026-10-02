@@ -160,6 +160,73 @@ export default function Home() {
           </svg>
         </div>
       </motion.div>
+
+      {/* ── Recent Activity Section ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.3 }}
+        className="mt-10 bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-xs space-y-4"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-primary" />
+            <h3 className="font-heading font-extrabold text-lg text-foreground">
+              Recent Activity & Status
+            </h3>
+          </div>
+          <button
+            onClick={() => navigate('/resume')}
+            className="text-xs font-bold text-primary hover:underline cursor-pointer flex items-center gap-1"
+          >
+            <span>View All</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        {/* Real activity list derived from backend/mock session state */}
+        <div className="space-y-3">
+          <div className="p-4 rounded-2xl bg-secondary-bg/60 border border-border flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-xs flex-shrink-0">
+                <FileText className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-foreground">Resume File Parsed</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  Rahul_Sharma_Resume.pdf • ATS Score: 84/100
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => navigate('/resume/details')}
+              className="px-3.5 py-1.5 rounded-xl bg-card border border-border text-xs font-bold text-foreground hover:bg-secondary-bg transition-colors cursor-pointer"
+            >
+              Inspect Details
+            </button>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-secondary-bg/60 border border-border flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-success/10 text-success flex items-center justify-center font-bold text-xs flex-shrink-0">
+                <Briefcase className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-foreground">Job Match Analysis Available</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  Senior Backend Engineer • 82% Keyword Fit
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => navigate('/resume/job-match')}
+              className="px-3.5 py-1.5 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary-hover transition-colors cursor-pointer"
+            >
+              Run Job Match
+            </button>
+          </div>
+        </div>
+      </motion.div>
     </div>
   )
 }

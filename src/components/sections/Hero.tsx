@@ -187,8 +187,8 @@ function DashboardPreview() {
                   </div>
                   <span
                     className={`flex-shrink-0 text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full ${priority === 'High'
-                        ? 'bg-danger/10 text-danger border border-danger/20'
-                        : 'bg-warning/10 text-warning border border-warning/20'
+                      ? 'bg-danger/10 text-danger border border-danger/20'
+                      : 'bg-warning/10 text-warning border border-warning/20'
                       }`}
                   >
                     {priority}

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { AnimatePresence } from 'framer-motion'
 import Toast from '@/components/layout/Toast'
+import NetworkStatusToast from '@/components/layout/NetworkStatusToast'
 import { API } from '@/config/api'
 
 // Centralized API client pointing to API Gateway backend with credentials enabled
@@ -282,6 +283,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   return (
     <AuthContext.Provider value={{ user, loginState, login, logout, loading, getProfile, fetchProfile, showToast }}>
       {children}
+      <NetworkStatusToast />
       <AnimatePresence>
         {toast && (
           <Toast
@@ -349,27 +351,52 @@ export function getErrorMessage(error: any): string {
     return ''
   }
 
+  // Sanitized backend response message
   if (error?.response?.data) {
     const data = error.response.data
 
-    if (data.message) {
+    if (data.message && typeof data.message === 'string' && !data.message.includes('Exception') && !data.message.includes('Stack:')) {
       return data.message
     }
 
-    if (data.error === true && data.message) {
-      return data.message
-    }
-
-    if (typeof data === 'string') {
+    if (typeof data === 'string' && data.length < 200 && !data.includes('Exception') && !data.includes('at ')) {
       return data
     }
   }
 
-  if (error?.message) {
-    if (error.message === 'Network Error' || error.code === 'ERR_NETWORK') {
-      return 'Network connection error. Please verify the API Gateway backend server is running.'
+  // Handle explicit HTTP status codes
+  const status = error?.response?.status
+  if (status) {
+    switch (status) {
+      case 400:
+        return 'Invalid request payload. Please check your inputs and try again.'
+      case 401:
+        return 'Your session has expired. Please log in again.'
+      case 403:
+        return 'You do not have permission to access this resource.'
+      case 404:
+        return 'The requested resource was not found on the server.'
+      case 409:
+        return 'A resource conflict occurred. This record may already exist.'
+      case 429:
+        return 'Rate limit exceeded. Please wait a moment before trying again.'
+      case 500:
+        return 'An internal server error occurred. Please try again later.'
+      case 502:
+      case 503:
+      case 504:
+        return 'The backend service is temporarily unavailable. Please try again in a few moments.'
     }
-    return error.message
+  }
+
+  // Request timeouts
+  if (error?.code === 'ECONNABORTED' || error?.message?.toLowerCase().includes('timeout')) {
+    return 'The server request timed out. Please check your connection and retry.'
+  }
+
+  // Network offline / connection failures
+  if (error?.message === 'Network Error' || error?.code === 'ERR_NETWORK' || !navigator.onLine) {
+    return 'Network connection error. Please check your internet connection or verify the backend server status.'
   }
 
   return 'An unexpected error occurred. Please try again.'

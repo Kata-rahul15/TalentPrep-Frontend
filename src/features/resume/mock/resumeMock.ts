@@ -220,6 +220,7 @@ export const mockApi = {
     await sleep(2500) // Simulate upload time
     hasResume = true
     return {
+      id: mockResumeFile.id,
       resumeId: mockResumeFile.id,
       fileName: _file.name,
       uploadedAt: new Date().toISOString(),
