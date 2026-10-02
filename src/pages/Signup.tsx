@@ -196,7 +196,7 @@ export default function Signup() {
       }
 
       // Existing verified account or standard error: stay on Signup page with inline error
-      const errMsg = getErrorMessage(error) || 'Email already exists.'
+      const errMsg = getErrorMessage(error) || 'Registration failed. Please check your details and try again.'
       setFormError(errMsg)
     } finally {
       setIsSubmitting(false);

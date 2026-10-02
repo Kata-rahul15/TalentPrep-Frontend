@@ -66,22 +66,32 @@ api.interceptors.response.use(
       return Promise.reject(error)
     }
 
-    const requestUrl = originalRequest?.url || ''
+    const requestUrl = (originalRequest?.url || '').toLowerCase()
 
-    // Prevent infinite loops by excluding auth endpoints from refresh logic
-    const isAuthEndpoint =
-      requestUrl.includes('/auth/refresh') ||
-      requestUrl.includes('/auth/login') ||
+    // Public authentication endpoints that MUST NEVER trigger token refresh or session expiration notifications
+    const isPublicAuthEndpoint =
       requestUrl.includes('/auth/register') ||
-      requestUrl.includes('/auth/logout') ||
-      requestUrl.includes('/send-verify-otp') ||
-      requestUrl.includes('/forgot-password') ||
-      requestUrl.includes('/reset-password')
+      requestUrl.includes('/auth/login') ||
+      requestUrl.includes('/auth/send-verify-otp') ||
+      requestUrl.includes('/auth/resend-otp') ||
+      requestUrl.includes('/auth/forgot-password') ||
+      requestUrl.includes('/auth/send-reset-otp') ||
+      requestUrl.includes('/auth/reset-password')
 
-    if (isAuthEndpoint || originalRequest?._retry) {
-      if (requestUrl.includes('/auth/refresh') || originalRequest?._retry) {
+    const isRefreshEndpoint = requestUrl.includes('/auth/refresh')
+
+    // Public auth requests reject directly to caller page without attempting token refresh
+    if (isPublicAuthEndpoint) {
+      return Promise.reject(error)
+    }
+
+    if (isRefreshEndpoint || originalRequest?._retry) {
+      if (isRefreshEndpoint) {
+        const hadUser = !!localStorage.getItem('tf_user')
         localStorage.removeItem('tf_user')
-        window.dispatchEvent(new Event('auth-unauthorized'))
+        if (hadUser) {
+          window.dispatchEvent(new Event('auth-unauthorized'))
+        }
       }
       return Promise.reject(error)
     }
@@ -117,8 +127,12 @@ api.interceptors.response.use(
       isRefreshing = false
       processQueue(refreshError)
 
+      const hadUser = !!localStorage.getItem('tf_user')
       localStorage.removeItem('tf_user')
-      window.dispatchEvent(new Event('auth-unauthorized'))
+
+      if (hadUser) {
+        window.dispatchEvent(new Event('auth-unauthorized'))
+      }
 
       return Promise.reject(refreshError)
     }
@@ -192,6 +206,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           } catch {
             localStorage.removeItem('tf_user')
           }
+        } else {
+          // If no stored user exists in localStorage, skip initial profile request for guest load
+          setLoading(false)
+          return
         }
 
         const profile = await getProfile()
@@ -211,9 +229,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Listen to unauthorized interceptor event
   useEffect(() => {
     const handleUnauthorized = () => {
+      const hadUser = !!user || !!localStorage.getItem('tf_user')
       setUser(null)
       localStorage.removeItem('tf_user')
-      navigate('/login')
+      if (hadUser) {
+        setToast({ message: 'Your session has expired. Please log in again.', type: 'error' })
+        navigate('/login')
+      }
     }
 
     window.addEventListener('auth-unauthorized', handleUnauthorized)
@@ -221,7 +243,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       window.removeEventListener('auth-unauthorized', handleUnauthorized)
     }
-  }, [navigate])
+  }, [navigate, user])
 
   const loginState = (profile: UserProfile) => {
     const { username, userId, email, isAccountVerified } = profile
@@ -351,37 +373,119 @@ export function getErrorMessage(error: any): string {
     return ''
   }
 
-  // Sanitized backend response message
+  // Extract sanitized backend response message across standard API error fields
   if (error?.response?.data) {
     const data = error.response.data
+
+    if (typeof data === 'string' && data.length < 200 && !data.includes('Exception') && !data.includes('at ')) {
+      return data
+    }
 
     if (data.message && typeof data.message === 'string' && !data.message.includes('Exception') && !data.message.includes('Stack:')) {
       return data.message
     }
 
-    if (typeof data === 'string' && data.length < 200 && !data.includes('Exception') && !data.includes('at ')) {
-      return data
+    if (data.error && typeof data.error === 'string' && !data.error.includes('Exception') && !data.error.includes('Stack:')) {
+      return data.error
+    }
+
+    if (data.error_description && typeof data.error_description === 'string') {
+      return data.error_description
+    }
+
+    if (data.detail && typeof data.detail === 'string') {
+      return data.detail
+    }
+
+    if (data.errorMessage && typeof data.errorMessage === 'string') {
+      return data.errorMessage
+    }
+
+    if (data.description && typeof data.description === 'string') {
+      return data.description
+    }
+
+    if (Array.isArray(data.errors) && data.errors.length > 0) {
+      const firstErr = data.errors[0]
+      if (typeof firstErr === 'string') return firstErr
+      if (firstErr?.defaultMessage && typeof firstErr.defaultMessage === 'string') return firstErr.defaultMessage
+      if (firstErr?.message && typeof firstErr.message === 'string') return firstErr.message
     }
   }
+
+  // Inspect request URL to accurately distinguish public auth requests from protected session requests
+  const requestUrl = (error?.config?.url || '').toLowerCase()
+
+  const isRegisterRequest = requestUrl.includes('/register')
+  const isLoginRequest = requestUrl.includes('/login')
+  const isOtpRequest = requestUrl.includes('/send-verify-otp') || requestUrl.includes('/resend-otp')
+  const isPasswordResetRequest =
+    requestUrl.includes('/forgot-password') ||
+    requestUrl.includes('/send-reset-otp') ||
+    requestUrl.includes('/reset-password')
+  const isPublicAuthRequest = isRegisterRequest || isLoginRequest || isOtpRequest || isPasswordResetRequest
 
   // Handle explicit HTTP status codes
   const status = error?.response?.status
   if (status) {
     switch (status) {
       case 400:
+        if (isRegisterRequest) {
+          return 'Registration request invalid. Please check your full name, email, and password.'
+        }
+        if (isLoginRequest) {
+          return 'Invalid login request. Please enter a valid email and password.'
+        }
         return 'Invalid request payload. Please check your inputs and try again.'
+
       case 401:
+        if (isRegisterRequest) {
+          return 'Registration failed. Please check your details and try again.'
+        }
+        if (isLoginRequest) {
+          return 'Invalid email or password. Please try again.'
+        }
+        if (isOtpRequest) {
+          return 'Invalid or expired verification code. Please try again.'
+        }
+        if (isPasswordResetRequest) {
+          return 'Password reset authorization failed. Please request a new OTP.'
+        }
+        if (isPublicAuthRequest) {
+          return 'Authentication failed. Please verify your details and try again.'
+        }
         return 'Your session has expired. Please log in again.'
+
       case 403:
+        if (isRegisterRequest) {
+          return 'Registration rejected. An account with this email may already exist.'
+        }
+        if (isLoginRequest) {
+          return 'Account unverified or access restricted.'
+        }
         return 'You do not have permission to access this resource.'
+
       case 404:
+        if (isLoginRequest) {
+          return 'Account not found. Please check your email or sign up.'
+        }
         return 'The requested resource was not found on the server.'
+
       case 409:
+        if (isRegisterRequest) {
+          return 'An account with this email address already exists.'
+        }
         return 'A resource conflict occurred. This record may already exist.'
+
+      case 422:
+        return 'Validation failed. Please check your inputs and try again.'
+
       case 429:
-        return 'Rate limit exceeded. Please wait a moment before trying again.'
+        return 'Too many requests. Please wait a moment before trying again.'
+
       case 500:
         return 'An internal server error occurred. Please try again later.'
+
       case 502:
       case 503:
       case 504:
@@ -397,6 +501,10 @@ export function getErrorMessage(error: any): string {
   // Network offline / connection failures
   if (error?.message === 'Network Error' || error?.code === 'ERR_NETWORK' || !navigator.onLine) {
     return 'Network connection error. Please check your internet connection or verify the backend server status.'
+  }
+
+  if (isRegisterRequest) {
+    return 'Registration failed. Please try again.'
   }
 
   return 'An unexpected error occurred. Please try again.'
