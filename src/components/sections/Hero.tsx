@@ -1,244 +1,199 @@
 import { motion, useInView } from 'framer-motion'
 import { useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, ChevronDown, CheckCircle2, Star, Zap } from 'lucide-react'
+import {
+  ArrowRight,
+  ChevronDown,
+  CheckCircle2,
+  Sparkles,
+  FileText,
+  Search,
+  Bot,
+  Zap,
+  Briefcase,
+  TrendingUp,
+} from 'lucide-react'
 
 /* ─────────────────────────────────────────────
-   Score Ring SVG — ATS score gauge
+   ATS Score Gauge SVG Component
    ───────────────────────────────────────────── */
-function ScoreRingSVG({ score = 84 }: { score?: number }) {
-  const r = 40
+function ScoreRingMini({ score = 92 }: { score?: number }) {
+  const r = 26
   const circ = 2 * Math.PI * r
   const dash = (score / 100) * circ
-  const color =
-    score >= 75 ? '#16A34A' : score >= 50 ? '#F59E0B' : '#DC2626'
 
   return (
-    <svg
-      width="96"
-      height="96"
-      viewBox="0 0 96 96"
-      aria-label={`ATS Score ${score}`}
-      className="block"
-    >
-      {/* Track */}
-      <circle
-        cx="48"
-        cy="48"
-        r={r}
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="7"
-        className="text-border"
-      />
-      {/* Fill */}
-      <circle
-        cx="48"
-        cy="48"
-        r={r}
-        fill="none"
-        stroke={color}
-        strokeWidth="7"
-        strokeLinecap="round"
-        strokeDasharray={`${dash} ${circ}`}
-        transform="rotate(-90 48 48)"
-        style={{ transition: 'stroke-dasharray 1.2s cubic-bezier(0.16,1,0.3,1) 0.5s' }}
-      />
-      {/* Label */}
-      <text
-        x="48"
-        y="44"
-        textAnchor="middle"
-        dominantBaseline="middle"
-        fontSize="18"
-        fontWeight="800"
-        fill={color}
-        fontFamily="Outfit, system-ui, sans-serif"
-      >
-        {score}
-      </text>
-      <text
-        x="48"
-        y="60"
-        textAnchor="middle"
-        dominantBaseline="middle"
-        fontSize="8.5"
-        fontWeight="600"
-        fill="currentColor"
-        className="text-muted-foreground"
-        fontFamily="Plus Jakarta Sans, system-ui, sans-serif"
-      >
-        ATS Score
-      </text>
-    </svg>
-  )
-}
-
-/* ─────────────────────────────────────────────
-   Score Bar row
-   ───────────────────────────────────────────── */
-function ScoreBar({
-  label,
-  value,
-  delay = '0s',
-}: {
-  label: string
-  value: number
-  delay?: string
-}) {
-  const color =
-    value >= 75 ? 'bg-success' : value >= 50 ? 'bg-warning' : 'bg-danger'
-
-  return (
-    <div className="flex items-center gap-2">
-      <span className="text-[10px] font-semibold text-muted-foreground w-24 flex-shrink-0 leading-none">
-        {label}
-      </span>
-      <div className="flex-1 h-1.5 rounded-full bg-border overflow-hidden">
-        <div
-          className={`h-full rounded-full animate-score-bar ${color}`}
-          style={
-            {
-              '--bar-target': `${value}%`,
-              '--bar-delay': delay,
-            } as React.CSSProperties
-          }
+    <div className="relative flex items-center justify-center">
+      <svg width="68" height="68" viewBox="0 0 68 68" aria-label={`ATS Score ${score}`} className="block">
+        <circle
+          cx="34"
+          cy="34"
+          r={r}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="5"
+          className="text-border"
         />
+        <circle
+          cx="34"
+          cy="34"
+          r={r}
+          fill="none"
+          stroke="#2563EB"
+          strokeWidth="5"
+          strokeLinecap="round"
+          strokeDasharray={`${dash} ${circ}`}
+          transform="rotate(-90 34 34)"
+          style={{ transition: 'stroke-dasharray 1.4s cubic-bezier(0.16,1,0.3,1) 0.3s' }}
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center leading-none">
+        <span className="font-heading font-extrabold text-base text-foreground">{score}</span>
+        <span className="text-[8px] font-bold text-primary uppercase tracking-wider">ATS</span>
       </div>
-      <span className="text-[10px] font-bold text-foreground w-7 text-right flex-shrink-0">
-        {value}%
-      </span>
     </div>
   )
 }
 
 /* ─────────────────────────────────────────────
-   Dashboard Preview MockupF
+   Hero Visual / Layered Product Story Composition
+   Resume → AI Intelligence → Job Search → Career Agent
    ───────────────────────────────────────────── */
-function DashboardPreview() {
+function HeroProductComposition() {
   return (
-    <div
-      className="relative w-full max-w-[520px] mx-auto lg:mx-0"
-      aria-hidden="true"
-    >
-      {/* Ambient glow behind card */}
-      <div className="absolute -inset-8 rounded-3xl bg-primary/10 dark:bg-primary/15 blur-3xl pointer-events-none" />
+    <div className="relative w-full max-w-[560px] mx-auto lg:mx-0 select-none" aria-hidden="true">
+      {/* Background ambient lighting */}
+      <div className="absolute -inset-6 rounded-3xl bg-primary/10 dark:bg-primary/20 blur-3xl pointer-events-none" />
+      <div className="absolute top-1/2 -right-6 w-56 h-56 bg-info/10 rounded-full blur-2xl pointer-events-none" />
 
-      {/* Main card */}
-      <div
-        className="relative rounded-2xl border border-border bg-card shadow-[0_20px_60px_-10px_rgba(0,0,0,0.12),_0_8px_24px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_20px_60px_-10px_rgba(0,0,0,0.5),_0_8px_24px_-4px_rgba(0,0,0,0.3)] overflow-hidden"
-      >
-        {/* Window chrome bar */}
-        <div className="flex items-center gap-1.5 px-4 py-3 border-b border-border bg-secondary-bg">
-          <span className="w-2.5 h-2.5 rounded-full bg-danger/70" />
-          <span className="w-2.5 h-2.5 rounded-full bg-warning/70" />
-          <span className="w-2.5 h-2.5 rounded-full bg-success/70" />
-          <span className="ml-3 text-[11px] font-semibold text-muted-foreground tracking-wide">
-            TalentPrep — Resume Evaluation
+      {/* ── Main Center Panel: AI Career Agent & Workspace ── */}
+      <div className="relative rounded-2xl border border-border bg-card shadow-[0_20px_60px_-12px_rgba(0,0,0,0.08),_0_8px_24px_-4px_rgba(0,0,0,0.04)] dark:shadow-[0_20px_60px_-12px_rgba(0,0,0,0.5),_0_8px_24px_-4px_rgba(0,0,0,0.3)] overflow-hidden">
+        {/* Window Chrome */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-secondary-bg/80 backdrop-blur-xs">
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-danger/70" />
+            <span className="w-2.5 h-2.5 rounded-full bg-warning/70" />
+            <span className="w-2.5 h-2.5 rounded-full bg-success/70" />
+            <span className="ml-2.5 text-[11px] font-semibold text-foreground/80 tracking-tight flex items-center gap-1.5">
+              <Bot className="w-3.5 h-3.5 text-primary" />
+              TalentPrep Workspace
+            </span>
+          </div>
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold border border-primary/20">
+            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+            Context Synced
           </span>
         </div>
 
-        {/* Card body */}
-        <div className="p-5 sm:p-6">
-          {/* Top row: score ring + score bars */}
-          <div className="flex items-start gap-5 sm:gap-6">
-            {/* Score ring */}
-            <div className="flex flex-col items-center gap-2 flex-shrink-0">
-              <ScoreRingSVG score={84} />
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-success/10 text-success text-[10px] font-bold border border-success/20">
-                ↑ +12 this week
+        {/* Panel Content */}
+        <div className="p-4 sm:p-5 space-y-3.5">
+          {/* Active Context Banner */}
+          <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-primary/5 border border-primary/10 text-[11px]">
+            <div className="flex items-center gap-2">
+              <FileText className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+              <span className="font-semibold text-foreground truncate max-w-[200px]">
+                Senior_Engineer_Resume.pdf
               </span>
             </div>
+            <span className="text-[10px] font-bold text-success flex items-center gap-1">
+              <CheckCircle2 className="w-3 h-3" />
+              Parsed & Ready
+            </span>
+          </div>
 
-            {/* Score bars */}
-            <div className="flex-1 flex flex-col gap-2.5 pt-1">
-              <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-1">
-                Breakdown
-              </p>
-              <ScoreBar label="Keyword Match" value={90} delay="0.55s" />
-              <ScoreBar label="Technical Skills" value={85} delay="0.65s" />
-              <ScoreBar label="Formatting" value={78} delay="0.75s" />
-              <ScoreBar label="Experience" value={72} delay="0.85s" />
+          {/* AI Career Agent Message Stream Preview */}
+          <div className="space-y-2.5 text-[11px]">
+            {/* User Query */}
+            <div className="flex items-start justify-end gap-2">
+              <div className="max-w-[85%] px-3 py-2 rounded-2xl rounded-tr-xs bg-primary text-white font-medium shadow-xs">
+                Find roles matching my TypeScript & Cloud backend experience and optimize my positioning.
+              </div>
+            </div>
+
+            {/* Agent Answer */}
+            <div className="flex items-start gap-2.5">
+              <div className="w-6 h-6 rounded-lg bg-primary/10 text-primary border border-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <Sparkles className="w-3.5 h-3.5" />
+              </div>
+              <div className="flex-1 px-3.5 py-2.5 rounded-2xl rounded-tl-xs bg-secondary-bg border border-border text-foreground space-y-1.5 shadow-xs">
+                <p className="font-semibold text-foreground flex items-center justify-between">
+                  <span>Target Match Analysis:</span>
+                  <span className="text-primary font-bold text-[10px]">3 High-Fit Roles Found</span>
+                </p>
+                <p className="text-muted-foreground text-[10.5px] leading-relaxed">
+                  Your resume has strong alignment with <strong className="text-foreground">Full Stack / Platform roles</strong>.
+                  I’ve matched your cloud architecture skills and prepared 2 actionable bullet-point enhancements.
+                </p>
+              </div>
             </div>
           </div>
 
-          {/* Divider */}
-          <div className="my-4 border-t border-divider" />
-
-          {/* Suggestion chips */}
-          <div>
-            <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-2.5">
-              AI Suggestions
-            </p>
-            <div className="flex flex-col gap-2">
-              {[
-                { label: 'Add Docker & Kubernetes to Skills', priority: 'High' },
-                { label: 'Quantify impact at Infosys with metrics', priority: 'Medium' },
-              ].map(({ label, priority }) => (
-                <div
-                  key={label}
-                  className="flex items-center justify-between gap-3 px-3 py-2 rounded-xl bg-secondary-bg border border-border"
-                >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <Zap className="w-3 h-3 text-primary flex-shrink-0" />
-                    <span className="text-[11px] font-medium text-foreground truncate">
-                      {label}
-                    </span>
-                  </div>
-                  <span
-                    className={`flex-shrink-0 text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full ${priority === 'High'
-                      ? 'bg-danger/10 text-danger border border-danger/20'
-                      : 'bg-warning/10 text-warning border border-warning/20'
-                      }`}
-                  >
-                    {priority}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Bottom stat strip */}
-          <div className="mt-4 flex items-center justify-between px-3 py-2.5 rounded-xl bg-primary/5 border border-primary/10">
-            <div className="flex items-center gap-1.5">
-              <Star className="w-3.5 h-3.5 text-primary" />
-              <span className="text-[11px] font-bold text-primary">Job Match: 82%</span>
-            </div>
-            <span className="text-[11px] font-medium text-muted-foreground">Senior Java Engineer · Infosys</span>
+          {/* Connected Quick Action Pills */}
+          <div className="pt-1 flex items-center gap-2 overflow-x-auto no-scrollbar">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-card border border-border text-[10.5px] font-semibold text-foreground shadow-2xs hover:border-primary/40 transition-colors">
+              <Search className="w-3 h-3 text-primary" /> View 3 Matched Jobs
+            </span>
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-card border border-border text-[10.5px] font-semibold text-foreground shadow-2xs hover:border-primary/40 transition-colors">
+              <Zap className="w-3 h-3 text-warning" /> Refine in Resume Builder
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Floating notification badge */}
+      {/* ── Top-Left Floating Badge: Resume Parsing & ATS Metric ── */}
       <motion.div
-        initial={{ opacity: 0, y: 10, scale: 0.92 }}
+        initial={{ opacity: 0, y: 15, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ delay: 1.1, duration: 0.5, type: 'spring', stiffness: 120, damping: 18 }}
-        className="absolute -top-4 -right-4 sm:-top-5 sm:-right-5 flex items-center gap-2 px-3 py-2 rounded-xl bg-card border border-border shadow-[0_4px_16px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.4)]"
+        transition={{ delay: 0.8, duration: 0.5, type: 'spring', stiffness: 120, damping: 16 }}
+        className="absolute -top-6 -left-4 sm:-top-7 sm:-left-6 p-3 rounded-2xl bg-card border border-border shadow-[0_12px_32px_rgba(0,0,0,0.09)] dark:shadow-[0_12px_32px_rgba(0,0,0,0.5)] flex items-center gap-3 backdrop-blur-md"
       >
-        <CheckCircle2 className="w-4 h-4 text-success flex-shrink-0" />
-        <div className="flex flex-col leading-none">
-          <span className="text-[10px] font-bold text-foreground">Resume Analyzed</span>
-          <span className="text-[9px] text-muted-foreground mt-0.5">Score improved by 12pts</span>
+        <ScoreRingMini score={92} />
+        <div className="flex flex-col">
+          <span className="text-[11px] font-extrabold text-foreground">ATS Optimization</span>
+          <span className="text-[10px] text-muted-foreground mt-0.5">Top 5% Keyword Match</span>
+          <div className="flex items-center gap-1 mt-1">
+            <span className="px-1.5 py-0.2 rounded bg-success/10 text-success text-[9px] font-bold">
+              ↑ +14 pts
+            </span>
+            <span className="text-[9px] text-muted-foreground">vs generic CV</span>
+          </div>
         </div>
       </motion.div>
 
-      {/* Floating "ATS Ready" pill */}
+      {/* ── Bottom-Right Floating Card: Intelligent Job Match Preview ── */}
       <motion.div
-        initial={{ opacity: 0, x: -10 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 1.3, duration: 0.45, type: 'spring', stiffness: 100, damping: 20 }}
-        className="absolute -bottom-4 -left-4 sm:-bottom-5 sm:-left-5 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-success text-white text-[11px] font-bold shadow-[0_4px_12px_rgba(22,163,74,0.35)]"
+        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ delay: 1.0, duration: 0.55, type: 'spring', stiffness: 110, damping: 17 }}
+        className="absolute -bottom-6 -right-3 sm:-bottom-7 sm:-right-5 p-3.5 rounded-2xl bg-card border border-border shadow-[0_16px_36px_rgba(0,0,0,0.1)] dark:shadow-[0_16px_36px_rgba(0,0,0,0.55)] flex items-center gap-3.5 max-w-[280px]"
       >
-        <span className="w-1.5 h-1.5 rounded-full bg-white/80 animate-pulse" />
-        ATS Ready
+        <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary border border-primary/20 flex items-center justify-center flex-shrink-0">
+          <Briefcase className="w-5 h-5" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-[11px] font-extrabold text-foreground truncate">
+              Senior Full Stack Engineer
+            </span>
+            <span className="px-1.5 py-0.5 rounded-md bg-success/15 text-success text-[9px] font-black flex-shrink-0">
+              96% Fit
+            </span>
+          </div>
+          <p className="text-[10px] text-muted-foreground truncate mt-0.5">
+            Stripe · Remote (Global)
+          </p>
+          <div className="flex items-center gap-1 mt-1 text-[9px] text-primary font-semibold">
+            <TrendingUp className="w-3 h-3" />
+            <span>Skills matched: React, Node, AWS</span>
+          </div>
+        </div>
       </motion.div>
     </div>
   )
 }
 
 /* ─────────────────────────────────────────────
-   Hero Section — Main Export
+   Hero Section Main Export
    ───────────────────────────────────────────── */
 export default function Hero() {
   const ref = useRef<HTMLDivElement>(null)
@@ -247,12 +202,12 @@ export default function Hero() {
   const containerVariants = {
     hidden: {},
     visible: {
-      transition: { staggerChildren: 0.09, delayChildren: 0.05 },
+      transition: { staggerChildren: 0.08, delayChildren: 0.05 },
     },
   }
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 22 },
+    hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
       y: 0,
@@ -261,79 +216,98 @@ export default function Hero() {
   }
 
   const panelVariants = {
-    hidden: { opacity: 0, y: 40, scale: 0.97 },
+    hidden: { opacity: 0, y: 35, scale: 0.98 },
     visible: {
       opacity: 1,
       y: 0,
       scale: 1,
-      transition: { type: 'spring' as const, stiffness: 70, damping: 16, delay: 0.25 },
+      transition: { type: 'spring' as const, stiffness: 70, damping: 16, delay: 0.2 },
     },
   }
 
   return (
     <section
       ref={ref}
-      className="relative min-h-[85vh] pt-20 pb-14 md:pt-28 md:pb-20 overflow-hidden bg-background"
+      className="relative min-h-[88vh] pt-24 pb-16 md:pt-32 md:pb-24 overflow-hidden bg-background"
       aria-label="Hero"
     >
-      {/* ── Background field ──────────────────────────── */}
-      {/* Top-center radial glow */}
-      <div
-        className="pointer-events-none absolute inset-0 z-0"
-        aria-hidden="true"
-      >
-        {/* Large ambient bloom */}
-        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-primary/8 dark:bg-primary/12 rounded-full blur-[140px]" />
-        {/* Right-side depth accent */}
-        <div className="absolute top-1/4 right-0 w-[400px] h-[400px] bg-info/6 dark:bg-info/8 rounded-full blur-[100px]" />
-        {/* Subtle grid */}
-        <div className="absolute inset-0 bg-grid-pattern opacity-50" />
-        {/* Bottom fade to next section */}
-        <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-background to-transparent" />
+      {/* ── Background Ambient Canvas ────────────────── */}
+      <div className="pointer-events-none absolute inset-0 z-0" aria-hidden="true">
+        {/* Central primary glow */}
+        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[850px] h-[550px] bg-primary/8 dark:bg-primary/12 rounded-full blur-[140px]" />
+        {/* Subtle accent glow */}
+        <div className="absolute top-1/3 right-4 w-[420px] h-[420px] bg-info/6 dark:bg-info/8 rounded-full blur-[110px]" />
+        {/* Subtle grid pattern */}
+        <div className="absolute inset-0 bg-grid-pattern opacity-55" />
+        {/* Gradient fade to bottom */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent" />
       </div>
 
-      {/* ── Content ───────────────────────────────────── */}
+      {/* ── Main Hero Layout ─────────────────────────── */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row lg:items-center lg:gap-12 xl:gap-16">
 
-          {/* ── LEFT: Editorial column ─────────────────── */}
+          {/* ── LEFT: Value Proposition Column ───────── */}
           <motion.div
             variants={containerVariants}
             initial="hidden"
             animate={inView ? 'visible' : 'hidden'}
-            className="flex-1 max-w-xl lg:max-w-none text-center lg:text-left"
+            className="flex-1 max-w-2xl lg:max-w-none text-center lg:text-left"
           >
+            {/* Category Pill */}
+            <motion.div variants={itemVariants} className="inline-flex items-center gap-2 mb-4">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold tracking-wide">
+                <Sparkles className="w-3.5 h-3.5" />
+                AI-Powered Career Intelligence
+              </span>
+            </motion.div>
+
             {/* Headline */}
             <motion.h1
               variants={itemVariants}
-              className="font-heading font-black text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] xl:text-[3.5rem] tracking-tight text-foreground leading-[1.1] sm:leading-[1.12]"
+              className="font-heading font-black text-3xl sm:text-4xl md:text-5xl lg:text-[3.35rem] xl:text-[3.65rem] tracking-tight text-foreground leading-[1.1] sm:leading-[1.12]"
             >
-              Land Your Dream Job —
-              <br className="hidden sm:block" />
-              <span className="text-primary"> Starting With</span>
-              <br className="hidden sm:block" />
-              Your Resume.
+              Your Career,
+              <br />
+              <span className="text-primary">Powered by AI.</span>
             </motion.h1>
 
             {/* Subtitle */}
             <motion.p
               variants={itemVariants}
-              className="mt-4 sm:mt-5 text-sm sm:text-base md:text-lg text-secondary-foreground leading-relaxed max-w-[50ch] mx-auto lg:mx-0"
+              className="mt-4 sm:mt-5 text-sm sm:text-base md:text-lg text-secondary-foreground leading-relaxed max-w-[54ch] mx-auto lg:mx-0"
             >
-              Analyze your resume with AI, match it to any job description, and
-              practice realistic interviews — all in one focused platform built
-              for engineers and professionals.
+              Understand your resume, discover tailored job opportunities, and collaborate with your personal AI career assistant to move forward faster.
             </motion.p>
 
-            {/* CTA row */}
+            {/* Feature Checkpoints */}
             <motion.div
               variants={itemVariants}
-              className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3"
+              className="mt-5 sm:mt-6 flex flex-wrap items-center justify-center lg:justify-start gap-y-2 gap-x-5 text-xs sm:text-sm text-foreground/80 font-medium"
+            >
+              <span className="flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />
+                Deep Resume Intelligence
+              </span>
+              <span className="flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />
+                Intelligent Job Discovery
+              </span>
+              <span className="flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />
+                Dedicated Career Agent
+              </span>
+            </motion.div>
+
+            {/* CTA Button Group */}
+            <motion.div
+              variants={itemVariants}
+              className="mt-7 sm:mt-8 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5"
             >
               <Link
                 to="/signup"
                 id="hero-cta-primary"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary-hover active:bg-primary-active text-white font-semibold text-sm sm:text-base rounded-xl shadow-[0_4px_20px_rgba(37,99,235,0.35)] hover:shadow-[0_6px_28px_rgba(37,99,235,0.45)] hover:-translate-y-0.5 transition-all duration-200 group cursor-pointer w-full sm:w-auto justify-center"
+                className="inline-flex items-center gap-2 px-6 py-3.5 bg-primary hover:bg-primary-hover active:bg-primary-active text-white font-bold text-sm sm:text-base rounded-xl shadow-[0_4px_20px_rgba(37,99,235,0.35)] hover:shadow-[0_6px_28px_rgba(37,99,235,0.45)] hover:-translate-y-0.5 transition-all duration-200 group cursor-pointer w-full sm:w-auto justify-center"
               >
                 <span>Get Started Free</span>
                 <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
@@ -346,78 +320,34 @@ export default function Hero() {
                   e.preventDefault()
                   document.querySelector('#how-it-works')?.scrollIntoView({ behavior: 'smooth' })
                 }}
-                className="inline-flex items-center gap-2 px-5 py-3 text-secondary-foreground hover:text-foreground font-semibold text-sm sm:text-base rounded-xl border border-border hover:border-primary/30 hover:bg-secondary-bg transition-all duration-200 cursor-pointer w-full sm:w-auto justify-center"
+                className="inline-flex items-center gap-2 px-5 py-3.5 text-secondary-foreground hover:text-foreground font-semibold text-sm sm:text-base rounded-xl border border-border hover:border-primary/30 hover:bg-secondary-bg transition-all duration-200 cursor-pointer w-full sm:w-auto justify-center"
               >
                 <ChevronDown className="w-4 h-4" />
                 <span>See How It Works</span>
               </a>
             </motion.div>
 
-            {/* Trust micro-proof */}
+            {/* Micro-Proof Footer */}
             <motion.div
               variants={itemVariants}
-              className="mt-6 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 sm:gap-5"
+              className="mt-6 flex items-center justify-center lg:justify-start gap-4 text-xs text-muted-foreground"
             >
-              {[
-                'No credit card required',
-                'Free to get started',
-                'Built for engineers',
-              ].map((item) => (
-                <span
-                  key={item}
-                  className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground font-medium"
-                >
-                  <CheckCircle2 className="w-3.5 h-3.5 text-success flex-shrink-0" />
-                  {item}
-                </span>
-              ))}
-            </motion.div>
-
-            {/* Social proof strip */}
-            <motion.div
-              variants={itemVariants}
-              className="mt-8 flex items-center gap-4 justify-center lg:justify-start"
-            >
-              {/* Avatar stack */}
-              <div className="flex -space-x-2.5">
-                {[
-                  { initials: 'RS', bg: 'bg-primary/15 text-primary' },
-                  { initials: 'AK', bg: 'bg-success/15 text-success' },
-                  { initials: 'PV', bg: 'bg-warning/15 text-warning' },
-                  { initials: 'MN', bg: 'bg-info/15 text-info' },
-                ].map(({ initials, bg }) => (
-                  <div
-                    key={initials}
-                    className={`w-8 h-8 rounded-full ring-2 ring-background flex items-center justify-center font-bold text-[10px] uppercase ${bg}`}
-                  >
-                    {initials}
-                  </div>
-                ))}
-                <div className="w-8 h-8 rounded-full ring-2 ring-background bg-secondary-bg border border-border flex items-center justify-center text-[9px] font-bold text-muted-foreground">
-                  +1k
-                </div>
-              </div>
-              <div className="flex flex-col leading-none">
-                <div className="flex items-center gap-0.5">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-3 h-3 fill-warning text-warning" />
-                  ))}
-                </div>
-                <span className="text-[11px] font-medium text-muted-foreground mt-1">
-                  Trusted by <strong className="text-foreground font-bold">10,000+</strong> job seekers
-                </span>
-              </div>
+              <span>No credit card required</span>
+              <span className="w-1 h-1 rounded-full bg-border" />
+              <span>Instant PDF / DOCX parsing</span>
+              <span className="w-1 h-1 rounded-full bg-border" />
+              <span>Free to get started</span>
             </motion.div>
           </motion.div>
 
-          {/* ── RIGHT: Dashboard panel ─────────────────── */}
+          {/* ── RIGHT: Layered SaaS Product Story Visual ── */}
           <motion.div
             variants={panelVariants}
             initial="hidden"
             animate={inView ? 'visible' : 'hidden'}
             className="mt-14 lg:mt-0 flex-1 flex items-center justify-center lg:justify-end animate-float-gentle"
           >
-            <DashboardPreview />
+            <HeroProductComposition />
           </motion.div>
 
         </div>

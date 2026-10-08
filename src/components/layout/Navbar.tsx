@@ -16,9 +16,11 @@ export default function Navbar() {
   }, [])
 
   const navLinks = [
-    { name: 'Features', href: '#features' },
     { name: 'How It Works', href: '#how-it-works' },
-    { name: 'Benefits', href: '#benefits' },
+    { name: 'Resume Intelligence', href: '#resume-intelligence' },
+    { name: 'Job Search', href: '#job-search' },
+    { name: 'AI Agent', href: '#ai-agent' },
+    { name: 'Resume Studio', href: '#resume-builder' },
     { name: 'FAQ', href: '#faq' },
   ]
 

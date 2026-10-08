@@ -1,58 +1,82 @@
 import { useState } from 'react'
-import { Plus, Minus } from 'lucide-react'
+import { Plus, Minus, HelpCircle } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 export default function FAQ() {
-  const [activeIndex, setActiveIndex] = useState<number | null>(null)
+  const [activeIndex, setActiveIndex] = useState<number | null>(0)
 
   const faqs = [
     {
-      question: 'How does AI interview simulation work?',
+      question: 'What is TalentPrep?',
       answer:
-        'Our platform uses advanced language models to generate contextual questions based on your target role. The AI acts as a real interviewer, speaking live to you, listening to your spoken answers, and adapting its follow-up questions in real-time to simulate a authentic conversation.',
+        'TalentPrep is an AI-powered career platform designed to help you understand your resume, discover relevant job opportunities based on your actual skills, collaborate with a dedicated AI Career Agent, and craft ATS-ready resumes with a built-in Resume Builder.',
     },
     {
-      question: 'Is technical interview practice included?',
+      question: 'How does TalentPrep understand my resume?',
       answer:
-        'Yes! We support multiple technical paths, including live coding sandboxes, database query builders, algorithm questions, and system design challenges, complete with automated complexity and architectural feedback.',
+        'When you upload your resume (PDF or DOCX), our parsing engine extracts your skills taxonomy, work history, education, and quantified achievements. It evaluates the document against ATS guidelines and creates a structured career profile that powers the rest of the platform.',
     },
     {
-      question: 'Can beginners use TalentPrep?',
+      question: 'How does AI Job Search work?',
       answer:
-        'Absolutely. We have preparation paths tailored for all experience levels, from entry-level graduates to staff engineers. You can adjust the difficulty of the AI\'s questions and pacing at any time to match your goals.',
+        'AI Job Search matches live tech openings against your extracted profile. Instead of relying solely on exact keyword queries, it calculates skill compatibility scores and lets you filter opportunities by role, location, recency, and work model (Remote, Hybrid, On-site).',
     },
     {
-      question: 'How is feedback generated?',
+      question: 'What is the AI Career Agent?',
       answer:
-        'Upon completing a session, our AI analyzes the transcript of your responses, checking for vocal clarity, filler word counts, sentiment tone, and adherence to structural frameworks like the STAR method. You get a complete scorecard with action items.',
+        'The AI Career Agent is your dedicated intelligent career assistant. It has visibility into your uploaded resume context and helps you analyze role requirements, suggest bullet point rewrites, identify technical skill gaps, and strategize your next career steps.',
     },
     {
-      question: 'Is my data secure?',
+      question: 'Can the AI Career Agent use my resume information?',
       answer:
-        'Yes, we take security very seriously. All interview audio and transcripts are encrypted, and we never share your data, credentials, or profile information with third-party employers without your direct permission.',
+        'Yes. When your resume is uploaded and parsed, the Career Agent automatically references your experience, skills, and background so its recommendations are tailored specifically to you rather than generic boilerplate advice.',
+    },
+    {
+      question: 'Can I build or improve my resume on TalentPrep?',
+      answer:
+        'Yes. TalentPrep includes an integrated Resume Builder/Studio where you can edit your sections, review real-time ATS compliance, format your content cleanly, and export print-ready PDF resumes formatted for top tech employers.',
+    },
+    {
+      question: 'Is TalentPrep just a generic job board?',
+      answer:
+        'No. TalentPrep is an end-to-end career intelligence workspace. While it provides powerful job discovery, it connects your resume analysis, job compatibility scoring, and AI advisory into a unified workflow.',
+    },
+    {
+      question: 'Does TalentPrep automatically apply for jobs on my behalf?',
+      answer:
+        'No. TalentPrep does not submit automated applications or message recruiters autonomously. Instead, it provides you with deep match scores, skill gap insights, and direct links so you can review and apply with confidence.',
+    },
+    {
+      question: 'Is my resume data and personal information secure?',
+      answer:
+        'Yes. We take privacy and security seriously. Your resumes, profile details, and agent conversations are securely stored and encrypted. We do not sell or distribute your private career data to third parties.',
+    },
+    {
+      question: 'What features are currently available today?',
+      answer:
+        'Currently available features include Resume Upload & Parsing, ATS Evaluation Scoring, AI Job Search & Matching, the Context-Aware AI Career Agent, and the full Resume Builder with PDF export.',
     },
   ]
 
   const toggleAccordion = (idx: number) => {
-    if (activeIndex === idx) {
-      setActiveIndex(null)
-    } else {
-      setActiveIndex(idx)
-    }
+    setActiveIndex(activeIndex === idx ? null : idx)
   }
 
   return (
-    <section id="faq" className="py-14 sm:py-16 md:py-20 bg-secondary-bg/30 scroll-mt-20">
+    <section id="faq" className="py-20 md:py-28 bg-secondary-bg/30 border-t border-border scroll-mt-20">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-12">
-          <p className="text-xs font-bold uppercase tracking-wider text-primary mb-2">Support & Assistance</p>
-          <h2 className="font-heading font-extrabold text-2xl sm:text-3xl lg:text-4xl text-foreground tracking-tight mb-3">
+        <div className="text-center max-w-3xl mx-auto mb-14 md:mb-16">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-wider mb-3">
+            <HelpCircle className="w-3.5 h-3.5" />
+            Answers to Common Questions
+          </div>
+          <h2 className="font-heading font-black text-3xl sm:text-4xl lg:text-5xl text-foreground tracking-tight leading-tight mb-4">
             Frequently Asked Questions
           </h2>
-          <p className="text-secondary-foreground text-sm sm:text-base">
-            Can’t find what you're looking for? Reach out to our customer support.
+          <p className="text-secondary-foreground text-base sm:text-lg leading-relaxed">
+            Everything you need to know about TalentPrep’s features, career intelligence, and privacy.
           </p>
         </div>
 
@@ -63,23 +87,27 @@ export default function FAQ() {
             return (
               <div
                 key={idx}
-                className={`bg-card rounded-2xl border transition-all duration-300 ${
+                className={`bg-card rounded-2xl border transition-all duration-200 overflow-hidden ${
                   isActive
-                    ? 'border-primary shadow-sm'
-                    : 'border-border shadow-sm hover:border-border'
+                    ? 'border-primary/50 shadow-xs ring-1 ring-primary/10'
+                    : 'border-border shadow-2xs hover:border-border/80'
                 }`}
               >
                 {/* Header Button */}
                 <button
                   onClick={() => toggleAccordion(idx)}
-                  className="w-full px-5 py-4 flex items-center justify-between gap-4 text-left font-semibold text-foreground focus:outline-none"
+                  className="w-full px-5 sm:px-6 py-4.5 flex items-center justify-between gap-4 text-left font-heading font-bold text-sm sm:text-base text-foreground focus:outline-none cursor-pointer"
                   aria-expanded={isActive}
                 >
-                  <span className="text-sm sm:text-base">{faq.question}</span>
-                  <div className={`p-1.5 rounded-lg border flex items-center justify-center flex-shrink-0 transition-colors ${
-                    isActive ? 'bg-primary/10 border-primary/20 text-primary' : 'bg-secondary-bg border-border text-muted-foreground'
-                  }`}>
-                    {isActive ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                  <span>{faq.question}</span>
+                  <div
+                    className={`w-7 h-7 rounded-lg border flex items-center justify-center flex-shrink-0 transition-colors ${
+                      isActive
+                        ? 'bg-primary text-white border-primary'
+                        : 'bg-secondary-bg border-border text-muted-foreground'
+                    }`}
+                  >
+                    {isActive ? <Minus className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
                   </div>
                 </button>
 
@@ -90,9 +118,9 @@ export default function FAQ() {
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: 'auto' }}
                       exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.25 }}
+                      transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
                     >
-                      <div className="px-6 pb-5 text-sm text-muted-foreground leading-relaxed border-t border-divider pt-4">
+                      <div className="px-5 sm:px-6 pb-5 text-sm sm:text-[14.5px] text-secondary-foreground leading-relaxed border-t border-divider pt-4">
                         {faq.answer}
                       </div>
                     </motion.div>
@@ -102,6 +130,7 @@ export default function FAQ() {
             )
           })}
         </div>
+
       </div>
     </section>
   )

@@ -5,17 +5,20 @@ export default function Footer() {
 
   const footerLinks = [
     {
-      title: 'Product',
+      title: 'Platform',
       links: [
-        { name: 'Features', href: '/#features', external: false },
-        { name: 'Resume Console', href: '/resume', external: false },
+        { name: 'How It Works', href: '/#how-it-works', external: false },
+        { name: 'Resume Intelligence', href: '/#resume-intelligence', external: false },
+        { name: 'AI Job Search', href: '/#job-search', external: false },
+        { name: 'AI Career Agent', href: '/#ai-agent', external: false },
+        { name: 'Resume Studio', href: '/#resume-builder', external: false },
       ],
     },
     {
       title: 'Resources',
       links: [
         { name: 'Help Center', href: '/help', external: false },
-        { name: 'FAQ', href: '/faq', external: false },
+        { name: 'FAQ', href: '/#faq', external: false },
         { name: 'Privacy Policy', href: '/privacy-policy', external: false },
       ],
     },
@@ -81,7 +84,7 @@ export default function Footer() {
               </span>
             </Link>
             <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
-              Empowering job seekers with realistic AI interview simulations, real-time analytics, and actionable behavioral coaching to master any interview.
+              AI-powered career intelligence platform. Understand your resume, discover tailored job opportunities, and navigate your career path with your dedicated AI Career Agent.
             </p>
             {/* Social Icons */}
             <div className="flex gap-3 mt-2">

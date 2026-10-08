@@ -1,88 +1,88 @@
-import { PlayCircle, Users, Award, MessageSquareCode } from 'lucide-react'
+import { ShieldCheck, Cpu, Search, Layers, Sparkles } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 export default function Trust() {
-  const stats = [
+  const pillars = [
     {
       id: 1,
-      number: '50,000+',
-      label: 'Practice Sessions Completed',
-      desc: 'Simulations across multiple domains and technologies.',
-      icon: PlayCircle,
-      color: 'text-primary bg-primary/5 border-primary/20',
+      title: 'Contextual Resume Intelligence',
+      badge: 'Parsing Engine',
+      desc: 'Deep multi-section extraction that breaks down complex resumes into structured skills, timelines, and impact metrics.',
+      icon: Cpu,
     },
     {
       id: 2,
-      number: '95%',
-      label: 'User Satisfaction',
-      desc: 'Graduates reported feeling significantly more prepared.',
-      icon: Users,
-      color: 'text-primary bg-primary/5 border-primary/20',
+      title: 'Real-Time Job Compatibility',
+      badge: 'Live Discovery',
+      desc: 'Matches live job openings against your actual validated skill set with transparent alignment indicators.',
+      icon: Search,
     },
     {
       id: 3,
-      number: '1,000+',
-      label: 'Interview Questions',
-      desc: 'Expert-curated behavioral, HR, and coding questions.',
-      icon: Award,
-      color: 'text-primary bg-primary/5 border-primary/20',
+      title: 'Context-Aware AI Assistant',
+      badge: 'Career Agent',
+      desc: 'Interacts with your unique background to provide actionable suggestions, career gap analysis, and tailored positioning.',
+      icon: Layers,
     },
     {
       id: 4,
-      number: 'Real-Time',
-      label: 'AI Feedback Engine',
-      desc: 'Instant scoring, audio analysis, and response coaching.',
-      icon: MessageSquareCode,
-      color: 'text-success bg-success/5 border-success/20',
+      title: 'Privacy & Data Security First',
+      badge: 'Encrypted & Safe',
+      desc: 'Your career documents are encrypted. We never sell, rent, or distribute your personal career profile.',
+      icon: ShieldCheck,
     },
   ]
 
   return (
-    <section className="py-16 bg-card border-y border-border">
+    <section className="py-16 sm:py-20 bg-card border-y border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Subtitle / Intro */}
+        
+        {/* Intro */}
         <div className="text-center max-w-2xl mx-auto mb-12">
-          <p className="text-xs font-bold uppercase tracking-wider text-primary mb-2">Proven Results</p>
-          <h2 className="font-heading font-extrabold text-3xl text-foreground tracking-tight">
-            Trusted by Job Seekers Worldwide
+          <p className="text-xs font-bold uppercase tracking-wider text-primary mb-2 flex items-center justify-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5" />
+            Built for Serious Professionals
+          </p>
+          <h2 className="font-heading font-black text-2xl sm:text-3xl lg:text-4xl text-foreground tracking-tight">
+            Engineered for Career Precision & Privacy
           </h2>
         </div>
 
-        {/* Stats Grid */}
+        {/* Pillars Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {stats.map((stat, idx) => {
-            const Icon = stat.icon
+          {pillars.map((item, idx) => {
+            const Icon = item.icon
             return (
               <motion.div
-                key={stat.id}
-                initial={{ opacity: 0, y: 20 }}
+                key={item.id}
+                initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-50px' }}
-                transition={{ duration: 0.4, delay: idx * 0.1 }}
-                whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                className="bg-card p-6 rounded-2xl border border-border shadow-sm hover:border-border transition-all flex flex-col items-center text-center gap-4 group"
+                transition={{ duration: 0.4, delay: idx * 0.08 }}
+                className="bg-secondary-bg/40 p-6 rounded-2xl border border-border flex flex-col justify-between hover:border-primary/25 hover:bg-card transition-all duration-200"
               >
-                {/* Icon Wrapper */}
-                <div className={`p-3.5 rounded-xl border flex items-center justify-center transition-colors ${stat.color} group-hover:scale-110 duration-200`}>
-                  <Icon className="w-6 h-6" />
-                </div>
-                
-                {/* Stats Info */}
                 <div>
-                  <h3 className="font-heading font-black text-3xl text-foreground tracking-tight mb-1">
-                    {stat.number}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary border border-primary/20 flex items-center justify-center">
+                      <Icon className="w-5 h-5" />
+                    </div>
+                    <span className="text-[9.5px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-card border border-border text-muted-foreground">
+                      {item.badge}
+                    </span>
+                  </div>
+
+                  <h3 className="font-heading font-extrabold text-base text-foreground mb-2">
+                    {item.title}
                   </h3>
-                  <h4 className="font-semibold text-sm text-secondary-foreground mb-2">
-                    {stat.label}
-                  </h4>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    {stat.desc}
+                    {item.desc}
                   </p>
                 </div>
               </motion.div>
             )
           })}
         </div>
+
       </div>
     </section>
   )
