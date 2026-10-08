@@ -57,12 +57,12 @@ export default function ResumeDetails() {
 
   if (resumeFile?.status === 'processing') {
     return (
-      <div className="max-w-xl mx-auto py-16 text-center space-y-4">
-        <div className="w-14 h-14 rounded-2xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center mx-auto animate-pulse">
-          <RefreshCw className="w-7 h-7 animate-spin" />
+      <div className="max-w-md mx-auto py-10 text-center space-y-3">
+        <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center mx-auto animate-pulse">
+          <RefreshCw className="w-6 h-6 animate-spin" />
         </div>
-        <h2 className="font-heading font-bold text-xl text-foreground">Processing Resume Content...</h2>
-        <p className="text-sm text-muted-foreground">
+        <h2 className="font-heading font-bold text-base sm:text-lg text-foreground">Processing Resume Content...</h2>
+        <p className="text-xs text-muted-foreground">
           We are extracting and structuring content for your resume. Details will appear once analysis completes.
         </p>
       </div>
@@ -80,11 +80,11 @@ export default function ResumeDetails() {
   const hasProjectsList = projectsList.length > 0
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3.5">
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="font-heading font-black text-2xl text-foreground">Resume Details</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">
+        <h1 className="font-heading font-black text-lg sm:text-xl text-foreground leading-tight">Resume Details</h1>
+        <p className="text-xs text-muted-foreground mt-0.5 leading-tight">
           Extracted and structured content from your uploaded resume
         </p>
       </motion.div>
@@ -94,35 +94,35 @@ export default function ResumeDetails() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.05 }}
-        className="bg-card border border-border rounded-2xl p-6 flex flex-col sm:flex-row items-start gap-5 shadow-sm"
+        className="bg-card border border-border rounded-xl p-4 sm:p-4.5 flex flex-col sm:flex-row items-start gap-3.5 shadow-2xs"
       >
-        <div className="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
-          <FileText className="w-7 h-7" />
+        <div className="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
+          <FileText className="w-5.5 h-5.5" />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="flex flex-wrap items-center gap-2 mb-1">
-            <h2 className="font-heading font-bold text-xl text-foreground truncate max-w-md">
+          <div className="flex flex-wrap items-center gap-2 mb-0.5">
+            <h2 className="font-heading font-bold text-base sm:text-lg text-foreground truncate max-w-md leading-tight">
               {filename}
             </h2>
             {resume.status && (
-              <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.2 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
                 <CheckCircle2 className="w-3 h-3" />
                 {resume.status}
               </span>
             )}
           </div>
 
-          <div className="flex flex-wrap gap-x-5 gap-y-1.5 mt-3 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1.5">
-              <HardDrive className="w-3.5 h-3.5 text-primary/70" />
+          <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-[11px] text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <HardDrive className="w-3 h-3 text-primary/70" />
               {formatFileSize(resume.fileSize)}
             </span>
-            <span className="flex items-center gap-1.5">
-              <FileType className="w-3.5 h-3.5 text-primary/70" />
+            <span className="flex items-center gap-1">
+              <FileType className="w-3 h-3 text-primary/70" />
               {resume.mimeType || 'application/pdf'}
             </span>
-            <span className="flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5 text-primary/70" />
+            <span className="flex items-center gap-1">
+              <Calendar className="w-3 h-3 text-primary/70" />
               Uploaded {formatDate(resume.createdAt)}
             </span>
           </div>
@@ -131,9 +131,9 @@ export default function ResumeDetails() {
 
       {/* Contact Information */}
       {Boolean(resume.contactInformation?.trim()) && (
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}>
-          <ExpandableCard title="Contact Information" icon={<Mail className="w-4 h-4" />} defaultOpen>
-            <p className="text-sm text-secondary-foreground leading-relaxed whitespace-pre-line">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.06 }}>
+          <ExpandableCard title="Contact Information" icon={<Mail className="w-3.5 h-3.5" />} defaultOpen>
+            <p className="text-xs sm:text-[13px] text-secondary-foreground leading-relaxed whitespace-pre-line">
               {resume.contactInformation}
             </p>
           </ExpandableCard>
@@ -142,9 +142,9 @@ export default function ResumeDetails() {
 
       {/* Professional Summary */}
       {Boolean(resume.summary?.trim()) && (
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-          <ExpandableCard title="Professional Summary" icon={<User className="w-4 h-4" />} defaultOpen>
-            <p className="text-sm text-secondary-foreground leading-relaxed whitespace-pre-line">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}>
+          <ExpandableCard title="Professional Summary" icon={<User className="w-3.5 h-3.5" />} defaultOpen>
+            <p className="text-xs sm:text-[13px] text-secondary-foreground leading-relaxed whitespace-pre-line">
               {resume.summary}
             </p>
           </ExpandableCard>
@@ -153,15 +153,15 @@ export default function ResumeDetails() {
 
       {/* Technical Skills */}
       {parsedSkills.length > 0 && (
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.13 }}>
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
           <ExpandableCard
             title="Technical Skills"
             subtitle={`${parsedSkills.length} skills identified`}
-            icon={<Code2 className="w-4 h-4" />}
-            badge={<span className="text-xs font-semibold text-muted-foreground">{parsedSkills.length}</span>}
+            icon={<Code2 className="w-3.5 h-3.5" />}
+            badge={<span className="text-[11px] font-semibold text-muted-foreground">{parsedSkills.length}</span>}
             defaultOpen
           >
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5">
               {parsedSkills.map((skill, index) => (
                 <SkillBadge key={`${skill}-${index}`} label={skill} variant="primary" />
               ))}
@@ -172,9 +172,9 @@ export default function ResumeDetails() {
 
       {/* Work Experience */}
       {Boolean(resume.experience?.trim()) && (
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.16 }}>
-          <ExpandableCard title="Work Experience" icon={<Briefcase className="w-4 h-4" />} defaultOpen>
-            <p className="text-sm text-secondary-foreground leading-relaxed whitespace-pre-line">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}>
+          <ExpandableCard title="Work Experience" icon={<Briefcase className="w-3.5 h-3.5" />} defaultOpen>
+            <p className="text-xs sm:text-[13px] text-secondary-foreground leading-relaxed whitespace-pre-line">
               {resume.experience}
             </p>
           </ExpandableCard>
@@ -183,42 +183,42 @@ export default function ResumeDetails() {
 
       {/* Projects */}
       {(hasProjectsList || (typeof resume.projects === 'string' && Boolean(resume.projects))) && (
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.19 }}>
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.14 }}>
           <ExpandableCard
             title="Projects"
             subtitle={hasProjectsList ? `${projectsList.length} projects` : undefined}
-            icon={<FolderGit2 className="w-4 h-4" />}
+            icon={<FolderGit2 className="w-3.5 h-3.5" />}
             badge={
               hasProjectsList ? (
-                <span className="text-xs font-semibold text-muted-foreground">{projectsList.length}</span>
+                <span className="text-[11px] font-semibold text-muted-foreground">{projectsList.length}</span>
               ) : undefined
             }
             defaultOpen
           >
             {hasProjectsList ? (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {projectsList.map((project, idx) => (
-                  <div key={idx} className="bg-secondary-bg/30 rounded-xl border border-border p-4">
+                  <div key={idx} className="bg-secondary-bg/30 rounded-lg border border-border p-3">
                     {project.name && (
-                      <h4 className="font-semibold text-sm text-foreground mb-1.5">{project.name}</h4>
+                      <h4 className="font-semibold text-xs sm:text-sm text-foreground mb-1">{project.name}</h4>
                     )}
                     {project.description && (
-                      <p className="text-xs text-muted-foreground mb-3 leading-relaxed whitespace-pre-line">
+                      <p className="text-xs text-muted-foreground mb-2 leading-relaxed whitespace-pre-line">
                         {project.description}
                       </p>
                     )}
                     {project.highlights && project.highlights.length > 0 && (
-                      <ul className="space-y-1 mb-3">
+                      <ul className="space-y-1 mb-2">
                         {project.highlights.map((highlight, i) => (
                           <li key={i} className="text-xs text-secondary-foreground flex items-start gap-1.5">
                             <span className="w-1.5 h-1.5 rounded-full bg-primary/70 mt-1.5 flex-shrink-0" />
-                            <span>{highlight}</span>
+                            <span className="leading-relaxed">{highlight}</span>
                           </li>
                         ))}
                       </ul>
                     )}
                     {project.technologies && project.technologies.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 mt-2">
+                      <div className="flex flex-wrap gap-1 mt-1.5">
                         {project.technologies.map((tech, i) => (
                           <SkillBadge key={i} label={tech} size="sm" variant="primary" />
                         ))}
@@ -228,7 +228,7 @@ export default function ResumeDetails() {
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-secondary-foreground leading-relaxed whitespace-pre-line">
+              <p className="text-xs sm:text-[13px] text-secondary-foreground leading-relaxed whitespace-pre-line">
                 {String(resume.projects)}
               </p>
             )}
@@ -238,9 +238,9 @@ export default function ResumeDetails() {
 
       {/* Education */}
       {Boolean(resume.education?.trim()) && (
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }}>
-          <ExpandableCard title="Education" icon={<GraduationCap className="w-4 h-4" />} defaultOpen>
-            <p className="text-sm text-secondary-foreground leading-relaxed whitespace-pre-line">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.16 }}>
+          <ExpandableCard title="Education" icon={<GraduationCap className="w-3.5 h-3.5" />} defaultOpen>
+            <p className="text-xs sm:text-[13px] text-secondary-foreground leading-relaxed whitespace-pre-line">
               {resume.education}
             </p>
           </ExpandableCard>
@@ -249,9 +249,9 @@ export default function ResumeDetails() {
 
       {/* Certifications */}
       {Boolean(resume.certifications?.trim()) && (
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-          <ExpandableCard title="Certifications" icon={<Award className="w-4 h-4" />} defaultOpen>
-            <p className="text-sm text-secondary-foreground leading-relaxed whitespace-pre-line">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}>
+          <ExpandableCard title="Certifications" icon={<Award className="w-3.5 h-3.5" />} defaultOpen>
+            <p className="text-xs sm:text-[13px] text-secondary-foreground leading-relaxed whitespace-pre-line">
               {resume.certifications}
             </p>
           </ExpandableCard>
@@ -260,9 +260,9 @@ export default function ResumeDetails() {
 
       {/* Achievements */}
       {Boolean(resume.achievements?.trim()) && (
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28 }}>
-          <ExpandableCard title="Achievements" icon={<Award className="w-4 h-4" />} defaultOpen>
-            <p className="text-sm text-secondary-foreground leading-relaxed whitespace-pre-line">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+          <ExpandableCard title="Achievements" icon={<Award className="w-3.5 h-3.5" />} defaultOpen>
+            <p className="text-xs sm:text-[13px] text-secondary-foreground leading-relaxed whitespace-pre-line">
               {resume.achievements}
             </p>
           </ExpandableCard>
@@ -271,9 +271,9 @@ export default function ResumeDetails() {
 
       {/* Languages */}
       {Boolean(resume.languages?.trim()) && (
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.31 }}>
-          <ExpandableCard title="Languages" icon={<User className="w-4 h-4" />} defaultOpen>
-            <p className="text-sm text-secondary-foreground leading-relaxed whitespace-pre-line">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }}>
+          <ExpandableCard title="Languages" icon={<User className="w-3.5 h-3.5" />} defaultOpen>
+            <p className="text-xs sm:text-[13px] text-secondary-foreground leading-relaxed whitespace-pre-line">
               {resume.languages}
             </p>
           </ExpandableCard>

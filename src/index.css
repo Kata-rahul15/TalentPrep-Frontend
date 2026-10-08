@@ -146,26 +146,7 @@
     scrollbar-width: thin;
     scrollbar-color: var(--color-border) transparent;
     
-    /* Responsive root font scaling: Reproduce 80% zoom visual scale at 100% browser zoom on desktop */
-    font-size: 100%; /* Default 16px on mobile for optimal readability & touch targets */
-  }
-
-  @media (min-width: 768px) {
-    html {
-      font-size: 90%; /* 14.4px on tablets */
-    }
-  }
-
-  @media (min-width: 1024px) {
-    html {
-      font-size: 80%; /* 12.8px (80% scale) on laptops and desktop displays */
-    }
-  }
-
-  @media (min-width: 1536px) {
-    html {
-      font-size: 80%; /* Maintain clean 80% scale on ultra-wide desktop displays */
-    }
+    font-size: 100%;
   }
 
   html::-webkit-scrollbar {
@@ -356,3 +337,41 @@
   pointer-events: none;
   z-index: 1;
 }
+
+/* ── Resume Builder Print Styling ── */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 8mm;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  #resume-printable-area,
+  #resume-printable-area * {
+    visibility: visible;
+  }
+
+  #resume-printable-area {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    transform: none !important;
+    background: white !important;
+    color: black !important;
+  }
+
+  /* Prevent awkward page breaks inside components */
+  .break-inside-avoid {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
+

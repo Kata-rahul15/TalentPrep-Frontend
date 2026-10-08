@@ -192,6 +192,7 @@ export interface ChatRequest {
 export interface ChatResponse {
   answer: string
   sources?: ChatSource[]
+  toolTrace?: string[]
 }
 
 export interface ChatSource {
@@ -206,6 +207,7 @@ export interface ChatMessage {
   content: string
   timestamp: string
   sources?: ChatSource[]
+  toolTrace?: string[]
 }
 // ─── API Response Wrappers ───────────────────────────────────────────────────
 

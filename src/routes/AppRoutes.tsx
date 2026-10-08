@@ -7,8 +7,9 @@ import VerifyOtp from '@/pages/VerifyOtp'
 import ForgotPassword from '@/pages/ForgotPassword'
 import ResetPassword from '@/pages/ResetPassword'
 import Home from '@/pages/Home'
-import Interview from '@/pages/Interview'
 import Profile from '@/pages/Profile'
+import AIAgent from '@/pages/AIAgent'
+import Jobs from '@/pages/Jobs'
 import { AuthProvider, useAuth } from '@/services/authService'
 import AuthenticatedLayout from '@/components/layout/AuthenticatedLayout'
 
@@ -16,6 +17,7 @@ import AuthenticatedLayout from '@/components/layout/AuthenticatedLayout'
 import ResumeLayout from '@/features/resume/components/ResumeLayout'
 import ResumeDashboard from '@/features/resume/pages/ResumeDashboard'
 import ResumeUpload from '@/features/resume/pages/ResumeUpload'
+import ResumeBuilder from '@/features/resume/pages/ResumeBuilder'
 import ResumeDetails from '@/features/resume/pages/ResumeDetails'
 import ResumeEvaluation from '@/features/resume/pages/ResumeEvaluation'
 import JobMatch from '@/features/resume/pages/JobMatch'
@@ -120,8 +122,10 @@ export default function AppRoutes() {
 
           {/* Authenticated Routes */}
           <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-          <Route path="/interview" element={<ProtectedRoute><Interview /></ProtectedRoute>} />
+          <Route path="/agent" element={<ProtectedRoute><AIAgent /></ProtectedRoute>} />
+          <Route path="/jobs" element={<ProtectedRoute><Jobs /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/settings" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
 
           {/* Resume Module Routes */}
           <Route
@@ -140,6 +144,16 @@ export default function AppRoutes() {
               <ProtectedRoute>
                 <ResumeLayout>
                   <ResumeUpload />
+                </ResumeLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/resume/builder"
+            element={
+              <ProtectedRoute>
+                <ResumeLayout>
+                  <ResumeBuilder />
                 </ResumeLayout>
               </ProtectedRoute>
             }

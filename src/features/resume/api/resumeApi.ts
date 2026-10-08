@@ -101,8 +101,30 @@ function normalizeResumeRecord(raw: any): ResumeFile {
 export const resumeApi = {
 
   // ═══════════════════════════════════════════════════════════
-  // RESUME METADATA
+  // RESUME METADATA LIST & SINGLE
   // ═══════════════════════════════════════════════════════════
+
+  /**
+   * GET /api/resumes/me
+   * Retrieve all uploaded resume records for the current user.
+   */
+  getResumesList: async (): Promise<ResumeFile[]> => {
+    try {
+      const response = await api.get('/api/resumes/me')
+      const data = response.data
+      if (!data) return []
+      if (Array.isArray(data)) {
+        return data.map(normalizeResumeRecord)
+      }
+      return [normalizeResumeRecord(data)]
+    } catch (error: any) {
+      if (error?.response?.status === 404 || error?.response?.status === 204) {
+        return []
+      }
+      console.error('[Resume] Error fetching resumes list', error)
+      throw error
+    }
+  },
 
   /**
    * GET /api/resumes/me or GET /api/resumes/{resumeId}
@@ -810,25 +832,25 @@ export const resumeApi = {
   // RAG CHAT
   // ═══════════════════════════════════════════════════════════
   chat: async (
-    question: string
-  ): Promise<ChatMessage> => {
-
-    if (!question?.trim()) {
-      throw new Error('Chat message cannot be empty.')
-    }
+    resumeId: string,
+    question: string,
+    conversationId?: string
+  ): Promise<ChatMessage & { conversationId?: string }> => {
+    if (!resumeId?.trim()) throw new Error('A resume is required for the AI agent.')
+    if (!question?.trim()) throw new Error('Chat message cannot be empty.')
 
     const response = await api.post(
-      '/api/resumes/chat',
-      {
-        question: question.trim(),
-      }
+      `/api/resumes/${resumeId}/agent/chat`,
+      { message: question.trim(), conversationId }
     )
 
     return {
       id: `assistant-${Date.now()}`,
       role: 'assistant',
-      content: response.data.answer,
+      content: response.data?.reply || 'I could not produce a response.',
       timestamp: new Date().toISOString(),
+      toolTrace: response.data?.toolTrace || [],
+      conversationId: response.data?.conversationId,
     }
   },
   // ═══════════════════════════════════════════════════════════
@@ -879,6 +901,34 @@ export const resumeApi = {
     return response.data
   },
 
+
+  // ═══════════════════════════════════════════════════════════
+  // RESUME BUILDER
+  // ═══════════════════════════════════════════════════════════
+  getBuilder: async (resumeId: string): Promise<any> => {
+    const response = await api.get(`/api/resumes/${resumeId}/builder`)
+    return response.data?.content ?? response.data
+  },
+
+  createBuilder: async (content?: any): Promise<{ resumeId: string; content: any }> => {
+    const response = await api.post('/api/resumes/builder', content || {})
+    return response.data
+  },
+
+  saveBuilder: async (resumeId: string, content: any): Promise<any> => {
+    const response = await api.put(`/api/resumes/${resumeId}/builder`, content)
+    return response.data?.content ?? response.data
+  },
+
+  searchJobs: async (params: { q?: string; location?: string; days?: number; limit?: number }) => {
+    const response = await api.get('/api/resumes/jobs/search', { params })
+    return response.data
+  },
+
+  getJobDetails: async (jobId: string) => {
+    const response = await api.get(`/api/resumes/jobs/${encodeURIComponent(jobId)}`)
+    return response.data
+  },
 
   // ═══════════════════════════════════════════════════════════
   // DELETE RESUME

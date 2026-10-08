@@ -16,8 +16,8 @@ const variantStyles = {
 }
 
 const sizeStyles = {
-  sm: 'px-2 py-0.5 text-[11px]',
-  md: 'px-2.5 py-1 text-xs',
+  sm: 'px-1.5 py-0.2 text-[10px] leading-tight',
+  md: 'px-2 py-0.5 text-[11px] leading-snug',
 }
 
 export default function SkillBadge({ label, variant = 'default', size = 'md', className }: SkillBadgeProps) {

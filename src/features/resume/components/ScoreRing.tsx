@@ -9,9 +9,9 @@ interface ScoreRingProps {
 }
 
 const sizeMap = {
-  sm: { outer: 64, stroke: 6, font: 'text-sm', labelFont: 'text-[10px]' },
-  md: { outer: 96, stroke: 8, font: 'text-xl', labelFont: 'text-xs' },
-  lg: { outer: 128, stroke: 10, font: 'text-3xl', labelFont: 'text-sm' },
+  sm: { outer: 52, stroke: 4.5, font: 'text-xs', labelFont: 'text-[9px]' },
+  md: { outer: 72, stroke: 6, font: 'text-base font-extrabold', labelFont: 'text-[10px]' },
+  lg: { outer: 96, stroke: 7.5, font: 'text-2xl font-black', labelFont: 'text-xs' },
 }
 
 function getScoreColor(score: number): string {
@@ -67,7 +67,7 @@ export default function ScoreRing({
         className="absolute flex flex-col items-center justify-center"
         style={{ width: outer, height: outer }}
       >
-        <span className={cn('font-heading font-black leading-none', font)} style={{ color: ringColor }}>
+        <span className={cn('font-heading leading-none', font)} style={{ color: ringColor }}>
           {score}
         </span>
         {label && (

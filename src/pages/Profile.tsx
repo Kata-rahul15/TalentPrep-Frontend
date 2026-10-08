@@ -23,51 +23,51 @@ export default function Profile() {
   }
 
   return (
-    <div className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 text-foreground">
+    <div className="flex-1 w-full max-w-[1400px] px-4 sm:px-6 lg:px-8 py-5 text-foreground space-y-5">
       {/* Header */}
-      <div className="mb-8 flex items-start justify-between flex-wrap gap-4">
+      <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
-          <h1 className="font-heading font-black text-2xl sm:text-3xl text-foreground tracking-tight">
+          <h1 className="font-heading font-black text-lg sm:text-xl text-foreground tracking-tight leading-tight">
             Account & Security Settings
           </h1>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+          <p className="text-xs text-muted-foreground mt-0.5 leading-tight">
             Manage your credentials, session preferences, and target career domains.
           </p>
         </div>
 
         <button
           onClick={logout}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-danger/10 text-danger hover:bg-danger/20 font-bold text-xs rounded-xl transition-colors cursor-pointer border border-danger/20"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-danger/10 text-danger hover:bg-danger/20 font-bold text-xs rounded-lg transition-colors cursor-pointer border border-danger/20 h-8"
         >
-          <LogOut className="w-4 h-4" />
+          <LogOut className="w-3.5 h-3.5" />
           <span>Log Out</span>
         </button>
       </div>
 
       <motion.div
-        initial={{ opacity: 0, y: 16 }}
+        initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        className="grid grid-cols-1 lg:grid-cols-12 gap-8"
+        className="grid grid-cols-1 lg:grid-cols-12 gap-5"
       >
         {/* Left Profile Summary Card */}
-        <div className="lg:col-span-4 bg-card border border-border rounded-3xl p-6 sm:p-8 flex flex-col items-center text-center shadow-xs">
-          <div className="w-24 h-24 rounded-full bg-primary/10 text-primary flex items-center justify-center font-black text-3xl uppercase border-2 border-primary/20 shadow-inner mb-4">
+        <div className="lg:col-span-4 bg-card border border-border rounded-xl p-4 sm:p-5 flex flex-col items-center text-center shadow-2xs">
+          <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center font-black text-xl uppercase border border-primary/20 shadow-inner mb-3">
             {user?.username?.slice(0, 2) || 'TP'}
           </div>
 
-          <h2 className="font-heading font-bold text-xl text-foreground">
+          <h2 className="font-heading font-bold text-base text-foreground leading-tight">
             {user?.username || 'Candidate User'}
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5">{user?.email || 'user@talentprep.ai'}</p>
 
-          <div className="mt-4 px-3.5 py-1 rounded-full bg-success/10 text-success border border-success/20 text-xs font-bold flex items-center gap-1.5">
-            <CheckCircle2 className="w-4 h-4" />
+          <div className="mt-3 px-2.5 py-0.5 rounded-full bg-success/10 text-success border border-success/20 text-[11px] font-bold flex items-center gap-1">
+            <CheckCircle2 className="w-3 h-3" />
             <span>Verified Candidate</span>
           </div>
 
-          <div className="w-full border-t border-border my-6" />
+          <div className="w-full border-t border-border my-4" />
 
-          <div className="w-full space-y-3.5 text-left text-xs">
+          <div className="w-full space-y-2.5 text-left text-xs">
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Account Status</span>
               <span className="font-bold text-success">Active</span>
@@ -84,43 +84,43 @@ export default function Profile() {
         </div>
 
         {/* Right Settings Tabs / Content */}
-        <div className="lg:col-span-8 space-y-6">
+        <div className="lg:col-span-8 space-y-4">
           {/* Account Details Panel */}
-          <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
-            <h3 className="font-heading font-bold text-lg text-foreground border-b border-border pb-4 flex items-center gap-2">
-              <User className="w-5 h-5 text-primary" />
-              Account Information
+          <div className="bg-card border border-border rounded-xl p-4 sm:p-5 shadow-2xs space-y-3.5">
+            <h3 className="font-heading font-bold text-sm sm:text-base text-foreground border-b border-border pb-2.5 flex items-center gap-1.5">
+              <User className="w-4 h-4 text-primary" />
+              <span>Account Information</span>
             </h3>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="p-4 rounded-2xl bg-secondary-bg/60 border border-border space-y-1">
-                <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground">
-                  <User className="w-3.5 h-3.5 text-primary" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="p-3 rounded-lg bg-secondary-bg/60 border border-border space-y-0.5">
+                <div className="flex items-center gap-1.5 text-[11px] font-bold text-muted-foreground">
+                  <User className="w-3 h-3 text-primary" />
                   <span>Username</span>
                 </div>
-                <p className="text-sm font-semibold text-foreground pt-0.5">
+                <p className="text-xs sm:text-sm font-semibold text-foreground pt-0.5">
                   {user?.username || 'N/A'}
                 </p>
               </div>
 
-              <div className="p-4 rounded-2xl bg-secondary-bg/60 border border-border space-y-1">
-                <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground">
-                  <Mail className="w-3.5 h-3.5 text-primary" />
+              <div className="p-3 rounded-lg bg-secondary-bg/60 border border-border space-y-0.5">
+                <div className="flex items-center gap-1.5 text-[11px] font-bold text-muted-foreground">
+                  <Mail className="w-3 h-3 text-primary" />
                   <span>Primary Email</span>
                 </div>
-                <p className="text-sm font-semibold text-foreground pt-0.5">
+                <p className="text-xs sm:text-sm font-semibold text-foreground pt-0.5">
                   {user?.email || 'N/A'}
                 </p>
               </div>
             </div>
 
-            <div className="p-5 rounded-2xl bg-primary/5 border border-primary/20 flex items-start gap-4">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
-                <Award className="w-5 h-5" />
+            <div className="p-3.5 rounded-lg bg-primary/5 border border-primary/20 flex items-start gap-3">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
+                <Award className="w-4 h-4" />
               </div>
               <div>
-                <h4 className="text-sm font-bold text-foreground">Target Role & Domain</h4>
-                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                <h4 className="text-xs sm:text-sm font-bold text-foreground">Target Role & Domain</h4>
+                <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
                   Configured for Software Engineering, System Architecture, and Technical Interview simulations.
                 </p>
               </div>
@@ -128,10 +128,10 @@ export default function Profile() {
           </div>
 
           {/* Password Management */}
-          <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-xs space-y-4">
-            <h3 className="font-heading font-bold text-lg text-foreground border-b border-border pb-4 flex items-center gap-2">
-              <KeyRound className="w-5 h-5 text-primary" />
-              Password & Security
+          <div className="bg-card border border-border rounded-xl p-4 sm:p-5 shadow-2xs space-y-3">
+            <h3 className="font-heading font-bold text-sm sm:text-base text-foreground border-b border-border pb-2.5 flex items-center gap-1.5">
+              <KeyRound className="w-4 h-4 text-primary" />
+              <span>Password & Security</span>
             </h3>
 
             <p className="text-xs text-muted-foreground leading-relaxed">
@@ -139,7 +139,7 @@ export default function Profile() {
             </p>
 
             {resetRequested ? (
-              <div className="p-4 rounded-2xl bg-success/10 border border-success/20 text-xs text-success font-semibold flex items-center gap-2">
+              <div className="p-3 rounded-lg bg-success/10 border border-success/20 text-xs text-success font-semibold flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
                 <span>Password reset OTP dispatched! Check your email inbox to reset your password.</span>
               </div>
@@ -147,27 +147,27 @@ export default function Profile() {
               <button
                 onClick={handlePasswordResetRequest}
                 disabled={resetLoading || !user?.email}
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary-hover text-white font-bold text-xs rounded-xl shadow-xs transition-all disabled:opacity-60 cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-primary hover:bg-primary-hover text-white font-bold text-xs rounded-lg shadow-2xs transition-all disabled:opacity-60 cursor-pointer h-8"
               >
-                <Lock className="w-3.5 h-3.5" />
+                <Lock className="w-3 h-3" />
                 <span>{resetLoading ? 'Sending OTP...' : 'Send Password Reset OTP'}</span>
               </button>
             )}
           </div>
 
           {/* Account Deletion & Disclaimer Panel */}
-          <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-xs space-y-4">
-            <h3 className="font-heading font-bold text-lg text-danger border-b border-border pb-4 flex items-center gap-2">
-              <ShieldAlert className="w-5 h-5 text-danger" />
-              Account Management & Deletion
+          <div className="bg-card border border-border rounded-xl p-4 sm:p-5 shadow-2xs space-y-3">
+            <h3 className="font-heading font-bold text-sm sm:text-base text-danger border-b border-border pb-2.5 flex items-center gap-1.5">
+              <ShieldAlert className="w-4 h-4 text-danger" />
+              <span>Account Management & Deletion</span>
             </h3>
 
-            <div className="p-4 rounded-2xl bg-secondary-bg border border-border space-y-2 text-xs text-muted-foreground">
-              <div className="flex items-center gap-2 font-bold text-foreground">
-                <AlertCircle className="w-4 h-4 text-amber-500" />
+            <div className="p-3 rounded-lg bg-secondary-bg border border-border space-y-1.5 text-xs text-muted-foreground">
+              <div className="flex items-center gap-1.5 font-bold text-foreground">
+                <AlertCircle className="w-3.5 h-3.5 text-amber-500" />
                 <span>Data Deletion Protocol</span>
               </div>
-              <p className="leading-relaxed">
+              <p className="leading-relaxed text-[11px]">
                 Direct self-service backend account deletion is currently undergoing backend security verification. To permanently purge your account data and resume records, please submit a deletion request to <strong className="text-foreground font-mono">support@talentprep.ai</strong>.
               </p>
             </div>

@@ -3,12 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Briefcase,
-  PlayCircle,
   CheckCircle2,
   XCircle,
   Tag,
   Lightbulb,
-  ChevronRight,
   Loader2,
   Circle,
   AlertCircle,
@@ -38,7 +36,6 @@ import type {
   JobMatchStatusResponse,
 } from '../types/resume.types'
 
-
 // ─────────────────────────────────────────────────────────────
 // Placeholder
 // ─────────────────────────────────────────────────────────────
@@ -46,8 +43,7 @@ import type {
 const PLACEHOLDER = `Paste a job description here to match it against your resume...
 
 Example:
-We are looking for a Senior Java Backend Engineer with strong experience in Spring Boot and microservices architecture. The ideal candidate will have hands-on experience with Apache Kafka, Redis caching, Docker containerization, and Kubernetes orchestration. Experience with system design, gRPC, and distributed tracing tools like Prometheus and Jaeger is a plus.`
-
+We are looking for a Senior Java Backend Engineer with strong experience in Spring Boot and microservices architecture. The ideal candidate will have hands-on experience with Apache Kafka, Redis caching, Docker containerization, and Kubernetes orchestration.`
 
 // ─────────────────────────────────────────────────────────────
 // Status configuration (6 Stages)
@@ -97,14 +93,7 @@ const STATUS_STEPS: {
   },
 ]
 
-
-// ─────────────────────────────────────────────────────────────
-// Status helpers
-// ─────────────────────────────────────────────────────────────
-
-function getStatusIndex(
-  status?: JobMatchStatus
-): number {
+function getStatusIndex(status?: JobMatchStatus): number {
   if (!status) return 0
   if (status === 'COMPLETED') return STATUS_STEPS.length - 1
   if (status === 'QUEUED') return 1
@@ -115,10 +104,7 @@ function getStatusIndex(
   return 0
 }
 
-
-function getStatusTitle(
-  status?: JobMatchStatus
-): string {
+function getStatusTitle(status?: JobMatchStatus): string {
   switch (status) {
     case 'QUEUED':
       return 'Analyzing resume information'
@@ -139,7 +125,6 @@ function getStatusTitle(
   }
 }
 
-
 // ─────────────────────────────────────────────────────────────
 // Progress UI
 // ─────────────────────────────────────────────────────────────
@@ -149,7 +134,6 @@ interface MatchProgressProps {
   errorMessage?: string | null
   elapsedSeconds?: number
 }
-
 
 function MatchProgress({
   status,
@@ -168,11 +152,10 @@ function MatchProgress({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-card border border-border rounded-2xl p-6 shadow-xs scroll-mt-24"
+      className="bg-card border border-border rounded-xl p-4 sm:p-5 shadow-2xs scroll-mt-24"
     >
-      {/* Accessible live announcements */}
       <div aria-live="polite" className="sr-only">
         {isFailed
           ? `Match analysis failed: ${errorMessage || 'Unknown error'}`
@@ -182,10 +165,10 @@ function MatchProgress({
       </div>
 
       {/* Header */}
-      <div className="flex items-start justify-between gap-4 mb-6">
-        <div className="flex items-start gap-4">
+      <div className="flex items-start justify-between gap-3 mb-4">
+        <div className="flex items-start gap-3">
           <div
-            className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${
+            className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${
               isFailed
                 ? 'bg-danger/10 text-danger'
                 : isCompleted
@@ -194,41 +177,41 @@ function MatchProgress({
             }`}
           >
             {isFailed ? (
-              <AlertCircle className="w-5 h-5" />
+              <AlertCircle className="w-4 h-4" />
             ) : isCompleted ? (
-              <CheckCircle2 className="w-5 h-5" />
+              <CheckCircle2 className="w-4 h-4" />
             ) : (
-              <Loader2 className="w-5 h-5 animate-spin" />
+              <Loader2 className="w-4 h-4 animate-spin" />
             )}
           </div>
 
           <div>
-            <h2 className="font-heading font-bold text-base text-foreground">
+            <h2 className="font-heading font-bold text-sm sm:text-base text-foreground">
               {getStatusTitle(status)}
             </h2>
 
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-xs text-muted-foreground mt-0.5">
               {isFailed
                 ? 'Something went wrong while processing your match.'
                 : isCompleted
                   ? 'Your resume has been successfully compared with the job description.'
-                  : 'Indeterminate AI processing is running. Please stay on this page.'}
+                  : 'AI matching is in progress. Please stay on this page.'}
             </p>
           </div>
         </div>
 
         {/* Elapsed Timer Badge */}
         {!isCompleted && !isFailed && (
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary-bg border border-border text-xs font-mono text-muted-foreground flex-shrink-0">
-            <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-            <span>{formatTime(elapsedSeconds)} elapsed</span>
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary-bg border border-border text-[11px] font-mono text-muted-foreground flex-shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+            <span>{formatTime(elapsedSeconds)}</span>
           </div>
         )}
       </div>
 
       {/* Progress steps */}
       {!isFailed && (
-        <div className="space-y-1">
+        <div className="space-y-0.5">
           {STATUS_STEPS.map((step, index) => {
             const Icon = step.icon
             const isCurrent = index === currentIndex && !isCompleted
@@ -236,11 +219,11 @@ function MatchProgress({
             const isUpcoming = !isDone && !isCurrent
 
             return (
-              <div key={step.label} className="relative flex gap-4">
+              <div key={step.label} className="relative flex gap-3">
                 {/* Vertical line */}
                 {index < STATUS_STEPS.length - 1 && (
                   <div
-                    className={`absolute left-[18px] top-10 w-px h-[calc(100%-2px)] ${
+                    className={`absolute left-[14px] top-8 w-px h-[calc(100%-2px)] ${
                       isDone ? 'bg-success/40' : 'bg-border'
                     }`}
                   />
@@ -248,7 +231,7 @@ function MatchProgress({
 
                 {/* Step icon */}
                 <div
-                  className={`relative z-10 w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 border ${
+                  className={`relative z-10 w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 border ${
                     isDone
                       ? 'bg-success/10 border-success/30 text-success'
                       : isCurrent
@@ -257,19 +240,19 @@ function MatchProgress({
                   }`}
                 >
                   {isDone ? (
-                    <CheckCircle2 className="w-4 h-4" />
+                    <CheckCircle2 className="w-3.5 h-3.5" />
                   ) : isCurrent ? (
-                    <Icon className="w-4 h-4" />
+                    <Icon className="w-3.5 h-3.5" />
                   ) : (
-                    <Circle className="w-3.5 h-3.5" />
+                    <Circle className="w-2.5 h-2.5" />
                   )}
                 </div>
 
                 {/* Step content */}
-                <div className={`pb-5 flex-1 ${isUpcoming ? 'opacity-50' : ''}`}>
+                <div className={`pb-3 flex-1 ${isUpcoming ? 'opacity-50' : ''}`}>
                   <div className="flex items-center gap-2">
                     <p
-                      className={`text-sm font-semibold ${
+                      className={`text-xs font-semibold ${
                         isCurrent
                           ? 'text-primary'
                           : isDone
@@ -281,11 +264,11 @@ function MatchProgress({
                     </p>
 
                     {isCurrent && (
-                      <Loader2 className="w-3.5 h-3.5 text-primary animate-spin" />
+                      <Loader2 className="w-3 h-3 text-primary animate-spin" />
                     )}
                   </div>
 
-                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                  <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
                     {step.description}
                   </p>
                 </div>
@@ -297,14 +280,14 @@ function MatchProgress({
 
       {/* Failed message */}
       {isFailed && (
-        <div className="mt-4 p-4 rounded-xl bg-danger/5 border border-danger/20">
-          <div className="flex items-start gap-3">
+        <div className="mt-3 p-3 rounded-lg bg-danger/5 border border-danger/20">
+          <div className="flex items-start gap-2.5">
             <AlertCircle className="w-4 h-4 text-danger mt-0.5 flex-shrink-0" />
             <div>
-              <p className="text-sm font-semibold text-danger">
+              <p className="text-xs font-semibold text-danger">
                 Match processing failed
               </p>
-              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+              <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
                 {errorMessage ||
                   'The server could not complete the job match. Your input has been preserved below.'}
               </p>
@@ -316,7 +299,6 @@ function MatchProgress({
   )
 }
 
-
 // ─────────────────────────────────────────────────────────────
 // Result Panel
 // ─────────────────────────────────────────────────────────────
@@ -325,30 +307,17 @@ interface ResultPanelProps {
   result: JobMatchStatusResponse
 }
 
-
-function ResultPanel({
-  result,
-}: ResultPanelProps) {
-
-  const overallMatch =
-    result.overallMatch ?? 0
+function ResultPanel({ result }: ResultPanelProps) {
+  const overallMatch = result.overallMatch ?? 0
 
   return (
     <motion.div
-      initial={{
-        opacity: 0,
-        y: 16,
-      }}
-      animate={{
-        opacity: 1,
-        y: 0,
-      }}
-      className="space-y-5"
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="space-y-3.5"
     >
-
       {/* Overall score */}
-      <div className="bg-card border border-border rounded-2xl p-6 flex flex-col sm:flex-row items-center gap-6">
-
+      <div className="bg-card border border-border rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row items-center gap-4">
         <ScoreRingContainer
           score={overallMatch}
           size="lg"
@@ -356,13 +325,12 @@ function ResultPanel({
         />
 
         <div className="flex-1 text-center sm:text-left">
-
-          <p className="text-xs text-muted-foreground uppercase tracking-wider font-bold mb-1">
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold mb-0.5">
             Job Description Match
           </p>
 
           <p
-            className={`font-heading font-black text-3xl mb-1 ${overallMatch >= 80
+            className={`font-heading font-black text-2xl mb-0.5 ${overallMatch >= 80
               ? 'text-success'
               : overallMatch >= 60
                 ? 'text-warning'
@@ -372,177 +340,102 @@ function ResultPanel({
             {overallMatch}%
           </p>
 
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs text-muted-foreground leading-relaxed">
             {overallMatch >= 80
               ? 'Your resume closely aligns with the supplied job requirements.'
               : overallMatch >= 60
                 ? 'Your resume has several matching requirements, with some gaps to review.'
                 : 'Your resume has several gaps compared with the supplied job requirements.'}
           </p>
-
         </div>
-
       </div>
-
 
       {/* Matched + Missing Skills */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
         {/* Matched */}
-        <div className="bg-card border border-border rounded-2xl p-5">
-
-          <h3 className="font-heading font-semibold text-sm text-foreground flex items-center gap-2 mb-3">
-
-            <CheckCircle2 className="w-4 h-4 text-success" />
-
-            Matched Skills
-
-            <span className="ml-auto text-xs text-success font-semibold">
+        <div className="bg-card border border-border rounded-xl p-4">
+          <h3 className="font-heading font-semibold text-xs sm:text-sm text-foreground flex items-center gap-1.5 mb-2.5">
+            <CheckCircle2 className="w-3.5 h-3.5 text-success" />
+            <span>Matched Skills</span>
+            <span className="ml-auto text-[11px] text-success font-semibold">
               {result.matchedSkills.length} found
             </span>
-
           </h3>
 
-          <div className="flex flex-wrap gap-2">
-
+          <div className="flex flex-wrap gap-1.5">
             {result.matchedSkills.length > 0 ? (
-              result.matchedSkills.map(
-                (skill) => (
-                  <SkillBadge
-                    key={skill}
-                    label={skill}
-                    variant="matched"
-                  />
-                )
-              )
+              result.matchedSkills.map((skill) => (
+                <SkillBadge key={skill} label={skill} variant="matched" />
+              ))
             ) : (
-              <p className="text-xs text-muted-foreground">
-                No matched skills identified.
-              </p>
+              <p className="text-xs text-muted-foreground">No matched skills identified.</p>
             )}
-
           </div>
-
         </div>
-
 
         {/* Missing */}
-        <div className="bg-card border border-border rounded-2xl p-5">
-
-          <h3 className="font-heading font-semibold text-sm text-foreground flex items-center gap-2 mb-3">
-
-            <XCircle className="w-4 h-4 text-danger" />
-
-            Missing Skills
-
-            <span className="ml-auto text-xs text-danger font-semibold">
+        <div className="bg-card border border-border rounded-xl p-4">
+          <h3 className="font-heading font-semibold text-xs sm:text-sm text-foreground flex items-center gap-1.5 mb-2.5">
+            <XCircle className="w-3.5 h-3.5 text-danger" />
+            <span>Missing Skills</span>
+            <span className="ml-auto text-[11px] text-danger font-semibold">
               {result.missingSkills.length} gaps
             </span>
-
           </h3>
 
-          <div className="flex flex-wrap gap-2">
-
+          <div className="flex flex-wrap gap-1.5">
             {result.missingSkills.length > 0 ? (
-              result.missingSkills.map(
-                (skill) => (
-                  <SkillBadge
-                    key={skill}
-                    label={skill}
-                    variant="missing"
-                  />
-                )
-              )
+              result.missingSkills.map((skill) => (
+                <SkillBadge key={skill} label={skill} variant="missing" />
+              ))
             ) : (
-              <p className="text-xs text-muted-foreground">
-                No missing skills identified.
-              </p>
+              <p className="text-xs text-muted-foreground">No missing skills identified.</p>
             )}
-
           </div>
-
         </div>
-
       </div>
-
 
       {/* Missing keywords */}
-      <div className="bg-card border border-border rounded-2xl p-5">
-
-        <h3 className="font-heading font-semibold text-sm text-foreground flex items-center gap-2 mb-3">
-
-          <Tag className="w-4 h-4 text-warning" />
-
-          Missing Keywords
-
+      <div className="bg-card border border-border rounded-xl p-4">
+        <h3 className="font-heading font-semibold text-xs sm:text-sm text-foreground flex items-center gap-1.5 mb-2.5">
+          <Tag className="w-3.5 h-3.5 text-warning" />
+          <span>Missing Keywords</span>
         </h3>
 
-        <div className="flex flex-wrap gap-2">
-
+        <div className="flex flex-wrap gap-1.5">
           {result.missingKeywords.length > 0 ? (
-            result.missingKeywords.map(
-              (keyword) => (
-                <SkillBadge
-                  key={keyword}
-                  label={keyword}
-                  variant="missing"
-                  size="sm"
-                />
-              )
-            )
+            result.missingKeywords.map((keyword) => (
+              <SkillBadge key={keyword} label={keyword} variant="missing" size="sm" />
+            ))
           ) : (
-            <p className="text-xs text-muted-foreground">
-              No missing keywords identified.
-            </p>
+            <p className="text-xs text-muted-foreground">No missing keywords identified.</p>
           )}
-
         </div>
-
       </div>
 
-
       {/* Recommendations */}
-      <div className="bg-card border border-border rounded-2xl p-5">
-
-        <h3 className="font-heading font-semibold text-sm text-foreground flex items-center gap-2 mb-3">
-
-          <Lightbulb className="w-4 h-4 text-primary" />
-
-          Recommendations
-
+      <div className="bg-card border border-border rounded-xl p-4">
+        <h3 className="font-heading font-semibold text-xs sm:text-sm text-foreground flex items-center gap-1.5 mb-2.5">
+          <Lightbulb className="w-3.5 h-3.5 text-primary" />
+          <span>Recommendations</span>
         </h3>
 
         {result.recommendations.length > 0 ? (
-          <ul className="space-y-2.5">
-
-            {result.recommendations.map(
-              (recommendation, index) => (
-                <li
-                  key={index}
-                  className="flex items-start gap-2 text-xs text-secondary-foreground leading-relaxed"
-                >
-
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 flex-shrink-0" />
-
-                  {recommendation}
-
-                </li>
-              )
-            )}
-
+          <ul className="space-y-1.5">
+            {result.recommendations.map((recommendation, index) => (
+              <li key={index} className="flex items-start gap-2 text-xs text-secondary-foreground leading-relaxed">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 flex-shrink-0" />
+                <span>{recommendation}</span>
+              </li>
+            ))}
           </ul>
         ) : (
-          <p className="text-xs text-muted-foreground">
-            No additional recommendations were generated.
-          </p>
+          <p className="text-xs text-muted-foreground">No additional recommendations were generated.</p>
         )}
-
       </div>
-
     </motion.div>
   )
 }
-
 
 // ─────────────────────────────────────────────────────────────
 // Main Page
@@ -582,11 +475,11 @@ export default function JobMatch() {
     return () => clearInterval(interval)
   }, [isProcessing, jobMatchMutation.isPending])
 
-  // Smooth scroll handler helper with navbar offset
+  // Smooth scroll handler helper
   const scrollToElement = (ref: React.RefObject<HTMLDivElement | null>) => {
     setTimeout(() => {
       ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }, 150)
+    }, 120)
   }
 
   // Handle Match action
@@ -599,7 +492,6 @@ export default function JobMatch() {
     setActiveMatchId(undefined)
     setElapsedSeconds(0)
 
-    // Scroll smoothly to progress section immediately
     scrollToElement(progressSectionRef)
 
     jobMatchMutation.mutate(
@@ -638,24 +530,23 @@ export default function JobMatch() {
     setActiveMatchId(undefined)
     setElapsedSeconds(0)
     jobMatchMutation.reset()
-    // Job description is deliberately preserved so user can re-trigger match
   }
 
   const result = status === 'COMPLETED' ? jobMatchStatusQuery.data : undefined
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-        <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
-            <Briefcase className="w-5 h-5" />
+        <div className="flex items-start gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
+            <Briefcase className="w-4 h-4" />
           </div>
           <div>
-            <h1 className="font-heading font-black text-2xl text-foreground">
+            <h1 className="font-heading font-black text-lg sm:text-xl text-foreground leading-tight">
               Job Description Match
             </h1>
-            <p className="text-sm text-muted-foreground mt-0.5">
+            <p className="text-xs text-muted-foreground mt-0.5 leading-tight">
               Compare your resume against any job description and discover where you align and where you have gaps.
             </p>
           </div>
@@ -666,12 +557,12 @@ export default function JobMatch() {
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="bg-card border border-border rounded-2xl p-6 space-y-4 shadow-xs"
+        transition={{ delay: 0.05 }}
+        className="bg-card border border-border rounded-xl p-4 space-y-3 shadow-2xs"
       >
-        <div className="flex items-center gap-2">
-          <Briefcase className="w-4 h-4 text-primary" />
-          <h2 className="font-heading font-semibold text-sm text-foreground">
+        <div className="flex items-center gap-1.5">
+          <Briefcase className="w-3.5 h-3.5 text-primary" />
+          <h2 className="font-heading font-semibold text-xs sm:text-sm text-foreground">
             Job Description
           </h2>
         </div>
@@ -680,14 +571,14 @@ export default function JobMatch() {
           value={jobDescription}
           onChange={(e) => setJobDescription(e.target.value)}
           placeholder={PLACEHOLDER}
-          rows={10}
+          rows={6}
           disabled={isProcessing || jobMatchMutation.isPending}
-          className="w-full resize-none bg-background border border-border rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-mono leading-relaxed disabled:opacity-60 disabled:cursor-not-allowed"
+          className="w-full resize-none bg-background border border-border rounded-lg px-3 py-2.5 text-xs sm:text-[13px] text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all font-mono leading-relaxed disabled:opacity-60 disabled:cursor-not-allowed"
           aria-label="Job description text input"
         />
 
-        <div className="flex items-center justify-between flex-wrap gap-3">
-          <p className="text-xs text-muted-foreground">
+        <div className="flex items-center justify-between flex-wrap gap-2.5">
+          <p className="text-[11px] text-muted-foreground">
             {jobDescription.length > 0
               ? `${jobDescription.split(/\s+/).filter(Boolean).length} words`
               : 'Paste the full job description for best results'}
@@ -710,11 +601,12 @@ export default function JobMatch() {
                 isProcessing
               }
               loading={jobMatchMutation.isPending || isProcessing}
+              size="md"
             >
               {jobMatchMutation.isPending
-                ? 'Preparing Match...'
+                ? 'Preparing...'
                 : isProcessing
-                  ? 'Analyzing Job Match...'
+                  ? 'Analyzing Match...'
                   : isResumeLoading
                     ? 'Loading Resume...'
                     : 'Match Resume'}
@@ -724,7 +616,7 @@ export default function JobMatch() {
       </motion.div>
 
       {/* Progress Section Anchor */}
-      <div ref={progressSectionRef} className="scroll-mt-24">
+      <div ref={progressSectionRef} className="scroll-mt-20">
         <AnimatePresence>
           {(jobMatchMutation.isPending || (activeMatchId && status && status !== 'COMPLETED' && status !== 'FAILED')) && (
             <MatchProgress
@@ -736,19 +628,19 @@ export default function JobMatch() {
       </div>
 
       {/* Failed state section */}
-      <div ref={errorSectionRef} className="scroll-mt-24">
+      <div ref={errorSectionRef} className="scroll-mt-20">
         <AnimatePresence>
           {status === 'FAILED' && (
-            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-2.5">
               <MatchProgress
                 status="FAILED"
                 errorMessage={jobMatchStatusQuery.data?.errorMessage}
                 elapsedSeconds={elapsedSeconds}
               />
               <div className="flex justify-end">
-                <Button variant="secondary" onClick={handleRetry}>
-                  <RotateCcw className="w-4 h-4" />
-                  Try Again
+                <Button variant="secondary" size="sm" onClick={handleRetry}>
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Try Again</span>
                 </Button>
               </div>
             </motion.div>
@@ -758,14 +650,14 @@ export default function JobMatch() {
 
       {/* Status polling error */}
       {jobMatchStatusQuery.isError && (
-        <div className="p-4 bg-danger/5 border border-danger/20 rounded-xl">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="w-4 h-4 text-danger mt-0.5" />
+        <div className="p-3 bg-danger/5 border border-danger/20 rounded-lg">
+          <div className="flex items-start gap-2.5">
+            <AlertCircle className="w-3.5 h-3.5 text-danger mt-0.5 flex-shrink-0" />
             <div>
-              <p className="text-sm font-semibold text-danger">
+              <p className="text-xs font-semibold text-danger">
                 Unable to retrieve match status
               </p>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-[11px] text-muted-foreground mt-0.5">
                 The match may still be processing. Please try refreshing the page.
               </p>
             </div>
@@ -774,7 +666,7 @@ export default function JobMatch() {
       )}
 
       {/* Results Section */}
-      <div ref={resultSectionRef} className="scroll-mt-24">
+      <div ref={resultSectionRef} className="scroll-mt-20">
         <AnimatePresence>
           {result && <ResultPanel result={result} />}
         </AnimatePresence>
@@ -785,24 +677,23 @@ export default function JobMatch() {
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-slate-950 text-white rounded-2xl p-6 flex items-center justify-between gap-4 flex-wrap shadow-sm"
+          className="bg-slate-950 text-white rounded-xl p-4 flex items-center justify-between gap-3 flex-wrap shadow-2xs"
         >
           <div>
-            <p className="font-heading font-bold text-base mb-0.5">
+            <p className="font-heading font-bold text-xs sm:text-sm mb-0.5">
               Ready for Interview?
             </p>
-            <p className="text-slate-400 text-sm">
-              Your {result.overallMatch}% match indicates how closely your resume aligns with the supplied job requirements.
+            <p className="text-slate-400 text-xs">
+              Your {result.overallMatch}% match indicates strong alignment with the job requirements.
             </p>
           </div>
 
           <Button
             onClick={() => navigate('/interview')}
-            className="bg-white text-slate-950 hover:bg-slate-100 font-bold"
+            variant="primary"
+            size="sm"
           >
-            <PlayCircle className="w-4 h-4" />
-            Start Interview Practice
-            <ChevronRight className="w-4 h-4" />
+            Launch Interview Prep
           </Button>
         </motion.div>
       )}

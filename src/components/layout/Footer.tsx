@@ -9,7 +9,6 @@ export default function Footer() {
       links: [
         { name: 'Features', href: '/#features', external: false },
         { name: 'Resume Console', href: '/resume', external: false },
-        { name: 'AI Interview', href: '/interview', external: false },
       ],
     },
     {

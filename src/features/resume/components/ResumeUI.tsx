@@ -1,3 +1,4 @@
+import React from 'react'
 import { Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -8,9 +9,9 @@ interface PageLoadingProps {
 
 export function PageLoading({ message = 'Loading...', className }: PageLoadingProps) {
   return (
-    <div className={cn('flex flex-col items-center justify-center py-20 gap-4', className)}>
-      <div className="w-10 h-10 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
-      <p className="text-sm text-muted-foreground font-medium">{message}</p>
+    <div className={cn('flex flex-col items-center justify-center py-12 gap-3', className)}>
+      <div className="w-8 h-8 rounded-full border-3 border-primary/20 border-t-primary animate-spin" />
+      <p className="text-xs sm:text-sm text-muted-foreground font-medium">{message}</p>
     </div>
   )
 }
@@ -23,18 +24,18 @@ interface PageErrorProps {
 
 export function PageError({ message = 'Something went wrong.', onRetry, className }: PageErrorProps) {
   return (
-    <div className={cn('flex flex-col items-center justify-center py-20 gap-4 text-center', className)}>
-      <div className="w-14 h-14 rounded-full bg-danger/10 text-danger flex items-center justify-center">
-        <span className="text-2xl">!</span>
+    <div className={cn('flex flex-col items-center justify-center py-12 gap-3 text-center', className)}>
+      <div className="w-10 h-10 rounded-full bg-danger/10 text-danger flex items-center justify-center font-bold">
+        <span>!</span>
       </div>
       <div>
-        <p className="font-semibold text-foreground mb-1">Failed to load</p>
-        <p className="text-sm text-muted-foreground max-w-xs">{message}</p>
+        <p className="font-semibold text-sm text-foreground mb-0.5">Failed to load</p>
+        <p className="text-xs text-muted-foreground max-w-xs">{message}</p>
       </div>
       {onRetry && (
         <button
           onClick={onRetry}
-          className="px-4 py-2 bg-primary hover:bg-primary-hover text-white text-sm font-semibold rounded-lg transition-colors"
+          className="px-3.5 py-1.5 bg-primary hover:bg-primary-hover text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer"
         >
           Try Again
         </button>
@@ -53,15 +54,15 @@ interface EmptyStateProps {
 
 export function EmptyState({ icon, title, description, action, className }: EmptyStateProps) {
   return (
-    <div className={cn('flex flex-col items-center justify-center py-16 gap-4 text-center', className)}>
+    <div className={cn('flex flex-col items-center justify-center py-10 gap-3 text-center', className)}>
       {icon && (
-        <div className="w-16 h-16 rounded-2xl bg-secondary-bg/50 text-muted-foreground flex items-center justify-center">
+        <div className="w-12 h-12 rounded-xl bg-secondary-bg/50 text-muted-foreground flex items-center justify-center">
           {icon}
         </div>
       )}
       <div>
-        <p className="font-heading font-semibold text-foreground mb-1">{title}</p>
-        {description && <p className="text-sm text-muted-foreground max-w-xs">{description}</p>}
+        <p className="font-heading font-semibold text-sm text-foreground mb-0.5">{title}</p>
+        {description && <p className="text-xs text-muted-foreground max-w-xs">{description}</p>}
       </div>
       {action}
     </div>
@@ -76,16 +77,16 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const buttonVariants = {
-  primary: 'bg-primary hover:bg-primary-hover text-white shadow-sm',
+  primary: 'bg-primary hover:bg-primary-hover text-white shadow-2xs',
   secondary: 'bg-card border border-border hover:bg-secondary-bg text-foreground',
   ghost: 'hover:bg-secondary-bg text-secondary-foreground',
   danger: 'bg-danger/10 hover:bg-danger/20 text-danger border border-danger/20',
 }
 
 const buttonSizes = {
-  sm: 'px-3 py-1.5 text-xs rounded-lg',
-  md: 'px-4 py-2 text-sm rounded-xl',
-  lg: 'px-6 py-3 text-sm rounded-xl',
+  sm: 'px-2.5 py-1 text-xs rounded-lg h-7.5',
+  md: 'px-3.5 py-1.5 text-xs sm:text-[13px] rounded-lg h-8.5',
+  lg: 'px-4.5 py-2 text-sm rounded-xl h-10',
 }
 
 export function Button({
@@ -102,14 +103,14 @@ export function Button({
       {...props}
       disabled={disabled || loading}
       className={cn(
-        'inline-flex items-center justify-center gap-2 font-semibold transition-all duration-200',
+        'inline-flex items-center justify-center gap-1.5 font-semibold transition-all duration-150 cursor-pointer',
         'disabled:opacity-50 disabled:cursor-not-allowed',
         buttonVariants[variant],
         buttonSizes[size],
         className
       )}
     >
-      {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+      {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
       {children}
     </button>
   )
@@ -125,15 +126,15 @@ interface StatCardProps {
 
 export function StatCard({ label, value, icon, className }: StatCardProps) {
   return (
-    <div className={cn('bg-card border border-border rounded-2xl p-5 flex items-center gap-4', className)}>
+    <div className={cn('bg-card border border-border rounded-xl p-3.5 sm:p-4 flex items-center gap-3', className)}>
       {icon && (
-        <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
+        <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
           {icon}
         </div>
       )}
       <div>
-        <p className="text-xs text-muted-foreground font-medium mb-0.5">{label}</p>
-        <p className="font-heading font-bold text-xl text-foreground">{value}</p>
+        <p className="text-[11px] text-muted-foreground font-medium mb-0.5 leading-tight">{label}</p>
+        <p className="font-heading font-bold text-base sm:text-lg text-foreground leading-tight">{value}</p>
       </div>
     </div>
   )

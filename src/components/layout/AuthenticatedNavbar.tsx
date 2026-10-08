@@ -21,7 +21,6 @@ export default function AuthenticatedNavbar() {
   const navItems = [
     { label: 'Home', to: '/home', activePattern: (path: string) => path === '/home' },
     { label: 'Resume', to: '/resume', activePattern: (path: string) => path.startsWith('/resume') },
-    { label: 'Interview', to: '/interview', activePattern: (path: string) => path.startsWith('/interview') },
     { label: 'Profile', to: '/profile', activePattern: (path: string) => path.startsWith('/profile') },
   ]
 

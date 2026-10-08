@@ -82,7 +82,7 @@ export default function FileUploader({ onFileSelect, isUploading, uploadProgress
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           className={cn(
-            'relative border-2 border-dashed rounded-2xl p-10 flex flex-col items-center gap-5 transition-all cursor-pointer',
+            'relative border-2 border-dashed rounded-xl p-6 sm:p-7 flex flex-col items-center gap-3.5 transition-all cursor-pointer',
             isDragOver
               ? 'border-primary bg-primary/5 scale-[1.01]'
               : 'border-border bg-card hover:border-primary/50 hover:bg-secondary-bg/30'
@@ -90,25 +90,25 @@ export default function FileUploader({ onFileSelect, isUploading, uploadProgress
         >
           <div
             className={cn(
-              'w-16 h-16 rounded-2xl flex items-center justify-center transition-all',
+              'w-12 h-12 rounded-xl flex items-center justify-center transition-all',
               isDragOver ? 'bg-primary text-white' : 'bg-primary/10 text-primary'
             )}
           >
-            <Upload className="w-7 h-7" />
+            <Upload className="w-5.5 h-5.5" />
           </div>
 
           <div className="text-center">
-            <p className="font-heading font-bold text-foreground text-lg mb-1">
+            <p className="font-heading font-bold text-foreground text-sm sm:text-base mb-0.5">
               {isDragOver ? 'Drop your resume here' : 'Drop your resume here'}
             </p>
-            <p className="text-muted-foreground text-sm mb-4">or click below to browse your files</p>
+            <p className="text-muted-foreground text-xs mb-3">or click below to browse your files</p>
 
             <label
               htmlFor="resume-upload-input"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary-hover text-white text-sm font-semibold rounded-xl cursor-pointer transition-colors shadow-sm"
+              className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-primary hover:bg-primary-hover text-white text-xs font-semibold rounded-lg cursor-pointer transition-colors shadow-2xs h-8"
             >
-              <FileText className="w-4 h-4" />
-              Browse Files
+              <FileText className="w-3.5 h-3.5" />
+              <span>Browse Files</span>
               <input
                 id="resume-upload-input"
                 type="file"
@@ -119,9 +119,9 @@ export default function FileUploader({ onFileSelect, isUploading, uploadProgress
             </label>
           </div>
 
-          <div className="flex items-center gap-4 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1.5">
-              <FileText className="w-3.5 h-3.5" />
+          <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <FileText className="w-3 h-3" />
               PDF, DOCX
             </span>
             <span className="w-1 h-1 rounded-full bg-border" />
@@ -129,41 +129,41 @@ export default function FileUploader({ onFileSelect, isUploading, uploadProgress
           </div>
 
           {fileError && (
-            <div className="flex items-center gap-2 p-3 bg-danger/5 border border-danger/20 rounded-xl w-full">
-              <AlertCircle className="w-4 h-4 text-danger flex-shrink-0" />
-              <p className="text-sm text-danger">{fileError}</p>
+            <div className="flex items-center gap-2 p-2.5 bg-danger/5 border border-danger/20 rounded-lg w-full">
+              <AlertCircle className="w-3.5 h-3.5 text-danger flex-shrink-0" />
+              <p className="text-xs text-danger">{fileError}</p>
             </div>
           )}
         </div>
       ) : (
-        <div className="border border-border rounded-2xl bg-card p-6">
+        <div className="border border-border rounded-xl bg-card p-4">
           {/* File info row */}
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
-              <FileText className="w-6 h-6" />
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
+              <FileText className="w-4.5 h-4.5" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm text-foreground truncate">{selectedFile.name}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{formatSize(selectedFile.size)}</p>
+              <p className="font-semibold text-xs text-foreground truncate leading-tight">{selectedFile.name}</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5 leading-tight">{formatSize(selectedFile.size)}</p>
             </div>
             {!isUploading && (
               <button
                 onClick={clearFile}
-                className="p-1.5 rounded-lg hover:bg-secondary-bg text-muted-foreground hover:text-danger transition-colors"
+                className="p-1 rounded-lg hover:bg-secondary-bg text-muted-foreground hover:text-danger transition-colors cursor-pointer"
                 aria-label="Remove file"
               >
-                <X className="w-4 h-4" />
+                <X className="w-3.5 h-3.5" />
               </button>
             )}
             {isUploading && uploadProgress >= 100 && (
-              <CheckCircle2 className="w-5 h-5 text-success flex-shrink-0" />
+              <CheckCircle2 className="w-4 h-4 text-success flex-shrink-0" />
             )}
           </div>
 
           {/* Upload progress */}
           {isUploading && (
-            <div className="mt-4 space-y-2">
-              <div className="flex justify-between text-xs text-muted-foreground">
+            <div className="mt-3 space-y-1.5">
+              <div className="flex justify-between text-[11px] text-muted-foreground">
                 <span>{uploadProgress >= 100 ? 'Upload complete!' : 'Uploading...'}</span>
                 <span>{uploadProgress}%</span>
               </div>

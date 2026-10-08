@@ -85,6 +85,22 @@ export function useResume(resumeIdOverride?: string | null) {
 
 
 // ─────────────────────────────────────────────────────────────
+// useResumes
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * Fetches all uploaded resume records for the current user.
+ */
+export function useResumes() {
+  return useQuery({
+    queryKey: resumeKeys.list(),
+    queryFn: () => resumeApi.getResumesList(),
+    staleTime: 5 * 60 * 1000,
+  })
+}
+
+
+// ─────────────────────────────────────────────────────────────
 // useResumeStatus
 // ─────────────────────────────────────────────────────────────
 
@@ -316,6 +332,8 @@ export function useJobMatchStatus(
 // ─────────────────────────────────────────────────────────────
 
 export function useResumeChat() {
+  const { selectedResumeId } = useResumeContext()
+  const [conversationId, setConversationId] = useState<string | undefined>()
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 'welcome',
@@ -349,7 +367,9 @@ export function useResumeChat() {
       setError(null)
 
       try {
-        const response = await resumeApi.chat(trimmedContent)
+        if (!selectedResumeId) throw new Error('Select or create a resume before using the AI agent.')
+        const response = await resumeApi.chat(selectedResumeId, trimmedContent, conversationId)
+        if (response.conversationId) setConversationId(response.conversationId)
         setMessages((prev) => [...prev, response])
       } catch (err) {
         console.error('[Resume Chat] Failed:', err)
@@ -358,7 +378,7 @@ export function useResumeChat() {
         setIsLoading(false)
       }
     },
-    [isLoading]
+    [isLoading, selectedResumeId, conversationId]
   )
 
   const clearHistory = useCallback(() => {
@@ -372,6 +392,7 @@ export function useResumeChat() {
       },
     ])
     setError(null)
+    setConversationId(undefined)
   }, [])
 
   return {
