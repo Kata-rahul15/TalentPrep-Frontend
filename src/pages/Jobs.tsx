@@ -1,27 +1,20 @@
 import { useState, useEffect, useMemo } from 'react'
-import { motion } from 'framer-motion'
 import {
   Briefcase,
   Search,
   MapPin,
-  Calendar,
   ExternalLink,
   Sparkles,
-  Building2,
   Clock,
   Filter,
-  CheckCircle2,
-  ChevronRight,
   AlertCircle,
   RefreshCw,
-  Eye,
-  X,
-  Layers,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { useResume, useResumeDetails } from '@/features/resume/hooks/useResume'
+import { useResumeDetails } from '@/features/resume/hooks/useResume'
 import { useResumeContext, ResumeProvider } from '@/features/resume/context/ResumeContext'
 import { resumeApi } from '@/features/resume/api/resumeApi'
+import { SkeletonJobList } from '@/features/resume/components/ResumeSkeletons'
 import { cn } from '@/lib/utils'
 
 interface JobListing {
@@ -41,7 +34,6 @@ interface JobListing {
 function JobsExplorerInner() {
   const navigate = useNavigate()
   const { selectedResumeId } = useResumeContext()
-  const { data: resume } = useResume(selectedResumeId)
   const { data: resumeDetails } = useResumeDetails(selectedResumeId)
 
   // Candidate parsed skills for instant match calculation
@@ -156,13 +148,13 @@ function JobsExplorerInner() {
         <div>
           <div className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400 text-[11px] font-bold uppercase tracking-wider mb-0.5">
             <Briefcase className="w-3.5 h-3.5" />
-            <span>Jobvetta Live Job Explorer</span>
+            <span>TALENTPREP JOB EXPLORER</span>
           </div>
           <h1 className="font-heading font-extrabold text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight leading-tight">
             Job Explorer
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-tight">
-            Search, filter, and manually discover opportunities aligned with your technical skills and experience.
+            Search, discover, and match with opportunities aligned with your skills and experience.
           </p>
         </div>
 
@@ -282,10 +274,7 @@ function JobsExplorerInner() {
         {/* Left List of Jobs */}
         <div className="lg:col-span-5 space-y-2.5 max-h-[750px] overflow-y-auto pr-1">
           {isLoading ? (
-            <div className="p-8 text-center bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-xl space-y-2">
-              <RefreshCw className="w-6 h-6 animate-spin text-blue-600 mx-auto" />
-              <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">Searching active opportunities...</p>
-            </div>
+            <SkeletonJobList />
           ) : filteredJobs.length === 0 ? (
             <div className="p-8 text-center bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-xl space-y-2">
               <Briefcase className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto" />

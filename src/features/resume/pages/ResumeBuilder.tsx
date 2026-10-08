@@ -19,9 +19,11 @@ import ResumePreview from '../components/builder/ResumePreview'
 import ResumeCreationModal from '../components/builder/ResumeCreationModal'
 import ResumeTemplateGalleryModal from '../components/builder/ResumeTemplateGalleryModal'
 import AIImproveModal from '../components/builder/AIImproveModal'
+import { SkeletonResumeBuilder } from '../components/ResumeSkeletons'
 import { resumeApi } from '../api/resumeApi'
 import { useResumeContext } from '../context/ResumeContext'
 import { downloadResumePdf } from '../utils/pdfExport'
+import { cn } from '@/lib/utils'
 
 function getStorageKey(resumeId?: string | null): string {
   return resumeId ? `talentprep_resume_builder_draft_${resumeId}` : 'talentprep_resume_builder_draft_default'
@@ -76,8 +78,7 @@ export default function ResumeBuilder() {
     }
   }, [selectedResumeId, availableResumes, setSelectedResumeId])
 
-  // ── Load Builder Data Flow: Priority Resolution ──
-  // Priority: 1. Existing Saved Builder Data -> 2. Parsed Resume Details -> 3. Empty Fallback
+  // ── Load Builder Data Flow ──
   useEffect(() => {
     let cancelled = false
 
@@ -89,7 +90,6 @@ export default function ResumeBuilder() {
       const targetResumeId = selectedResumeId || (availableResumes && availableResumes[0]?.id)
 
       if (!targetResumeId) {
-        // Check local recovery draft for default
         try {
           const cached = localStorage.getItem(getStorageKey(null))
           if (cached) {
@@ -192,12 +192,10 @@ export default function ResumeBuilder() {
         // ── Priority 2: Use existing parsed Resume Details data ──
         if (!loadedData) {
           try {
-            console.log('[ResumeBuilder] Fetching structured resume details for ID:', targetResumeId)
             const details = await resumeApi.getResumeDetails(targetResumeId)
             if (details) {
               const converted = convertResumeDetailsToBuilderData(details)
               loadedData = converted
-              // Cache initial converted data locally
               localStorage.setItem(getStorageKey(targetResumeId), JSON.stringify(converted))
             }
           } catch (detailsErr) {
@@ -364,31 +362,18 @@ export default function ResumeBuilder() {
       await downloadResumePdf(resumeData, filename)
     } catch (error) {
       console.error('[ResumeBuilder] PDF download failed:', error)
-      window.alert('We could not generate the PDF. Please try again. If the problem persists, check the browser console for details.')
+      window.alert('We could not generate the PDF. Please try again.')
     }
   }
 
   if (isLoadingBuilder) {
-    return (
-      <div className="min-h-[560px] flex items-center justify-center rounded-xl border border-slate-200 bg-white dark:bg-slate-900 dark:border-slate-800">
-        <div className="text-center space-y-2">
-          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
-          <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
-            Loading your resume in builder...
-          </p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            Loading structured sections from your uploaded resume.
-          </p>
-        </div>
-      </div>
-    )
+    return <SkeletonResumeBuilder />
   }
 
-  // Completeness Calculation
   const completeness = calculateResumeCompleteness(resumeData)
 
   return (
-    <div className="space-y-3 pb-8">
+    <div className="space-y-3.5 pb-8">
       {/* ── Top Workspace Toolbar ── */}
       <ResumeBuilderToolbar
         documentTitle={resumeData.title}
@@ -410,13 +395,14 @@ export default function ResumeBuilder() {
         onOpenCreationModal={() => setIsCreationModalOpen(true)}
       />
 
-      {/* ── Three-Panel Desktop Workspace Layout ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 items-start">
-        {/* Panel 1: Left Section Navigation Sidebar */}
+      {/* ── Three-Panel Desktop Workspace Layout (Balanced Proportions: 18% Sections | 36% Editor | 46% Preview) ── */}
+      <div className="flex-1 flex flex-col xl:flex-row items-stretch border border-slate-200/90 dark:border-slate-800 rounded-2xl bg-white dark:bg-slate-900 overflow-hidden shadow-2xs h-[calc(100dvh-135px)] min-h-[660px]">
+        {/* Panel 1: Left Section Navigation (~18% on desktop, subtle 1px right border, comfortable items) */}
         <div
-          className={`lg:col-span-3 xl:col-span-3 ${
+          className={cn(
+            'w-full xl:w-[18%] xl:min-w-[210px] xl:max-w-[240px] flex-shrink-0 border-b xl:border-b-0 xl:border-r border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-3 space-y-3 overflow-y-auto',
             mobileViewMode === 'preview' ? 'hidden xl:block' : 'block'
-          }`}
+          )}
         >
           <ResumeSectionSidebar
             activeSection={activeSection}
@@ -425,33 +411,38 @@ export default function ResumeBuilder() {
             onToggleVisibility={handleToggleSectionVisibility}
             onMoveSection={handleMoveSection}
             completeness={completeness}
+            embedded
           />
         </div>
 
-        {/* Panel 2: Center Active Section Editor */}
+        {/* Panel 2: Center Section Editor (~36% on desktop, subtle 1px right border, comfortable forms) */}
         <div
-          className={`lg:col-span-9 xl:col-span-4 min-h-[560px] flex flex-col ${
+          className={cn(
+            'w-full xl:w-[36%] flex-1 flex flex-col border-b xl:border-b-0 xl:border-r border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 sm:p-5 overflow-y-auto min-w-0',
             mobileViewMode === 'preview' ? 'hidden xl:flex' : 'flex'
-          }`}
+          )}
         >
           <ResumeEditorPanel
             activeSection={activeSection}
             data={resumeData}
             onChange={handleDataChange}
             onImproveWithAI={handleOpenAiImprove}
+            embedded
           />
         </div>
 
-        {/* Panel 3: Right Live A4 Preview */}
+        {/* Panel 3: Right Live A4 Preview (~46% on desktop - The Visual Focus of the Builder!) */}
         <div
-          className={`xl:col-span-5 h-[760px] sticky top-4 ${
-            mobileViewMode === 'edit' ? 'hidden xl:block' : 'block'
-          }`}
+          className={cn(
+            'w-full xl:w-[46%] xl:min-w-[480px] flex flex-col bg-slate-100/90 dark:bg-slate-950 overflow-hidden',
+            mobileViewMode === 'edit' ? 'hidden xl:flex' : 'flex'
+          )}
         >
           <ResumePreview
             data={resumeData}
             isFullscreen={isFullscreenPreview}
             onToggleFullscreen={() => setIsFullscreenPreview(!isFullscreenPreview)}
+            embedded
           />
         </div>
       </div>

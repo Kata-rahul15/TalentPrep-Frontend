@@ -12,13 +12,14 @@ import {
   Menu,
 } from 'lucide-react'
 import { useAuth } from '@/services/authService'
+import TalentPrepLogo from '@/components/common/TalentPrepLogo'
 import { cn } from '@/lib/utils'
 
 const workspaceNav = [
-  { to: '/home', label: 'Dashboard', icon: Home, match: (p: string) => p === '/home' },
-  { to: '/resume', label: 'My Resume', icon: FileText, match: (p: string) => p.startsWith('/resume') },
-  { to: '/jobs', label: 'Jobs', icon: Briefcase, match: (p: string) => p.startsWith('/jobs') },
+  { to: '/home', label: 'Home', icon: Home, match: (p: string) => p === '/home' },
+  { to: '/resume', label: 'Resume', icon: FileText, match: (p: string) => p.startsWith('/resume') },
   { to: '/agent', label: 'AI Career Agent', icon: Sparkles, match: (p: string) => p.startsWith('/agent') },
+  { to: '/jobs', label: 'Jobs', icon: Briefcase, match: (p: string) => p.startsWith('/jobs') },
 ]
 
 const accountNav = [
@@ -94,62 +95,54 @@ export default function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
   return (
     <aside
       className={cn(
-        'fixed top-0 left-0 z-40 h-screen flex flex-col bg-white dark:bg-slate-900 border-r border-border transition-all duration-200 ease-in-out select-none',
-        collapsed ? 'w-[68px]' : 'w-[240px]'
+        'fixed top-0 left-0 z-40 h-screen flex flex-col bg-white dark:bg-slate-900 border-r border-slate-200/80 dark:border-slate-800 transition-all duration-300 ease-in-out select-none',
+        collapsed ? 'w-[64px]' : 'w-[240px]'
       )}
     >
-      {/* ── 1 & 2. Top Header Row ── */}
+      {/* ── Top Header Brand Row ── */}
       <div
         className={cn(
-          'flex items-center h-14 border-b border-border/70 flex-shrink-0 transition-all duration-200',
-          collapsed ? 'justify-center px-0' : 'justify-between px-3.5'
+          'flex items-center h-14 border-b border-slate-200/70 dark:border-slate-800/70 flex-shrink-0 transition-all duration-300',
+          collapsed ? 'justify-center px-2' : 'justify-between px-4 gap-3'
         )}
       >
-        {/* TalentPrep Logo (Expanded state only) */}
-        {!collapsed && (
-          <div
-            onClick={() => navigate('/home')}
-            className="flex items-center gap-2.5 cursor-pointer group min-w-0 transition-opacity duration-200"
-          >
-            {/* Modern TalentPrep Logo Mark */}
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-primary to-indigo-500 flex items-center justify-center text-white shadow-xs flex-shrink-0 transition-transform group-hover:scale-105">
-              <svg
-                className="w-4.5 h-4.5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M12 2L2 7l10 5 10-5-10-5z" />
-                <path d="M2 17l10 5 10-5" />
-                <path d="M2 12l10 5 10-5" />
-              </svg>
+        {collapsed ? (
+          <SidebarTooltip label="Expand sidebar" show={true}>
+            <button
+              type="button"
+              onClick={onToggle}
+              className="w-9 h-9 rounded-lg flex items-center justify-center text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-150 cursor-pointer focus:outline-none"
+              aria-label="Expand sidebar"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+          </SidebarTooltip>
+        ) : (
+          <>
+            <div
+              onClick={() => navigate('/home')}
+              className="cursor-pointer group min-w-0 transition-opacity duration-200 flex-shrink-0"
+            >
+              <TalentPrepLogo size="md" />
             </div>
-            <span className="font-heading font-extrabold text-base tracking-tight text-gray-900 dark:text-white whitespace-nowrap">
-              TalentPrep
-            </span>
-          </div>
-        )}
 
-        {/* Hamburger / Menu Toggle Button */}
-        <SidebarTooltip label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'} show={true}>
-          <button
-            type="button"
-            onClick={onToggle}
-            className={cn(
-              'w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors duration-150 cursor-pointer flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40'
-            )}
-            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          >
-            <Menu className="w-4.5 h-4.5" />
-          </button>
-        </SidebarTooltip>
+            {/* Expanded Menu Toggle Button */}
+            <SidebarTooltip label="Collapse sidebar" show={true}>
+              <button
+                type="button"
+                onClick={onToggle}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-150 cursor-pointer flex-shrink-0 focus:outline-none"
+                aria-label="Collapse sidebar"
+              >
+                <Menu className="w-4.5 h-4.5" />
+              </button>
+            </SidebarTooltip>
+          </>
+        )}
       </div>
 
       {/* ── Workspace Navigation ── */}
-      <nav className="flex-1 px-2.5 py-3 space-y-1 overflow-y-auto overflow-x-hidden">
+      <nav className="flex-1 px-2 py-3 space-y-1 overflow-y-auto overflow-x-hidden">
         {!collapsed && (
           <div className="px-2 mb-1.5 transition-opacity duration-150">
             <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
@@ -165,17 +158,17 @@ export default function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
             <NavLink
               to={item.to}
               className={cn(
-                'flex items-center gap-3 rounded-lg transition-all duration-150 group h-9 w-full',
+                'flex items-center gap-3 rounded-xl transition-all duration-150 group h-9 w-full',
                 collapsed ? 'justify-center px-0' : 'px-2.5',
                 isActive
-                  ? 'bg-primary/10 text-primary font-semibold'
-                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100/80 dark:hover:bg-slate-800/60 hover:text-gray-900 dark:hover:text-white'
+                  ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 font-semibold border border-blue-200/60 dark:border-blue-900/50'
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white'
               )}
             >
               <item.icon
                 className={cn(
                   'w-4.5 h-4.5 flex-shrink-0 transition-transform duration-150',
-                  isActive ? 'text-primary' : 'group-hover:scale-105'
+                  isActive ? 'text-blue-600 dark:text-blue-400' : 'group-hover:scale-105'
                 )}
               />
               {!collapsed && (
@@ -197,7 +190,7 @@ export default function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
       </nav>
 
       {/* ── Account Navigation ── */}
-      <div className="px-2.5 pb-2 space-y-1 border-t border-border/70 pt-2">
+      <div className="px-2 pb-2 space-y-1 border-t border-slate-200/70 dark:border-slate-800/70 pt-2">
         {!collapsed && (
           <div className="px-2 mb-1 transition-opacity duration-150">
             <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
@@ -213,17 +206,17 @@ export default function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
             <NavLink
               to={item.to}
               className={cn(
-                'flex items-center gap-3 rounded-lg transition-all duration-150 h-8.5 w-full group',
+                'flex items-center gap-3 rounded-xl transition-all duration-150 h-8.5 w-full group',
                 collapsed ? 'justify-center px-0' : 'px-2.5',
                 isActive
-                  ? 'bg-primary/10 text-primary font-semibold'
-                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100/80 dark:hover:bg-slate-800/60 hover:text-gray-900 dark:hover:text-white'
+                  ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 font-semibold border border-blue-200/60 dark:border-blue-900/50'
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white'
               )}
             >
               <item.icon
                 className={cn(
                   'w-4 h-4 flex-shrink-0 transition-transform duration-150',
-                  isActive ? 'text-primary' : 'group-hover:scale-105'
+                  isActive ? 'text-blue-600 dark:text-blue-400' : 'group-hover:scale-105'
                 )}
               />
               {!collapsed && (
@@ -250,7 +243,7 @@ export default function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
               type="button"
               onClick={handleLogout}
               className={cn(
-                'flex items-center gap-3 rounded-lg transition-all duration-150 w-full text-gray-600 dark:text-gray-400 hover:bg-danger/10 hover:text-danger cursor-pointer h-8.5 group',
+                'flex items-center gap-3 rounded-xl transition-all duration-150 w-full text-slate-600 dark:text-slate-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-600 cursor-pointer h-8.5 group',
                 collapsed ? 'justify-center px-0' : 'px-2.5'
               )}
             >
@@ -267,12 +260,12 @@ export default function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
 
       {/* ── User Profile Footer ── */}
       {user && (
-        <div className="px-2.5 pb-2.5 border-t border-border/70 pt-2 flex justify-center">
+        <div className="px-2 pb-2.5 border-t border-slate-200/70 dark:border-slate-800/70 pt-2 flex justify-center">
           {collapsed ? (
             <SidebarTooltip label={user.username || user.email || 'Profile'} show={true}>
               <div
                 onClick={() => navigate('/profile')}
-                className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs uppercase border border-primary/20 cursor-pointer hover:bg-primary/20 transition-colors"
+                className="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-xs uppercase border border-blue-200/60 dark:border-blue-900/60 cursor-pointer hover:bg-blue-100 transition-colors"
               >
                 {user.username?.slice(0, 2) || 'TP'}
               </div>
@@ -280,13 +273,13 @@ export default function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
           ) : (
             <div
               onClick={() => navigate('/profile')}
-              className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-100/80 dark:hover:bg-slate-800/60 cursor-pointer transition-colors w-full"
+              className="flex items-center gap-2.5 px-2 py-1.5 rounded-xl hover:bg-slate-100/80 dark:hover:bg-slate-800/60 cursor-pointer transition-colors w-full"
             >
-              <div className="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs uppercase flex-shrink-0 border border-primary/20">
+              <div className="w-7 h-7 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-xs uppercase flex-shrink-0 border border-blue-200/60 dark:border-blue-900/60">
                 {user.username?.slice(0, 2) || 'TP'}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-semibold text-gray-900 dark:text-white truncate leading-tight">
+                <p className="text-xs font-bold text-slate-900 dark:text-white truncate leading-tight">
                   {user.username || 'User'}
                 </p>
                 <p className="text-[10px] text-muted-foreground truncate leading-tight mt-0.5">

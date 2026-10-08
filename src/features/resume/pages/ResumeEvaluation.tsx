@@ -10,7 +10,8 @@ import {
 } from 'lucide-react'
 import { useResume, useResumeEvaluation, useEvaluateResume } from '../hooks/useResume'
 import { useResumeContext } from '../context/ResumeContext'
-import { PageLoading, PageError, Button } from '../components/ResumeUI'
+import { PageError, Button } from '../components/ResumeUI'
+import { SkeletonResumeEvaluation } from '../components/ResumeSkeletons'
 import ScoreBar from '../components/ScoreBar'
 import { ScoreRingContainer } from '../components/ScoreRing'
 import SkillBadge from '../components/SkillBadge'
@@ -60,7 +61,7 @@ export default function ResumeEvaluation() {
     )
   }
 
-  if (isLoading) return <PageLoading message="Running AI evaluation..." />
+  if (isLoading) return <SkeletonResumeEvaluation />
   if (isError || !evaluation) return <PageError message="Could not load ATS evaluation." onRetry={refetch} />
 
   const { scores, strengths = [], weaknesses = [], suggestions = [], missingKeywords = [] } = evaluation

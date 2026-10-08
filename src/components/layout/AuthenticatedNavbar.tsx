@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { LogOut, Menu, X } from 'lucide-react'
 import { useAuth } from '@/services/authService'
+import TalentPrepLogo from '@/components/common/TalentPrepLogo'
 import { cn } from '@/lib/utils'
 
 export default function AuthenticatedNavbar() {
@@ -31,16 +32,7 @@ export default function AuthenticatedNavbar() {
         {/* ── Left Side: Brand Logo ── */}
         <div className="flex items-center gap-3">
           <Link to="/home" className="flex items-center gap-2 group">
-            <div className="w-7.5 h-7.5 rounded-xl bg-primary flex items-center justify-center text-white shadow-sm transition-transform group-hover:scale-105">
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 2L2 7l10 5 10-5-10-5z" />
-                <path d="M2 17l10 5 10-5" />
-                <path d="M2 12l10 5 10-5" />
-              </svg>
-            </div>
-            <span className="font-heading font-extrabold text-xl tracking-tight text-gray-900 dark:text-white">
-              TalentPrep
-            </span>
+            <TalentPrepLogo size="md" />
           </Link>
         </div>
 

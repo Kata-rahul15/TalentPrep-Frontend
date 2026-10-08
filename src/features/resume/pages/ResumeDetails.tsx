@@ -16,7 +16,8 @@ import {
 } from 'lucide-react'
 import { useResume, useResumeDetails } from '../hooks/useResume'
 import { useResumeContext } from '../context/ResumeContext'
-import { PageLoading, PageError } from '../components/ResumeUI'
+import { PageError } from '../components/ResumeUI'
+import { SkeletonResumeDetails } from '../components/ResumeSkeletons'
 import ExpandableCard from '../components/ExpandableCard'
 import SkillBadge from '../components/SkillBadge'
 
@@ -69,7 +70,7 @@ export default function ResumeDetails() {
     )
   }
 
-  if (isLoading) return <PageLoading message="Loading resume details..." />
+  if (isLoading) return <SkeletonResumeDetails />
   if (isError || !resume)
     return <PageError message="Could not load resume details." onRetry={refetch} />
 

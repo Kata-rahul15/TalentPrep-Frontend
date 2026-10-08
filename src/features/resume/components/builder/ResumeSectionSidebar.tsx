@@ -31,6 +31,7 @@ interface Props {
     overall: number
     sectionScores: Record<string, boolean>
   }
+  embedded?: boolean
 }
 
 const SECTION_CONFIG: Record<
@@ -55,6 +56,7 @@ export default function ResumeSectionSidebar({
   onToggleVisibility,
   onMoveSection,
   completeness,
+  embedded = false,
 }: Props) {
   const sections = data.sectionOrder || [
     'personal',
@@ -69,7 +71,14 @@ export default function ResumeSectionSidebar({
   ]
 
   return (
-    <aside className="w-full md:w-56 flex-shrink-0 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-3 shadow-2xs space-y-3">
+    <aside
+      className={cn(
+        'flex-shrink-0 space-y-3',
+        embedded
+          ? 'w-full'
+          : 'w-full md:w-56 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-3 shadow-2xs'
+      )}
+    >
       {/* Completeness Meter */}
       <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60 rounded-lg p-2.5 space-y-1.5">
         <div className="flex items-center justify-between">

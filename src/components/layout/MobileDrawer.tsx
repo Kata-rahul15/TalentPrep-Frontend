@@ -11,6 +11,7 @@ import {
   X,
 } from 'lucide-react'
 import { useAuth } from '@/services/authService'
+import TalentPrepLogo from '@/components/common/TalentPrepLogo'
 import { cn } from '@/lib/utils'
 
 const workspaceNav = [
@@ -74,19 +75,8 @@ export default function MobileDrawer({ open, onClose }: MobileDrawerProps) {
       {/* Drawer */}
       <div className="fixed inset-y-0 left-0 w-[240px] bg-white dark:bg-slate-900 border-r border-border shadow-xl flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between h-12 px-3.5 border-b border-border/60 flex-shrink-0">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center text-white">
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 2L2 7l10 5 10-5-10-5z" />
-                <path d="M2 17l10 5 10-5" />
-                <path d="M2 12l10 5 10-5" />
-              </svg>
-            </div>
-            <span className="font-heading font-extrabold text-base tracking-tight text-gray-900 dark:text-white">
-              TalentPrep
-            </span>
-          </div>
+        <div className="flex items-center justify-between h-13 px-3.5 border-b border-border/60 flex-shrink-0">
+          <TalentPrepLogo size="sm" />
           <button
             onClick={onClose}
             className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"

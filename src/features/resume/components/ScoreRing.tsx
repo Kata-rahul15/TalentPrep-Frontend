@@ -9,21 +9,21 @@ interface ScoreRingProps {
 }
 
 const sizeMap = {
-  sm: { outer: 52, stroke: 4.5, font: 'text-xs', labelFont: 'text-[9px]' },
-  md: { outer: 72, stroke: 6, font: 'text-base font-extrabold', labelFont: 'text-[10px]' },
-  lg: { outer: 96, stroke: 7.5, font: 'text-2xl font-black', labelFont: 'text-xs' },
+  sm: { outer: 48, stroke: 4, font: 'text-xs font-bold', labelFont: 'text-[8px]' },
+  md: { outer: 60, stroke: 5, font: 'text-sm sm:text-base font-extrabold', labelFont: 'text-[9px]' },
+  lg: { outer: 84, stroke: 6.5, font: 'text-xl font-black', labelFont: 'text-[11px]' },
 }
 
 function getScoreColor(score: number): string {
-  if (score >= 80) return '#16A34A'
-  if (score >= 60) return '#F59E0B'
-  return '#DC2626'
+  if (score >= 75) return '#2563EB' // blue
+  if (score >= 60) return '#3B82F6' // medium blue
+  return '#F59E0B' // amber
 }
 
 export default function ScoreRing({
   score,
   size = 'md',
-  label,
+  label = '/100',
   className,
   color,
 }: ScoreRingProps) {
@@ -36,7 +36,7 @@ export default function ScoreRing({
   const center = outer / 2
 
   return (
-    <div className={cn('flex flex-col items-center gap-1', className)}>
+    <div className={cn('relative flex items-center justify-center flex-shrink-0', className)} style={{ width: outer, height: outer }}>
       <svg width={outer} height={outer} className="-rotate-90">
         {/* Track */}
         <circle
@@ -46,7 +46,7 @@ export default function ScoreRing({
           fill="none"
           stroke="currentColor"
           strokeWidth={stroke}
-          className="text-border"
+          className="text-slate-100 dark:text-slate-800"
         />
         {/* Progress */}
         <circle
@@ -59,19 +59,18 @@ export default function ScoreRing({
           strokeDasharray={circumference}
           strokeDashoffset={offset}
           strokeLinecap="round"
-          style={{ transition: 'stroke-dashoffset 1s ease-in-out' }}
+          style={{ transition: 'stroke-dashoffset 0.8s ease-in-out' }}
         />
       </svg>
       {/* Center text overlay */}
       <div
-        className="absolute flex flex-col items-center justify-center"
-        style={{ width: outer, height: outer }}
+        className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none"
       >
-        <span className={cn('font-heading leading-none', font)} style={{ color: ringColor }}>
+        <span className={cn('font-heading leading-none text-slate-900 dark:text-white', font)}>
           {score}
         </span>
         {label && (
-          <span className={cn('text-muted-foreground font-medium mt-0.5', labelFont)}>
+          <span className={cn('text-slate-400 font-medium leading-none mt-0.5', labelFont)}>
             {label}
           </span>
         )}
@@ -84,14 +83,9 @@ export default function ScoreRing({
 export function ScoreRingContainer({
   score,
   size = 'md',
-  label,
+  label = '/100',
   className,
   color,
 }: ScoreRingProps) {
-  const { outer } = sizeMap[size]
-  return (
-    <div className={cn('relative flex items-center justify-center', className)} style={{ width: outer, height: outer }}>
-      <ScoreRing score={score} size={size} label={label} color={color} />
-    </div>
-  )
+  return <ScoreRing score={score} size={size} label={label} color={color} className={className} />
 }

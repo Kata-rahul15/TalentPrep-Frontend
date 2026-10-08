@@ -3,8 +3,6 @@ import {
   LayoutDashboard,
   FileText,
   BarChart3,
-  Briefcase,
-  MessageSquare,
   RefreshCw,
   FileEdit,
   Plus,

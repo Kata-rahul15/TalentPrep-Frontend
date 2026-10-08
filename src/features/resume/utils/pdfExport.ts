@@ -847,7 +847,7 @@ export async function downloadResumePdf(
   console.info('[PDF] Starting production PDF export')
 
   const bytes = renderPdf(data)
-  const blob = new Blob([bytes], { type: 'application/pdf' })
+  const blob = new Blob([bytes.buffer as ArrayBuffer], { type: 'application/pdf' })
 
   if (blob.size === 0) {
     throw new Error('Generated PDF is empty.')

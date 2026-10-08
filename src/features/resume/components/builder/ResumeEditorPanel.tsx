@@ -11,12 +11,14 @@ import ProjectsEditor from './ProjectsEditor'
 import CertificationsEditor from './CertificationsEditor'
 import AchievementsEditor from './AchievementsEditor'
 import CustomSectionEditor from './CustomSectionEditor'
+import { cn } from '@/lib/utils'
 
 interface Props {
   activeSection: ResumeSectionKey
   data: ResumeBuilderData
   onChange: (updated: ResumeBuilderData) => void
   onImproveWithAI: (text: string, context: string, fieldTarget?: string) => void
+  embedded?: boolean
 }
 
 export default function ResumeEditorPanel({
@@ -24,6 +26,7 @@ export default function ResumeEditorPanel({
   data,
   onChange,
   onImproveWithAI,
+  embedded = false,
 }: Props) {
   const renderEditor = () => {
     switch (activeSection) {
@@ -103,7 +106,13 @@ export default function ResumeEditorPanel({
   }
 
   return (
-    <div className="flex-1 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-2xs overflow-y-auto">
+    <div
+      className={cn(
+        'flex-1 overflow-y-auto',
+        !embedded &&
+          'bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-2xs'
+      )}
+    >
       {renderEditor()}
     </div>
   )

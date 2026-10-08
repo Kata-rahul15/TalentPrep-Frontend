@@ -15,7 +15,7 @@ interface DragPayload {
   sourceCategoryId: string
 }
 
-const PREDEFINED_NAMES = new Set(
+const PREDEFINED_NAMES = new Set<string>(
   PREDEFINED_SKILL_CATEGORIES.map((category) => category.name)
 )
 

@@ -3,7 +3,6 @@ import type {
   ResumeBuilderData,
   WorkExperienceItem,
   EducationItem,
-  SkillCategory,
   ProjectItem,
   CertificationItem,
   AchievementItem,
