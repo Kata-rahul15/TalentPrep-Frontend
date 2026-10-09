@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react'
 import {
   Menu,
@@ -53,17 +54,25 @@ export default function AuthenticatedLayout({
   const location = useLocation()
   const { user, logout } = useAuth()
 
-  const [collapsed, setCollapsed] = useState(() => {
+  // Explicit boolean typing fixes TS7006.
+  const [collapsed, setCollapsed] = useState<boolean>(() => {
     try {
       const saved = localStorage.getItem('talentprep_sidebar_collapsed')
-      return saved ? JSON.parse(saved) : false
+
+      if (saved === null) {
+        return false
+      }
+
+      const parsed: unknown = JSON.parse(saved)
+
+      return typeof parsed === 'boolean' ? parsed : false
     } catch {
       return false
     }
   })
 
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false)
+  const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false)
 
   useEffect(() => {
     try {
@@ -76,12 +85,12 @@ export default function AuthenticatedLayout({
     }
   }, [collapsed])
 
-  // Close the secondary menu when the route changes.
+  // Close the mobile account menu when the route changes.
   useEffect(() => {
     setMobileMenuOpen(false)
   }, [location.pathname])
 
-  // Prevent the background page from scrolling while the menu is open.
+  // Prevent background scrolling while the mobile menu is open.
   useEffect(() => {
     if (!mobileMenuOpen) return
 
@@ -93,11 +102,7 @@ export default function AuthenticatedLayout({
     }
   }, [mobileMenuOpen])
 
-  // const userInitial = user?.username
-  //   ? user.username.slice(0, 2).toUpperCase()
-  //   : 'TP'
-
-  const handleLogout = async () => {
+  const handleLogout = async (): Promise<void> => {
     if (isLoggingOut) return
 
     setIsLoggingOut(true)
@@ -110,34 +115,35 @@ export default function AuthenticatedLayout({
     }
   }
 
-  const navigateMobile = (path: string) => {
+  const navigateMobile = (path: string): void => {
     setMobileMenuOpen(false)
     navigate(path)
   }
 
   return (
     <div className="min-h-screen bg-slate-50/50 text-foreground selection:bg-blue-500/20 selection:text-blue-600 dark:bg-slate-950">
-
       {/* Desktop sidebar: visible only at md and above */}
       <div className="hidden md:block">
         <AppSidebar
           collapsed={collapsed}
-          onToggle={() => setCollapsed((previous) => !previous)}
+          onToggle={() => setCollapsed((previous: boolean) => !previous)}
         />
       </div>
 
-      {/* Mobile workspace navbar: never rendered on desktop */}
+      {/* Mobile authenticated workspace navbar */}
       <header className="sticky top-0 z-40 w-full border-b border-border bg-white shadow-[0_1px_3px_rgba(0,0,0,0.02)] dark:bg-slate-900 md:hidden">
-
-        {/* Row 1: Hamburger, branding and profile */}
+        {/* Row 1: Hamburger and branding */}
         <div className="flex h-14 items-center justify-between border-b border-slate-100 px-4 dark:border-slate-800">
-
           <div className="flex min-w-0 items-center gap-2">
             <button
               type="button"
-              onClick={() => setMobileMenuOpen((open) => !open)}
+              onClick={() =>
+                setMobileMenuOpen((open: boolean) => !open)
+              }
               className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-slate-700 transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:text-slate-200 dark:hover:bg-slate-800"
-              aria-label={mobileMenuOpen ? 'Close menu' : 'Open account menu'}
+              aria-label={
+                mobileMenuOpen ? 'Close menu' : 'Open account menu'
+              }
               aria-expanded={mobileMenuOpen}
               aria-controls="authenticated-mobile-menu"
             >
@@ -157,18 +163,9 @@ export default function AuthenticatedLayout({
               <TalentPrepLogo size="md" />
             </button>
           </div>
-
-          {/* <button
-            type="button"
-            onClick={() => navigateMobile('/profile')}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-primary/20 bg-primary/10 text-xs font-bold uppercase text-primary transition-colors hover:bg-primary/15"
-            aria-label="View user profile"
-          >
-            {userInitial}
-          </button> */}
         </div>
 
-        {/* Row 2: Authenticated workspace navigation */}
+        {/* Row 2: Primary workspace navigation */}
         <nav
           aria-label="Primary workspace navigation"
           className="grid grid-cols-4 gap-1 bg-white px-2 py-1.5 dark:bg-slate-900"
@@ -199,7 +196,7 @@ export default function AuthenticatedLayout({
         </nav>
       </header>
 
-      {/* Mobile secondary account menu, not the public marketing drawer */}
+      {/* Mobile account menu */}
       {mobileMenuOpen && (
         <div className="md:hidden">
           <button
@@ -219,14 +216,11 @@ export default function AuthenticatedLayout({
               onClick={() => navigateMobile('/profile')}
               className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
             >
-              {/* <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
-                {userInitial}
-              </span> */}
-
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-sm font-semibold text-slate-900 dark:text-white">
                   {user?.username || 'User'}
                 </span>
+
                 <span className="block truncate text-xs text-muted-foreground">
                   {user?.email || 'View profile'}
                 </span>
@@ -255,7 +249,7 @@ export default function AuthenticatedLayout({
         </div>
       )}
 
-      {/* Main content: desktop sidebar spacing; full width on mobile */}
+      {/* Main content: desktop sidebar spacing, full width on mobile */}
       <div
         className={cn(
           'flex min-h-[calc(100vh-112px)] flex-col transition-[padding] duration-300 ease-in-out md:min-h-screen',
