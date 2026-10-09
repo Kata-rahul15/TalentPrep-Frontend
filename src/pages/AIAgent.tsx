@@ -690,64 +690,67 @@ function FindMatchingJobsWorkflow() {
       setStage('searching')
 
       try {
-        const buildRoleQuery = () => {
-          const skills = (details?.skills || '').toLowerCase()
-          const summary = (details?.summary || '').toLowerCase()
-          const experience = (details?.experience || '').toLowerCase()
-          const profile = `${summary} ${experience} ${skills}`
+        // const buildRoleQuery = () => {
+        //   const skills = (details?.skills || '').toLowerCase()
+        //   const summary = (details?.summary || '').toLowerCase()
+        //   const experience = (details?.experience || '').toLowerCase()
+        //   const profile = `${summary} ${experience} ${skills}`
 
-          if (profile.includes('java') && (
-            profile.includes('spring boot') ||
-            profile.includes('springboot') ||
-            profile.includes('microservices') ||
-            profile.includes('backend') ||
-            profile.includes('back-end')
-          )) {
-            return 'Java Backend Developer'
-          }
+        //   if (profile.includes('java') && (
+        //     profile.includes('spring boot') ||
+        //     profile.includes('springboot') ||
+        //     profile.includes('microservices') ||
+        //     profile.includes('backend') ||
+        //     profile.includes('back-end')
+        //   )) {
+        //     return 'Java Backend Developer'
+        //   }
 
-          if (profile.includes('java')) return 'Java Developer'
+        //   if (profile.includes('java')) return 'Java Developer'
 
-          if (profile.includes('react') && (
-            profile.includes('node') ||
-            profile.includes('full stack') ||
-            profile.includes('full-stack')
-          )) {
-            return 'Full Stack Developer'
-          }
+        //   if (profile.includes('react') && (
+        //     profile.includes('node') ||
+        //     profile.includes('full stack') ||
+        //     profile.includes('full-stack')
+        //   )) {
+        //     return 'Full Stack Developer'
+        //   }
 
-          if (profile.includes('python') && (
-            profile.includes('django') ||
-            profile.includes('flask') ||
-            profile.includes('fastapi') ||
-            profile.includes('backend')
-          )) {
-            return 'Python Backend Developer'
-          }
+        //   if (profile.includes('python') && (
+        //     profile.includes('django') ||
+        //     profile.includes('flask') ||
+        //     profile.includes('fastapi') ||
+        //     profile.includes('backend')
+        //   )) {
+        //     return 'Python Backend Developer'
+        //   }
 
-          if (profile.includes('devops') || (profile.includes('kubernetes') && profile.includes('cloud'))) {
-            return 'DevOps Engineer'
-          }
+        //   if (profile.includes('devops') || (profile.includes('kubernetes') && profile.includes('cloud'))) {
+        //     return 'DevOps Engineer'
+        //   }
 
-          if (profile.includes('data engineer')) return 'Data Engineer'
-          if (profile.includes('machine learning') || profile.includes('machine-learning')) return 'Machine Learning Engineer'
-          if (profile.includes('ai engineer') || profile.includes('artificial intelligence')) return 'AI Engineer'
+        //   if (profile.includes('data engineer')) return 'Data Engineer'
+        //   if (profile.includes('machine learning') || profile.includes('machine-learning')) return 'Machine Learning Engineer'
+        //   if (profile.includes('ai engineer') || profile.includes('artificial intelligence')) return 'AI Engineer'
 
-          const roleMatch = profile.match(/(?:senior|sr\.?|junior|jr\.?|lead)?\s*(software engineer|software developer|backend developer|frontend developer|full stack developer|data engineer|devops engineer|platform engineer|qa engineer|test engineer)/i)
-          if (roleMatch?.[1]) return roleMatch[1].replace(/\s+/g, ' ').trim()
+        //   const roleMatch = profile.match(/(?:senior|sr\.?|junior|jr\.?|lead)?\s*(software engineer|software developer|backend developer|frontend developer|full stack developer|data engineer|devops engineer|platform engineer|qa engineer|test engineer)/i)
+        //   if (roleMatch?.[1]) return roleMatch[1].replace(/\s+/g, ' ').trim()
 
-          return 'Software Engineer'
-        }
+        //   return 'Software Engineer'
+        // }
 
-        const roleQuery = buildRoleQuery()
 
-        const result = await resumeApi.searchJobs({
-          q: roleQuery,
+        // const result = await resumeApi.searchJobs({
+        //   q: roleQuery,
+        //   location: 'India',
+        //   days: 30,
+        //   limit: 10,
+        // })
+        const result = await resumeApi.findJobsForMe({
           location: 'India',
           days: 30,
-          limit: 10,
+          limit: 20,
         })
-
         if (cancelled) return
         setStage('comparing')
         await new Promise((r) => setTimeout(r, 500))

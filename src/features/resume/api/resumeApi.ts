@@ -924,7 +924,16 @@ export const resumeApi = {
     const response = await api.get('/api/resumes/jobs/search', { params })
     return response.data
   },
-
+  findJobsForMe: async (params?: {
+    location?: string
+    days?: number
+    limit?: number
+  }) => {
+    const response = await api.get('/api/resumes/jobs/for-me', {
+      params,
+    })
+    return response.data
+  },
   getJobDetails: async (jobId: string) => {
     const response = await api.get(`/api/resumes/jobs/${encodeURIComponent(jobId)}`)
     return response.data
