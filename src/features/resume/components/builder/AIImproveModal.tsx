@@ -187,10 +187,14 @@ Current Text: "${originalText}"`
             type="button"
             disabled={isLoading || !originalText.trim()}
             onClick={handleGenerate}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-blue-600 dark:text-blue-400 bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-900 rounded-xl hover:bg-blue-50 transition-colors shadow-2xs disabled:opacity-40 cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-blue-600 dark:text-blue-400 bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-900 rounded-xl hover:bg-blue-50 transition-colors shadow-2xs disabled:bg-secondary-bg disabled:text-muted-foreground disabled:border-border disabled:cursor-not-allowed cursor-pointer"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-            <span>{hasGenerated ? 'Regenerate' : 'Generate AI Suggestion'}</span>
+            {isLoading ? (
+              <div className="w-3.5 h-3.5 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin flex-shrink-0" />
+            ) : (
+              <RefreshCw className="w-3.5 h-3.5" />
+            )}
+            <span>{isLoading ? 'Generating...' : hasGenerated ? 'Regenerate' : 'Generate AI Suggestion'}</span>
           </button>
 
           <div className="flex items-center gap-2">
@@ -205,7 +209,7 @@ Current Text: "${originalText}"`
               type="button"
               disabled={!suggestion || isLoading}
               onClick={handleAccept}
-              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-40 rounded-xl shadow-xs transition-all cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:bg-secondary-bg disabled:text-muted-foreground disabled:border disabled:border-border disabled:cursor-not-allowed rounded-xl shadow-xs transition-all cursor-pointer"
             >
               <Check className="w-3.5 h-3.5" />
               <span>Accept & Apply</span>

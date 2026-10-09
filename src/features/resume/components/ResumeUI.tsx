@@ -1,5 +1,4 @@
 import React from 'react'
-import { Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface PageLoadingProps {
@@ -103,14 +102,16 @@ export function Button({
       {...props}
       disabled={disabled || loading}
       className={cn(
-        'inline-flex items-center justify-center gap-1.5 font-semibold transition-all duration-150 cursor-pointer',
-        'disabled:opacity-50 disabled:cursor-not-allowed',
+        'inline-flex items-center justify-center gap-1.5 font-semibold transition-all duration-150 cursor-pointer active:scale-[0.98]',
         buttonVariants[variant],
         buttonSizes[size],
+        'disabled:bg-secondary-bg disabled:text-muted-foreground disabled:border-border disabled:cursor-not-allowed disabled:shadow-none disabled:active:scale-100 disabled:opacity-80',
         className
       )}
     >
-      {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+      {loading ? (
+        <div className="w-3.5 h-3.5 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin flex-shrink-0" />
+      ) : null}
       {children}
     </button>
   )

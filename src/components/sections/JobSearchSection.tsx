@@ -73,26 +73,26 @@ export default function JobSearchSection() {
             </div>
 
             <h2 className="font-heading font-black text-3xl sm:text-4xl lg:text-5xl text-foreground tracking-tight leading-[1.15]">
-              Intelligent Career Discovery, Not Endless Job Boards.
+              Find Roles Matched to Your Real Experience.
             </h2>
 
             <p className="text-secondary-foreground text-sm sm:text-base md:text-lg leading-relaxed">
-              Skip hundreds of irrelevant search results. TalentPrep maps your parsed profile directly against live openings, ranking roles by true skill alignment.
+              Search opportunities ranked by true skill alignment. Filter by work model, see compatibility scores, and focus on roles where your background stands out.
             </p>
 
             <div className="space-y-3 pt-2">
               {[
                 {
                   title: 'Skill-Weighted Match Scoring',
-                  desc: 'See exactly why a role fits you, including matched technical skills and domain strengths.',
+                  desc: 'Understand exactly how your experience aligns with each opening, including matched skills and key requirements.',
                 },
                 {
-                  title: 'Role & Work-Model Filtering',
-                  desc: 'Easily filter by Remote, Hybrid, On-site, and recency without bloated spam listings.',
+                  title: 'Work Model & Role Filtering',
+                  desc: 'Quickly find Remote, Hybrid, and On-site positions with transparent location and compensation details.',
                 },
                 {
-                  title: 'Direct Application Intelligence',
-                  desc: 'Know your alignment score before applying and calibrate your resume to maximize callbacks.',
+                  title: 'Actionable Compatibility Insights',
+                  desc: 'See your match percentage upfront to prioritize opportunities and apply with confidence.',
                 },
               ].map((item, idx) => (
                 <div key={idx} className="flex items-start gap-3">
@@ -114,7 +114,7 @@ export default function JobSearchSection() {
                 to="/signup"
                 className="inline-flex items-center gap-2 px-6 py-3.5 bg-primary hover:bg-primary-hover text-white font-bold text-sm sm:text-base rounded-xl shadow-sm transition-all hover:-translate-y-0.5"
               >
-                <span>Search Matched Jobs</span>
+                <span>Explore Job Search</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
@@ -134,10 +134,10 @@ export default function JobSearchSection() {
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-foreground flex items-center gap-2">
                     <Briefcase className="w-4 h-4 text-primary" />
-                    TalentPrep Jobs Explorer
+                    Job Search Experience Preview
                   </span>
                   <span className="text-[10px] font-semibold text-muted-foreground">
-                    Powered by Live Backend Search
+                    Interactive Interface
                   </span>
                 </div>
 

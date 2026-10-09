@@ -12,7 +12,6 @@ import {
   Award,
   ChevronRight,
   ArrowLeft,
-  RefreshCw,
 } from 'lucide-react'
 
 interface Track {
@@ -311,11 +310,11 @@ export default function Interview() {
                 <button
                   onClick={handleEvaluateAnswer}
                   disabled={!userResponse.trim() || isAnalyzing}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-primary hover:bg-primary-hover disabled:opacity-50 text-white font-semibold text-xs rounded-lg shadow-2xs transition-all cursor-pointer h-8"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-primary hover:bg-primary-hover disabled:bg-secondary-bg disabled:text-muted-foreground disabled:border disabled:border-border disabled:cursor-not-allowed text-white font-semibold text-xs rounded-lg shadow-2xs transition-all cursor-pointer h-8"
                 >
                   {isAnalyzing ? (
                     <>
-                      <RefreshCw className="w-3 h-3 animate-spin" />
+                      <div className="w-3.5 h-3.5 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin flex-shrink-0" />
                       <span>Analyzing...</span>
                     </>
                   ) : (

@@ -214,18 +214,23 @@ export default function ResumeBuilderToolbar({
         {/* Save Draft Button */}
         <button
           type="button"
+          disabled={saveStatus === 'saving'}
           onClick={onSaveDraft}
-          className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg hover:bg-slate-50 transition-colors shadow-2xs cursor-pointer h-7.5"
+          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg hover:bg-slate-50 disabled:bg-secondary-bg disabled:text-muted-foreground disabled:cursor-not-allowed transition-all shadow-2xs active:scale-95 cursor-pointer h-7.5"
         >
-          <Save className="w-3.5 h-3.5 text-slate-500" />
-          <span className="hidden sm:inline">Save Draft</span>
+          {saveStatus === 'saving' ? (
+            <div className="w-3.5 h-3.5 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin flex-shrink-0" />
+          ) : (
+            <Save className="w-3.5 h-3.5 text-slate-500" />
+          )}
+          <span className="hidden sm:inline">{saveStatus === 'saving' ? 'Saving...' : 'Save Draft'}</span>
         </button>
 
         {/* Download PDF Button */}
         <button
           type="button"
           onClick={onDownloadPdf}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-2xs cursor-pointer h-7.5"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 active:scale-95 rounded-lg transition-all shadow-2xs cursor-pointer h-7.5"
         >
           <Download className="w-3.5 h-3.5" />
           <span>Download PDF</span>

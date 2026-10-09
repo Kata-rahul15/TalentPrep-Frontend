@@ -20,15 +20,15 @@ export default function HowItWorks() {
   const steps = [
     {
       step: '01',
-      phase: 'UNDERSTAND',
-      title: 'Deep Resume & Profile Intelligence',
-      tagline: 'Your resume is analyzed into rich, structured career intelligence.',
+      phase: 'RESUME CONTEXT',
+      title: 'Upload or Provide Resume Information',
+      tagline: 'Start by providing your resume in PDF or DOCX format.',
       description:
-        'Upload your existing resume in PDF or DOCX format. TalentPrep extracts your skills taxonomy, quantifiable accomplishments, and work history, generating an instant ATS evaluation with actionable optimization insights.',
+        'TalentPrep securely extracts your skills, work history, and achievements into structured career context that powers your personalized experience.',
       icon: FileText,
-      badge: 'Step 1: Parse & Structure',
+      badge: 'Step 1: Provide Resume',
       badgeColor: 'bg-primary/10 text-primary border-primary/20',
-      actionText: 'Optimize Resume',
+      actionText: 'Get Started',
       actionHref: '/signup',
       // UI Demonstration Snippet
       preview: (
@@ -36,16 +36,16 @@ export default function HowItWorks() {
           <div className="flex items-center justify-between border-b border-border pb-3">
             <div className="flex items-center gap-2">
               <FileSpreadsheet className="w-4 h-4 text-primary" />
-              <span className="text-xs font-bold text-foreground">Extracted Profile Metadata</span>
+              <span className="text-xs font-bold text-foreground">Extracted Profile Context</span>
             </div>
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-success/10 text-success border border-success/20">
-              92/100 ATS Score
+              Profile Ready
             </span>
           </div>
 
           <div className="space-y-2">
             <div className="text-[11px]">
-              <span className="font-semibold text-muted-foreground">Identified Core Skills:</span>
+              <span className="font-semibold text-muted-foreground">Identified Skills Taxonomy:</span>
               <div className="flex flex-wrap gap-1.5 mt-1.5">
                 {['TypeScript', 'React.js', 'Node.js', 'System Architecture', 'PostgreSQL', 'AWS'].map((skill) => (
                   <span
@@ -61,7 +61,7 @@ export default function HowItWorks() {
             <div className="p-2.5 rounded-xl bg-primary/5 border border-primary/10 flex items-start gap-2 text-[11px] text-foreground">
               <CheckCircle2 className="w-3.5 h-3.5 text-primary flex-shrink-0 mt-0.5" />
               <span>
-                <strong className="text-primary font-bold">Contextual Bridge:</strong> Career data is synchronized and immediately ready for AI matching and chat.
+                <strong className="text-primary font-bold">Context Synced:</strong> Career history is loaded for immediate job matching and agent consultation.
               </span>
             </div>
           </div>
@@ -71,12 +71,12 @@ export default function HowItWorks() {
     {
       step: '02',
       phase: 'DISCOVER',
-      title: 'Intelligent Role-Based Job Search',
-      tagline: 'Discover opportunities matched directly to your actual capabilities.',
+      title: 'Discover Relevant Jobs',
+      tagline: 'Explore opportunities matched to your actual capabilities.',
       description:
-        'Stop sifting through hundreds of irrelevant job listings. TalentPrep queries live tech roles and calculates precise compatibility scores based on your parsed skills, preferred work models, and location intent.',
+        'Search tech roles ranked by skill alignment. Filter by remote, hybrid, or on-site work models and review transparent compatibility metrics.',
       icon: Search,
-      badge: 'Step 2: Match & Discover',
+      badge: 'Step 2: Find Jobs',
       badgeColor: 'bg-info/10 text-info border-info/20',
       actionText: 'Explore Job Search',
       actionHref: '/signup',
@@ -88,7 +88,7 @@ export default function HowItWorks() {
               <Target className="w-4 h-4 text-info" />
               <span className="text-xs font-bold text-foreground">Role Compatibility Feed</span>
             </div>
-            <span className="text-[10px] font-bold text-muted-foreground">20+ Live Openings</span>
+            <span className="text-[10px] font-bold text-muted-foreground">Live Tech Roles</span>
           </div>
 
           <div className="space-y-2">
@@ -123,13 +123,13 @@ export default function HowItWorks() {
     },
     {
       step: '03',
-      phase: 'ACT',
-      title: 'Dedicated AI Career Agent Collaboration',
-      tagline: 'Work with an AI partner that understands your unique background.',
+      phase: 'GUIDANCE',
+      title: 'Work with the AI Career Agent',
+      tagline: 'Get personalized career guidance and application assistance.',
       description:
-        'Get contextual guidance tailored to your specific career history. Consult your AI Career Agent to evaluate target roles, craft bullet-point enhancements, and refine your resume using the integrated builder.',
+        'Collaborate with your dedicated AI assistant to evaluate target positions, improve resume bullet points, and get actionable recommendations.',
       icon: Bot,
-      badge: 'Step 3: Advise & Execute',
+      badge: 'Step 3: AI Career Agent',
       badgeColor: 'bg-primary/10 text-primary border-primary/20',
       actionText: 'Meet Your Agent',
       actionHref: '/signup',
@@ -149,14 +149,14 @@ export default function HowItWorks() {
 
           <div className="space-y-2 text-[11px]">
             <div className="p-3 rounded-xl bg-secondary-bg border border-border space-y-1">
-              <span className="font-bold text-foreground block">Career Agent Insight:</span>
+              <span className="font-bold text-foreground block">Career Agent Guidance:</span>
               <p className="text-muted-foreground text-[10.5px] leading-relaxed">
-                "For the Lead Architect position, highlight your distributed state management experience and quantify the 40% performance gain from your recent React project."
+                "For the Lead Architect position, highlight your distributed state management experience and quantify the 40% performance gain from your recent project."
               </p>
             </div>
             <div className="flex items-center gap-2 pt-1 text-[10px] font-semibold text-primary">
               <TrendingUp className="w-3 h-3" />
-              <span>Ready to generate tailored CV in Resume Builder</span>
+              <span>Tailored resume recommendations ready</span>
             </div>
           </div>
         </div>

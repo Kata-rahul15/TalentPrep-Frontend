@@ -1,12 +1,8 @@
 import Navbar from '@/components/layout/Navbar'
 import Hero from '@/components/sections/Hero'
-import Trust from '@/components/sections/Trust'
-import HowItWorks from '@/components/sections/HowItWorks'
-import ResumeIntelligence from '@/components/sections/ResumeIntelligence'
 import JobSearchSection from '@/components/sections/JobSearchSection'
 import AIAgentSection from '@/components/sections/AIAgentSection'
-import ResumeBuilderSection from '@/components/sections/ResumeBuilderSection'
-import ProductFlow from '@/components/sections/ProductFlow'
+import HowItWorks from '@/components/sections/HowItWorks'
 import FAQ from '@/components/sections/FAQ'
 import CTA from '@/components/sections/CTA'
 import Footer from '@/components/layout/Footer'
@@ -15,9 +11,10 @@ import OAuthCallback from '@/pages/OAuthCallback'
 export default function Landing() {
   const isOAuthReturn =
     typeof window !== 'undefined' &&
-    (sessionStorage.getItem('oauth_pending') === 'true' ||
-     window.location.search.includes('oauth') ||
-     window.location.search.includes('code='))
+    (window.location.search.includes('code=') ||
+      window.location.search.includes('oauth=success') ||
+      (sessionStorage.getItem('oauth_pending') === 'true' &&
+        (window.location.search.includes('oauth') || window.location.search.includes('state='))))
 
   if (isOAuthReturn) {
     return <OAuthCallback />
@@ -33,36 +30,25 @@ export default function Landing() {
         {/* 1. Hero Section */}
         <Hero />
         
-        {/* 2. Architecture & Trust Pillars */}
-        <Trust />
-        
-        {/* 3. Product Journey: Understand -> Discover -> Act */}
-        <HowItWorks />
-        
-        {/* 4. Deep Dive: Resume Intelligence */}
-        <ResumeIntelligence />
-        
-        {/* 5. Core Feature: AI Job Search */}
+        {/* 2. AI Job Search Section */}
         <JobSearchSection />
         
-        {/* 6. Core Feature: AI Career Agent */}
+        {/* 3. AI Career Agent Section */}
         <AIAgentSection />
         
-        {/* 7. Core Feature: Resume Builder Studio */}
-        <ResumeBuilderSection />
+        {/* 4. How It Works Section */}
+        <HowItWorks />
         
-        {/* 8. End-to-End Product Flow */}
-        <ProductFlow />
-        
-        {/* 9. Comprehensive Product FAQ */}
+        {/* 5. Frequently Asked Questions */}
         <FAQ />
         
-        {/* 10. Call to Action Banner */}
+        {/* 6. Final Call to Action */}
         <CTA />
       </main>
       
-      {/* Footer Block */}
+      {/* Footer */}
       <Footer />
     </div>
   )
 }
+

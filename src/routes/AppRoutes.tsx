@@ -106,11 +106,11 @@ export default function AppRoutes() {
           <Route path="/" element={<Landing />} />
 
           {/* Authentication Routes with Service Wakeup Guard */}
-          <Route path="/login" element={<PublicRoute><ReadinessAuthGuard><Login /></ReadinessAuthGuard></PublicRoute>} />
-          <Route path="/signup" element={<PublicRoute><ReadinessAuthGuard><Signup /></ReadinessAuthGuard></PublicRoute>} />
-          <Route path="/verify-otp" element={<PublicRoute><ReadinessAuthGuard><VerifyOtp /></ReadinessAuthGuard></PublicRoute>} />
-          <Route path="/forgot-password" element={<PublicRoute><ReadinessAuthGuard><ForgotPassword /></ReadinessAuthGuard></PublicRoute>} />
-          <Route path="/reset-password" element={<PublicRoute><ReadinessAuthGuard><ResetPassword /></ReadinessAuthGuard></PublicRoute>} />
+          <Route path="/login" element={<ReadinessAuthGuard><PublicRoute><Login /></PublicRoute></ReadinessAuthGuard>} />
+          <Route path="/signup" element={<ReadinessAuthGuard><PublicRoute><Signup /></PublicRoute></ReadinessAuthGuard>} />
+          <Route path="/verify-otp" element={<ReadinessAuthGuard><PublicRoute><VerifyOtp /></PublicRoute></ReadinessAuthGuard>} />
+          <Route path="/forgot-password" element={<ReadinessAuthGuard><PublicRoute><ForgotPassword /></PublicRoute></ReadinessAuthGuard>} />
+          <Route path="/reset-password" element={<ReadinessAuthGuard><PublicRoute><ResetPassword /></PublicRoute></ReadinessAuthGuard>} />
           <Route path="/oauth/success" element={<OAuthCallback />} />
           <Route path="/oauth/callback" element={<OAuthCallback />} />
 

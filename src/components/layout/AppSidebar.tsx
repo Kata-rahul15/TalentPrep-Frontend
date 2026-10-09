@@ -84,11 +84,16 @@ export default function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
   const location = useLocation()
   const { user, logout } = useAuth()
 
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
+
   const handleLogout = async () => {
+    if (isLoggingOut) return
+    setIsLoggingOut(true)
     try {
       await logout()
     } catch (err) {
       console.error('Logout failed:', err)
+      setIsLoggingOut(false)
     }
   }
 
@@ -238,19 +243,24 @@ export default function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
 
         {/* Logout button */}
         <div className="w-full flex justify-center">
-          <SidebarTooltip label="Logout" show={collapsed}>
+          <SidebarTooltip label={isLoggingOut ? 'Logging out...' : 'Logout'} show={collapsed}>
             <button
               type="button"
               onClick={handleLogout}
+              disabled={isLoggingOut}
               className={cn(
-                'flex items-center gap-3 rounded-xl transition-all duration-150 w-full text-slate-600 dark:text-slate-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-600 cursor-pointer h-8.5 group',
+                'flex items-center gap-3 rounded-xl transition-all duration-150 w-full text-slate-600 dark:text-slate-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-600 disabled:bg-secondary-bg disabled:text-muted-foreground disabled:cursor-not-allowed cursor-pointer h-8.5 group',
                 collapsed ? 'justify-center px-0' : 'px-2.5'
               )}
             >
-              <LogOut className="w-4 h-4 flex-shrink-0 transition-transform duration-150 group-hover:scale-105" />
+              {isLoggingOut ? (
+                <div className="w-4 h-4 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin flex-shrink-0" />
+              ) : (
+                <LogOut className="w-4 h-4 flex-shrink-0 transition-transform duration-150 group-hover:scale-105" />
+              )}
               {!collapsed && (
                 <span className="text-xs font-medium leading-none whitespace-nowrap overflow-hidden text-ellipsis">
-                  Logout
+                  {isLoggingOut ? 'Logging out...' : 'Logout'}
                 </span>
               )}
             </button>

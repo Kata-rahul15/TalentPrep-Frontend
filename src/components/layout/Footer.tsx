@@ -7,19 +7,18 @@ export default function Footer() {
     {
       title: 'Platform',
       links: [
-        { name: 'How It Works', href: '/#how-it-works', external: false },
-        { name: 'Resume Intelligence', href: '/#resume-intelligence', external: false },
-        { name: 'AI Job Search', href: '/#job-search', external: false },
+        { name: 'Job Search', href: '/#job-search', external: false },
         { name: 'AI Career Agent', href: '/#ai-agent', external: false },
-        { name: 'Resume Studio', href: '/#resume-builder', external: false },
+        { name: 'How It Works', href: '/#how-it-works', external: false },
+        { name: 'FAQ', href: '/#faq', external: false },
       ],
     },
     {
       title: 'Resources',
       links: [
         { name: 'Help Center', href: '/help', external: false },
-        { name: 'FAQ', href: '/#faq', external: false },
         { name: 'Privacy Policy', href: '/privacy-policy', external: false },
+        { name: 'Terms & Conditions', href: '/terms-and-conditions', external: false },
       ],
     },
     {

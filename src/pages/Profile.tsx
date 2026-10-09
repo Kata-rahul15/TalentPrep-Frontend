@@ -7,6 +7,18 @@ export default function Profile() {
   const { user, logout, showToast } = useAuth()
   const [resetRequested, setResetRequested] = useState(false)
   const [resetLoading, setResetLoading] = useState(false)
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
+
+  const handleLogout = async () => {
+    if (isLoggingOut) return
+    setIsLoggingOut(true)
+    try {
+      await logout()
+    } catch (err) {
+      console.error('Logout error:', err)
+      setIsLoggingOut(false)
+    }
+  }
 
   const handlePasswordResetRequest = async () => {
     if (!user?.email) return
@@ -36,11 +48,16 @@ export default function Profile() {
         </div>
 
         <button
-          onClick={logout}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-danger/10 text-danger hover:bg-danger/20 font-bold text-xs rounded-lg transition-colors cursor-pointer border border-danger/20 h-8"
+          onClick={handleLogout}
+          disabled={isLoggingOut}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-danger/10 text-danger hover:bg-danger/20 disabled:bg-secondary-bg disabled:text-muted-foreground disabled:border-border disabled:cursor-not-allowed font-bold text-xs rounded-lg transition-colors cursor-pointer border border-danger/20 h-8"
         >
-          <LogOut className="w-3.5 h-3.5" />
-          <span>Log Out</span>
+          {isLoggingOut ? (
+            <div className="w-3.5 h-3.5 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin flex-shrink-0" />
+          ) : (
+            <LogOut className="w-3.5 h-3.5" />
+          )}
+          <span>{isLoggingOut ? 'Logging out...' : 'Log Out'}</span>
         </button>
       </div>
 
@@ -147,9 +164,13 @@ export default function Profile() {
               <button
                 onClick={handlePasswordResetRequest}
                 disabled={resetLoading || !user?.email}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-primary hover:bg-primary-hover text-white font-bold text-xs rounded-lg shadow-2xs transition-all disabled:opacity-60 cursor-pointer h-8"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-primary hover:bg-primary-hover text-white font-bold text-xs rounded-lg shadow-2xs transition-all disabled:bg-secondary-bg disabled:text-muted-foreground disabled:border disabled:border-border disabled:cursor-not-allowed cursor-pointer h-8"
               >
-                <Lock className="w-3 h-3" />
+                {resetLoading ? (
+                  <div className="w-3.5 h-3.5 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin flex-shrink-0" />
+                ) : (
+                  <Lock className="w-3 h-3" />
+                )}
                 <span>{resetLoading ? 'Sending OTP...' : 'Send Password Reset OTP'}</span>
               </button>
             )}

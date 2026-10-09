@@ -11,17 +11,24 @@ export default function AuthenticatedNavbar() {
   const navigate = useNavigate()
   const { user, logout } = useAuth()
 
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
+
   const handleLogout = async () => {
+    if (isLoggingOut) return
+    setIsLoggingOut(true)
     try {
       await logout()
     } catch (err) {
       console.error('Logout failed:', err)
+      setIsLoggingOut(false)
     }
   }
 
   const navItems = [
     { label: 'Home', to: '/home', activePattern: (path: string) => path === '/home' },
     { label: 'Resume', to: '/resume', activePattern: (path: string) => path.startsWith('/resume') },
+    { label: 'AI Career Agent', to: '/agent', activePattern: (path: string) => path.startsWith('/agent') },
+    { label: 'Jobs', to: '/jobs', activePattern: (path: string) => path.startsWith('/jobs') },
     { label: 'Profile', to: '/profile', activePattern: (path: string) => path.startsWith('/profile') },
   ]
 
@@ -83,11 +90,16 @@ export default function AuthenticatedNavbar() {
 
           <button
             onClick={handleLogout}
-            className="font-medium text-sm text-gray-500 hover:text-danger hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors px-2.5 py-1 rounded-lg cursor-pointer flex items-center gap-1.5"
+            disabled={isLoggingOut}
+            className="font-medium text-sm text-gray-500 hover:text-danger hover:bg-gray-50 dark:hover:bg-slate-800 disabled:text-muted-foreground disabled:cursor-not-allowed transition-colors px-2.5 py-1 rounded-lg cursor-pointer flex items-center gap-1.5"
             title="Logout"
           >
-            <LogOut className="w-3.5 h-3.5" />
-            <span>Logout</span>
+            {isLoggingOut ? (
+              <div className="w-3.5 h-3.5 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin flex-shrink-0" />
+            ) : (
+              <LogOut className="w-3.5 h-3.5" />
+            )}
+            <span>{isLoggingOut ? 'Logging out...' : 'Logout'}</span>
           </button>
         </div>
 
@@ -138,13 +150,17 @@ export default function AuthenticatedNavbar() {
 
             <button
               onClick={() => {
-                setMobileMenuOpen(false)
                 handleLogout()
               }}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-danger bg-danger/10 hover:bg-danger/20 rounded-xl transition-colors cursor-pointer"
+              disabled={isLoggingOut}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-danger bg-danger/10 hover:bg-danger/20 disabled:bg-secondary-bg disabled:text-muted-foreground disabled:border-border disabled:cursor-not-allowed rounded-xl transition-colors cursor-pointer"
             >
-              <LogOut className="w-3.5 h-3.5" />
-              <span>Logout</span>
+              {isLoggingOut ? (
+                <div className="w-3.5 h-3.5 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin flex-shrink-0" />
+              ) : (
+                <LogOut className="w-3.5 h-3.5" />
+              )}
+              <span>{isLoggingOut ? 'Logging out...' : 'Logout'}</span>
             </button>
           </div>
         </div>

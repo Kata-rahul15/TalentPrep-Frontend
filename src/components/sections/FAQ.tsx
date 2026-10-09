@@ -9,42 +9,27 @@ export default function FAQ() {
     {
       question: 'What is TalentPrep?',
       answer:
-        'TalentPrep is an AI-powered career platform designed to help you understand your resume, discover relevant job opportunities based on your actual skills, collaborate with a dedicated AI Career Agent, and craft ATS-ready resumes with a built-in Resume Builder.',
-    },
-    {
-      question: 'How does TalentPrep understand my resume?',
-      answer:
-        'When you upload your resume (PDF or DOCX), our parsing engine extracts your skills taxonomy, work history, education, and quantified achievements. It evaluates the document against ATS guidelines and creates a structured career profile that powers the rest of the platform.',
+        'TalentPrep is an AI-powered career platform focused on intelligent job discovery and personalized guidance. It helps you discover relevant job opportunities matched to your actual skills and collaborate with a dedicated AI Career Agent for career and resume advice.',
     },
     {
       question: 'How does AI Job Search work?',
       answer:
-        'AI Job Search matches live tech openings against your extracted profile. Instead of relying solely on exact keyword queries, it calculates skill compatibility scores and lets you filter opportunities by role, location, recency, and work model (Remote, Hybrid, On-site).',
+        'AI Job Search matches tech openings against your experience and capabilities. Instead of relying solely on basic keywords, it calculates skill compatibility scores and lets you filter by role, location, and work model (Remote, Hybrid, On-site).',
     },
     {
       question: 'What is the AI Career Agent?',
       answer:
-        'The AI Career Agent is your dedicated intelligent career assistant. It has visibility into your uploaded resume context and helps you analyze role requirements, suggest bullet point rewrites, identify technical skill gaps, and strategize your next career steps.',
+        'The AI Career Agent is your dedicated career assistant. It has visibility into your uploaded resume context to help you analyze role requirements, suggest bullet point enhancements, evaluate skill gaps, and navigate your job search effectively.',
     },
     {
-      question: 'Can the AI Career Agent use my resume information?',
+      question: 'How does TalentPrep use my resume information?',
       answer:
-        'Yes. When your resume is uploaded and parsed, the Career Agent automatically references your experience, skills, and background so its recommendations are tailored specifically to you rather than generic boilerplate advice.',
-    },
-    {
-      question: 'Can I build or improve my resume on TalentPrep?',
-      answer:
-        'Yes. TalentPrep includes an integrated Resume Builder/Studio where you can edit your sections, review real-time ATS compliance, format your content cleanly, and export print-ready PDF resumes formatted for top tech employers.',
-    },
-    {
-      question: 'Is TalentPrep just a generic job board?',
-      answer:
-        'No. TalentPrep is an end-to-end career intelligence workspace. While it provides powerful job discovery, it connects your resume analysis, job compatibility scoring, and AI advisory into a unified workflow.',
+        'When you upload your resume (PDF or DOCX), TalentPrep extracts your skills, work history, and achievements into structured context. This context is used to personalize your job match scores and empower your AI Career Agent conversations.',
     },
     {
       question: 'Does TalentPrep automatically apply for jobs on my behalf?',
       answer:
-        'No. TalentPrep does not submit automated applications or message recruiters autonomously. Instead, it provides you with deep match scores, skill gap insights, and direct links so you can review and apply with confidence.',
+        'No. TalentPrep does not submit automated applications or message recruiters autonomously. It provides you with match scores, skill insights, and direct links so you can make informed application decisions.',
     },
     {
       question: 'Is my resume data and personal information secure?',
@@ -52,9 +37,9 @@ export default function FAQ() {
         'Yes. We take privacy and security seriously. Your resumes, profile details, and agent conversations are securely stored and encrypted. We do not sell or distribute your private career data to third parties.',
     },
     {
-      question: 'What features are currently available today?',
+      question: 'How do I get started with TalentPrep?',
       answer:
-        'Currently available features include Resume Upload & Parsing, ATS Evaluation Scoring, AI Job Search & Matching, the Context-Aware AI Career Agent, and the full Resume Builder with PDF export.',
+        'You can create a free account in seconds, provide your resume or background information, explore matched job opportunities, and start collaborating with your AI Career Agent right away.',
     },
   ]
 

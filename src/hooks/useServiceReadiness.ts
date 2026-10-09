@@ -5,8 +5,31 @@ import { API } from '@/config/api'
 
 export type ServiceConnectionStatus = 'connecting' | 'waking' | 'ready' | 'connected' | 'unavailable'
 
-// In-memory flag for the current page session lifecycle
+// In-memory flag and timestamp for the current page session lifecycle
 let globalReadinessVerified = false
+let globalReadinessTimestamp = 0
+const READINESS_CACHE_TTL_MS = 5 * 60 * 1000 // 5 minutes cache TTL
+
+export const isReadinessVerified = (): boolean => {
+  if (!globalReadinessVerified) return false
+  const age = Date.now() - globalReadinessTimestamp
+  if (age > READINESS_CACHE_TTL_MS) {
+    globalReadinessVerified = false
+    globalReadinessTimestamp = 0
+    return false
+  }
+  return true
+}
+
+export const setReadinessVerified = (verified: boolean) => {
+  globalReadinessVerified = verified
+  globalReadinessTimestamp = verified ? Date.now() : 0
+}
+
+export const invalidateReadiness = () => {
+  globalReadinessVerified = false
+  globalReadinessTimestamp = 0
+}
 
 export interface UseServiceReadinessReturn {
   isChecking: boolean
@@ -27,21 +50,23 @@ const POLLING_INTERVAL_MS = 3000 // 3 seconds
 const MAX_TIMEOUT_MS = 90000 // 90 seconds
 
 export function useServiceReadiness(autoStart = false): UseServiceReadinessReturn {
-  const [isChecking, setIsChecking] = useState<boolean>(false)
-  const [isReady, setIsReady] = useState<boolean>(globalReadinessVerified)
+  const isCurrentlyVerified = isReadinessVerified()
+
+  const [isChecking, setIsChecking] = useState<boolean>(!isCurrentlyVerified && autoStart)
+  const [isReady, setIsReady] = useState<boolean>(isCurrentlyVerified)
   const [isTimedOut, setIsTimedOut] = useState<boolean>(false)
   const [isFailed, setIsFailed] = useState<boolean>(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [elapsedSeconds, setElapsedSeconds] = useState<number>(0)
 
   const [gatewayStatus, setGatewayStatus] = useState<ServiceConnectionStatus>(
-    globalReadinessVerified ? 'connected' : 'connecting'
+    isCurrentlyVerified ? 'connected' : 'connecting'
   )
   const [authStatus, setAuthStatus] = useState<ServiceConnectionStatus>(
-    globalReadinessVerified ? 'ready' : 'waking'
+    isCurrentlyVerified ? 'ready' : 'waking'
   )
   const [resumeStatus, setResumeStatus] = useState<ServiceConnectionStatus>(
-    globalReadinessVerified ? 'ready' : 'waking'
+    isCurrentlyVerified ? 'ready' : 'waking'
   )
 
   const pollingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -132,7 +157,7 @@ export function useServiceReadiness(autoStart = false): UseServiceReadinessRetur
 
       if (data.ready) {
         console.log('[ServiceReadiness] Readiness confirmed! All microservices ready.')
-        globalReadinessVerified = true
+        setReadinessVerified(true)
         setIsReady(true)
         setIsChecking(false)
         setGatewayStatus('connected')
@@ -177,7 +202,7 @@ export function useServiceReadiness(autoStart = false): UseServiceReadinessRetur
   // Start polling workflow
   const startCheck = useCallback(
     (options?: { force?: boolean }) => {
-      if (globalReadinessVerified && !options?.force) {
+      if (isReadinessVerified() && !options?.force) {
         console.log('[ServiceReadiness] Services already verified ready in current session.')
         setIsReady(true)
         setIsChecking(false)
@@ -221,14 +246,14 @@ export function useServiceReadiness(autoStart = false): UseServiceReadinessRetur
 
   // Automatically start on mount if autoStart is true and not yet verified
   useEffect(() => {
-    if (autoStart && !globalReadinessVerified && !isReady && !isTimedOut && !isFailed) {
+    if (autoStart && !isReadinessVerified() && !isReady && !isTimedOut && !isFailed) {
       startCheck()
     }
   }, [autoStart, startCheck, isReady, isTimedOut, isFailed])
 
   const retry = useCallback(() => {
     console.log('[ServiceReadiness] Manual retry triggered.')
-    globalReadinessVerified = false
+    invalidateReadiness()
     startCheck({ force: true })
   }, [startCheck])
 

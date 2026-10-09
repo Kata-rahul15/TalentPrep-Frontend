@@ -7,7 +7,6 @@ import {
   Check,
   X,
   FileText,
-  Clock,
   ArrowRight,
 } from 'lucide-react'
 import type { ResumeFile, ResumeDetails } from '../../types/resume.types'
@@ -232,11 +231,11 @@ export default function ResumeCreationModal({
                       type="button"
                       disabled={isImporting || !selectedResumeId}
                       onClick={handleImportExisting}
-                      className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-xl shadow-xs cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:bg-secondary-bg disabled:text-muted-foreground disabled:border disabled:border-border disabled:cursor-not-allowed rounded-xl shadow-xs cursor-pointer"
                     >
                       {isImporting ? (
                         <>
-                          <Clock className="w-3.5 h-3.5 animate-spin" />
+                          <div className="w-3.5 h-3.5 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin flex-shrink-0" />
                           <span>Importing & Parsing...</span>
                         </>
                       ) : (

@@ -1,5 +1,6 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   Home,
   FileText,
@@ -15,15 +16,15 @@ import TalentPrepLogo from '@/components/common/TalentPrepLogo'
 import { cn } from '@/lib/utils'
 
 const workspaceNav = [
-  { to: '/home', label: 'Home', icon: Home },
-  { to: '/resume', label: 'Resume', icon: FileText },
-  { to: '/agent', label: 'AI Career Agent', icon: Sparkles },
-  { to: '/jobs', label: 'Jobs', icon: Briefcase },
+  { to: '/home', label: 'Home', icon: Home, match: (p: string) => p === '/home' },
+  { to: '/resume', label: 'Resume', icon: FileText, match: (p: string) => p.startsWith('/resume') },
+  { to: '/agent', label: 'AI Career Agent', icon: Sparkles, match: (p: string) => p.startsWith('/agent') },
+  { to: '/jobs', label: 'Jobs', icon: Briefcase, match: (p: string) => p.startsWith('/jobs') },
 ]
 
 const accountNav = [
-  { to: '/profile', label: 'Profile', icon: User },
-  { to: '/settings', label: 'Settings', icon: Settings },
+  { to: '/profile', label: 'Profile', icon: User, match: (p: string) => p === '/profile' },
+  { to: '/settings', label: 'Settings', icon: Settings, match: (p: string) => p === '/settings' },
 ]
 
 interface MobileDrawerProps {
@@ -52,116 +53,142 @@ export default function MobileDrawer({ open, onClose }: MobileDrawerProps) {
     }
   }, [open])
 
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
+
   const handleLogout = async () => {
-    onClose()
+    if (isLoggingOut) return
+    setIsLoggingOut(true)
     try {
       await logout()
+      onClose()
     } catch (err) {
       console.error('Logout failed:', err)
+      setIsLoggingOut(false)
     }
   }
 
-  if (!open) return null
-
   return (
-    <div className="fixed inset-0 z-50 md:hidden">
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black/40 backdrop-blur-xs"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-
-      {/* Drawer */}
-      <div className="fixed inset-y-0 left-0 w-[240px] bg-white dark:bg-slate-900 border-r border-border shadow-xl flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between h-13 px-3.5 border-b border-border/60 flex-shrink-0">
-          <TalentPrepLogo size="sm" />
-          <button
+    <AnimatePresence>
+      {open && (
+        <div className="fixed inset-0 z-50 md:hidden flex select-none">
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-black/40 backdrop-blur-xs"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
-            aria-label="Close menu"
+            aria-hidden="true"
+          />
+
+          {/* Drawer Panel */}
+          <motion.div
+            initial={{ x: '-100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '-100%' }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            className="relative w-72 max-w-[85vw] h-full bg-white dark:bg-slate-900 border-r border-border shadow-2xl flex flex-col z-10"
           >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* Navigation */}
-        <nav className="flex-1 px-2.5 py-3 space-y-0.5 overflow-y-auto">
-          <div className="px-2 mb-1.5">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-              Workspace
-            </span>
-          </div>
-          {workspaceNav.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={({ isActive }) =>
-                cn(
-                  'flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-medium transition-colors',
-                  isActive
-                    ? 'bg-primary/10 text-primary font-semibold'
-                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-800/60'
-                )
-              }
-            >
-              <item.icon className="w-4 h-4" />
-              <span>{item.label}</span>
-            </NavLink>
-          ))}
-
-          <div className="pt-3 pb-1.5 px-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-              Account
-            </span>
-          </div>
-          {accountNav.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={({ isActive }) =>
-                cn(
-                  'flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-medium transition-colors',
-                  isActive
-                    ? 'bg-primary/10 text-primary font-semibold'
-                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-800/60'
-                )
-              }
-            >
-              <item.icon className="w-4 h-4" />
-              <span>{item.label}</span>
-            </NavLink>
-          ))}
-
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-medium text-gray-600 dark:text-gray-400 hover:bg-danger/8 hover:text-danger transition-colors w-full cursor-pointer"
-          >
-            <LogOut className="w-4 h-4" />
-            <span>Logout</span>
-          </button>
-        </nav>
-
-        {/* User card */}
-        {user && (
-          <div className="px-3 pb-3 pt-2 border-t border-border/60">
-            <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs uppercase border border-primary/20">
-                {user.username?.slice(0, 2) || 'TP'}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs font-semibold text-gray-900 dark:text-white truncate">
-                  {user.username || 'User'}
-                </p>
-                <p className="text-[10px] text-muted-foreground truncate">
-                  {user.email || ''}
-                </p>
-              </div>
+            {/* Header */}
+            <div className="flex items-center justify-between h-14 px-4 border-b border-border flex-shrink-0">
+              <TalentPrepLogo size="sm" />
+              <button
+                onClick={onClose}
+                className="p-2 rounded-xl text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-secondary-bg transition-colors cursor-pointer"
+                aria-label="Close navigation menu"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
-          </div>
-        )}
-      </div>
-    </div>
+
+            {/* Navigation */}
+            <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto overscroll-contain">
+              <div className="px-2 mb-2">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                  Workspace
+                </span>
+              </div>
+              {workspaceNav.map((item) => {
+                const isActive = item.match(location.pathname)
+                return (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    className={cn(
+                      'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors',
+                      isActive
+                        ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 font-bold border border-blue-200/60 dark:border-blue-900/50'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-secondary-bg'
+                    )}
+                  >
+                    <item.icon className="w-4.5 h-4.5 flex-shrink-0" />
+                    <span>{item.label}</span>
+                  </NavLink>
+                )
+              })}
+
+              <div className="pt-4 pb-2 px-2">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                  Account
+                </span>
+              </div>
+              {accountNav.map((item) => {
+                const isActive = item.match(location.pathname)
+                return (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    className={cn(
+                      'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors',
+                      isActive
+                        ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 font-bold border border-blue-200/60 dark:border-blue-900/50'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-secondary-bg'
+                    )}
+                  >
+                    <item.icon className="w-4.5 h-4.5 flex-shrink-0" />
+                    <span>{item.label}</span>
+                  </NavLink>
+                )
+              })}
+
+              <div className="pt-2">
+                <button
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-danger hover:bg-danger/10 disabled:bg-secondary-bg disabled:text-muted-foreground disabled:cursor-not-allowed transition-colors w-full cursor-pointer"
+                >
+                  {isLoggingOut ? (
+                    <div className="w-4 h-4 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin flex-shrink-0" />
+                  ) : (
+                    <LogOut className="w-4.5 h-4.5 flex-shrink-0" />
+                  )}
+                  <span>{isLoggingOut ? 'Logging out...' : 'Logout'}</span>
+                </button>
+              </div>
+            </nav>
+
+            {/* User card footer */}
+            {user && (
+              <div className="px-4 py-3 border-t border-border bg-secondary-bg/40 flex-shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs uppercase border border-primary/20 flex-shrink-0">
+                    {user.username?.slice(0, 2) || 'TP'}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-bold text-gray-900 dark:text-white truncate">
+                      {user.username || 'User'}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground truncate">
+                      {user.email || ''}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   )
 }

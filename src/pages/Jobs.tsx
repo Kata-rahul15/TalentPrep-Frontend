@@ -8,7 +8,6 @@ import {
   Clock,
   Filter,
   AlertCircle,
-  RefreshCw,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useResumeDetails } from '@/features/resume/hooks/useResume'
@@ -161,7 +160,7 @@ function JobsExplorerInner() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigate('/agent?task=find_jobs')}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-2xs cursor-pointer h-8"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 active:scale-95 rounded-lg transition-all shadow-2xs cursor-pointer h-8"
           >
             <Sparkles className="w-3.5 h-3.5" />
             <span>AI Find Jobs For Me</span>
@@ -215,11 +214,11 @@ function JobsExplorerInner() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-lg transition-colors cursor-pointer h-full"
+              className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:bg-secondary-bg disabled:text-muted-foreground disabled:border disabled:border-border disabled:cursor-not-allowed rounded-lg transition-colors cursor-pointer h-full"
             >
               {isLoading ? (
                 <>
-                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                  <div className="w-3.5 h-3.5 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin flex-shrink-0" />
                   <span>Searching...</span>
                 </>
               ) : (

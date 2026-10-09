@@ -183,7 +183,7 @@ export default function ResumeBuilderSection() {
             <div className="pt-4">
               <Link
                 to="/signup"
-                className="inline-flex items-center gap-2 px-6 py-3.5 bg-primary hover:bg-primary-hover text-white font-bold text-sm sm:text-base rounded-xl shadow-sm transition-all hover:-translate-y-0.5"
+                className="inline-flex items-center gap-2 px-6 py-3.5 bg-primary hover:bg-primary-hover active:scale-[0.98] text-white font-bold text-sm sm:text-base rounded-xl shadow-sm transition-all hover:-translate-y-0.5 cursor-pointer"
               >
                 <span>Build Your Resume</span>
                 <ArrowRight className="w-4 h-4" />

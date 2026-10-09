@@ -648,16 +648,14 @@ function AgentChatPanel() {
           <button
             onClick={handleSend}
             disabled={!input.trim() || isLoading}
-            className="w-9 h-9 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-30 disabled:cursor-not-allowed text-white flex items-center justify-center transition-all cursor-pointer shadow-xs flex-shrink-0"
+            className="w-9 h-9 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-secondary-bg disabled:text-muted-foreground disabled:border disabled:border-border disabled:cursor-not-allowed text-white flex items-center justify-center transition-all cursor-pointer shadow-xs flex-shrink-0"
             aria-label="Send message"
           >
-
             {isLoading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <div className="w-4 h-4 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin flex-shrink-0" />
             ) : (
               <Send className="w-4 h-4" />
             )}
-
           </button>
 
         </div>
@@ -975,11 +973,11 @@ function MatchJobDescriptionWorkflow({ initialJdText }: { initialJdText?: string
           <button
             onClick={handleMatch}
             disabled={!jobDescription.trim() || !resume?.id || isProcessing || jobMatchMutation.isPending}
-            className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold text-xs rounded-lg transition-colors shadow-2xs cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-secondary-bg disabled:text-muted-foreground disabled:border disabled:border-border disabled:cursor-not-allowed text-white font-semibold text-xs rounded-lg transition-colors shadow-2xs cursor-pointer"
           >
             {isProcessing || jobMatchMutation.isPending ? (
               <>
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <div className="w-3.5 h-3.5 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin flex-shrink-0" />
                 <span>Evaluating Match...</span>
               </>
             ) : (

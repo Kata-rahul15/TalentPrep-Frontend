@@ -258,7 +258,7 @@ export default function Hero() {
             <motion.div variants={itemVariants} className="inline-flex items-center gap-2 mb-4">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold tracking-wide">
                 <Sparkles className="w-3.5 h-3.5" />
-                AI-Powered Career Intelligence
+                AI Job Search & Career Agent
               </span>
             </motion.div>
 
@@ -267,37 +267,17 @@ export default function Hero() {
               variants={itemVariants}
               className="font-heading font-black text-3xl sm:text-4xl md:text-5xl lg:text-[3.35rem] xl:text-[3.65rem] tracking-tight text-foreground leading-[1.1] sm:leading-[1.12]"
             >
-              Your Career,
-              <br />
-              <span className="text-primary">Powered by AI.</span>
+              AI-Powered Job Discovery &amp;{' '}
+              <span className="text-primary">Personalized Career Guidance.</span>
             </motion.h1>
 
             {/* Subtitle */}
             <motion.p
               variants={itemVariants}
-              className="mt-4 sm:mt-5 text-sm sm:text-base md:text-lg text-secondary-foreground leading-relaxed max-w-[54ch] mx-auto lg:mx-0"
+              className="mt-4 sm:mt-5 text-sm sm:text-base md:text-lg text-secondary-foreground leading-relaxed max-w-[52ch] mx-auto lg:mx-0"
             >
-              Understand your resume, discover tailored job opportunities, and collaborate with your personal AI career assistant to move forward faster.
+              Discover relevant tech opportunities matched to your actual skills, and collaborate with a dedicated AI Career Agent to navigate your job search and optimize your resume.
             </motion.p>
-
-            {/* Feature Checkpoints */}
-            <motion.div
-              variants={itemVariants}
-              className="mt-5 sm:mt-6 flex flex-wrap items-center justify-center lg:justify-start gap-y-2 gap-x-5 text-xs sm:text-sm text-foreground/80 font-medium"
-            >
-              <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />
-                Deep Resume Intelligence
-              </span>
-              <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />
-                Intelligent Job Discovery
-              </span>
-              <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />
-                Dedicated Career Agent
-              </span>
-            </motion.div>
 
             {/* CTA Button Group */}
             <motion.div
@@ -307,7 +287,7 @@ export default function Hero() {
               <Link
                 to="/signup"
                 id="hero-cta-primary"
-                className="inline-flex items-center gap-2 px-6 py-3.5 bg-primary hover:bg-primary-hover active:bg-primary-active text-white font-bold text-sm sm:text-base rounded-xl shadow-[0_4px_20px_rgba(37,99,235,0.35)] hover:shadow-[0_6px_28px_rgba(37,99,235,0.45)] hover:-translate-y-0.5 transition-all duration-200 group cursor-pointer w-full sm:w-auto justify-center"
+                className="inline-flex items-center gap-2 px-6 py-3.5 bg-primary hover:bg-primary-hover active:bg-primary-active active:scale-[0.98] text-white font-bold text-sm sm:text-base rounded-xl shadow-[0_4px_20px_rgba(37,99,235,0.35)] hover:shadow-[0_6px_28px_rgba(37,99,235,0.45)] hover:-translate-y-0.5 transition-all duration-200 group cursor-pointer w-full sm:w-auto justify-center"
               >
                 <span>Get Started Free</span>
                 <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
@@ -320,7 +300,7 @@ export default function Hero() {
                   e.preventDefault()
                   document.querySelector('#how-it-works')?.scrollIntoView({ behavior: 'smooth' })
                 }}
-                className="inline-flex items-center gap-2 px-5 py-3.5 text-secondary-foreground hover:text-foreground font-semibold text-sm sm:text-base rounded-xl border border-border hover:border-primary/30 hover:bg-secondary-bg transition-all duration-200 cursor-pointer w-full sm:w-auto justify-center"
+                className="inline-flex items-center gap-2 px-5 py-3.5 text-secondary-foreground hover:text-foreground active:scale-[0.98] font-semibold text-sm sm:text-base rounded-xl border border-border hover:border-primary/30 hover:bg-secondary-bg transition-all duration-200 cursor-pointer w-full sm:w-auto justify-center"
               >
                 <ChevronDown className="w-4 h-4" />
                 <span>See How It Works</span>
@@ -330,11 +310,11 @@ export default function Hero() {
             {/* Micro-Proof Footer */}
             <motion.div
               variants={itemVariants}
-              className="mt-6 flex items-center justify-center lg:justify-start gap-4 text-xs text-muted-foreground"
+              className="mt-6 flex items-center justify-center lg:justify-start gap-3.5 text-xs text-muted-foreground"
             >
               <span>No credit card required</span>
               <span className="w-1 h-1 rounded-full bg-border" />
-              <span>Instant PDF / DOCX parsing</span>
+              <span>Instant profile matching</span>
               <span className="w-1 h-1 rounded-full bg-border" />
               <span>Free to get started</span>
             </motion.div>

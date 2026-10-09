@@ -20,18 +20,18 @@ export default function CTA() {
           </div>
 
           <h2 className="font-heading font-black text-2xl sm:text-3xl md:text-4xl lg:text-5xl tracking-tight mb-4 leading-tight">
-            Ready to Take Control of Your Career Journey?
+            Ready to Accelerate Your Career with AI?
           </h2>
           
           <p className="text-slate-300 text-sm sm:text-base md:text-lg max-w-2xl mx-auto mb-8 leading-relaxed">
-            Understand your resume, discover matched job opportunities, and collaborate with your personal AI Career Agent in one unified platform.
+            Discover relevant job opportunities matched to your real experience and collaborate with your dedicated AI Career Agent today.
           </p>
 
           <div className="flex flex-col sm:flex-row justify-center items-center gap-3.5">
             <Link
               to="/signup"
               id="cta-get-started-btn"
-              className="w-full sm:w-auto px-7 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm sm:text-base rounded-xl shadow-[0_4px_20px_rgba(37,99,235,0.4)] transition-all hover:-translate-y-0.5 flex items-center justify-center gap-2 group cursor-pointer"
+              className="w-full sm:w-auto px-7 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm sm:text-base rounded-xl shadow-[0_4px_20px_rgba(37,99,235,0.4)] transition-all hover:-translate-y-0.5 active:scale-[0.98] flex items-center justify-center gap-2 group cursor-pointer"
             >
               <span>Get Started Free</span>
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
@@ -40,7 +40,7 @@ export default function CTA() {
             <Link
               to="/login"
               id="cta-signin-btn"
-              className="w-full sm:w-auto px-6 py-3.5 bg-white/10 hover:bg-white/15 border border-white/15 text-white font-semibold text-sm sm:text-base rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer backdrop-blur-xs"
+              className="w-full sm:w-auto px-6 py-3.5 bg-white/10 hover:bg-white/15 border border-white/15 text-white font-semibold text-sm sm:text-base rounded-xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer backdrop-blur-xs"
             >
               Sign In to Your Workspace
             </Link>
