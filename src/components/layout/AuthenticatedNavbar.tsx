@@ -1,168 +1,320 @@
-import { useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { LogOut, Menu, X } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
+import {
+  Menu,
+  X,
+  Home,
+  FileText,
+  Briefcase,
+  Sparkles,
+  UserRound,
+  LogOut,
+} from 'lucide-react'
 import { useAuth } from '@/services/authService'
 import TalentPrepLogo from '@/components/common/TalentPrepLogo'
 import { cn } from '@/lib/utils'
 
+const mobilePrimaryNav = [
+  {
+    to: '/home',
+    label: 'Home',
+    icon: Home,
+    match: (path: string) => path === '/home',
+  },
+  {
+    to: '/resume',
+    label: 'Resume',
+    icon: FileText,
+    match: (path: string) => path.startsWith('/resume'),
+  },
+  {
+    to: '/jobs',
+    label: 'Jobs',
+    icon: Briefcase,
+    match: (path: string) => path.startsWith('/jobs'),
+  },
+  {
+    to: '/agent',
+    label: 'AI Agent',
+    icon: Sparkles,
+    match: (path: string) => path.startsWith('/agent'),
+  },
+]
+
+const desktopNavItems = [
+  {
+    label: 'Home',
+    to: '/home',
+    match: (path: string) => path === '/home',
+  },
+  {
+    label: 'Resume',
+    to: '/resume',
+    match: (path: string) => path.startsWith('/resume'),
+  },
+  {
+    label: 'Jobs',
+    to: '/jobs',
+    match: (path: string) => path.startsWith('/jobs'),
+  },
+  {
+    label: 'AI Career Agent',
+    to: '/agent',
+    match: (path: string) => path.startsWith('/agent'),
+  },
+  {
+    label: 'Profile',
+    to: '/profile',
+    match: (path: string) => path.startsWith('/profile'),
+  },
+]
+
 export default function AuthenticatedNavbar() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
+
   const location = useLocation()
   const navigate = useNavigate()
   const { user, logout } = useAuth()
 
-  const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const userInitial = user?.username
+    ? user.username.slice(0, 2).toUpperCase()
+    : 'TP'
+
+  useEffect(() => {
+    setMenuOpen(false)
+  }, [location.pathname])
+
+  useEffect(() => {
+    if (!menuOpen) return
+
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setMenuOpen(false)
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [menuOpen])
 
   const handleLogout = async () => {
     if (isLoggingOut) return
+
     setIsLoggingOut(true)
+
     try {
       await logout()
-    } catch (err) {
-      console.error('Logout failed:', err)
+      setMenuOpen(false)
+    } catch (error) {
+      console.error('Logout failed:', error)
       setIsLoggingOut(false)
     }
   }
 
-  const navItems = [
-    { label: 'Home', to: '/home', activePattern: (path: string) => path === '/home' },
-    { label: 'Resume', to: '/resume', activePattern: (path: string) => path.startsWith('/resume') },
-    { label: 'AI Career Agent', to: '/agent', activePattern: (path: string) => path.startsWith('/agent') },
-    { label: 'Jobs', to: '/jobs', activePattern: (path: string) => path.startsWith('/jobs') },
-    { label: 'Profile', to: '/profile', activePattern: (path: string) => path.startsWith('/profile') },
-  ]
+  const goToProfile = () => {
+    setMenuOpen(false)
+    navigate('/profile')
+  }
 
   return (
-    <header className="sticky top-0 z-40 bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border-b border-border/80 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
-        
-        {/* ── Left Side: Brand Logo ── */}
-        <div className="flex items-center gap-3">
-          <Link to="/home" className="flex items-center gap-2 group">
+    <header className="sticky top-0 z-40 w-full border-b border-border/80 bg-white/95 shadow-[0_1px_3px_rgba(0,0,0,0.02)] backdrop-blur-md dark:bg-slate-900/95">
+
+      {/* Top row: hamburger, TalentPrep logo and profile avatar */}
+      <div className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+
+        <div className="flex min-w-0 items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setMenuOpen((open) => !open)}
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-slate-700 transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary md:hidden dark:text-slate-200 dark:hover:bg-slate-800"
+            aria-label={menuOpen ? 'Close account menu' : 'Open account menu'}
+            aria-expanded={menuOpen}
+            aria-controls="authenticated-mobile-account-menu"
+          >
+            {menuOpen ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
+          </button>
+
+          <Link
+            to="/home"
+            onClick={() => setMenuOpen(false)}
+            className="flex min-w-0 items-center"
+            aria-label="TalentPrep home"
+          >
             <TalentPrepLogo size="md" />
           </Link>
         </div>
 
-        {/* ── Center Navigation (Clean & Borderless) ── */}
-        <nav className="hidden md:flex items-center gap-6 lg:gap-8">
-          {navItems.map((item) => {
-            const isActive = item.activePattern(location.pathname)
+        {/* Desktop navigation */}
+        <nav
+          aria-label="Workspace navigation"
+          className="hidden items-center gap-6 md:flex lg:gap-8"
+        >
+          {desktopNavItems.map((item) => {
+            const active = item.match(location.pathname)
+
             return (
-              <Link
-                key={item.label}
+              <NavLink
+                key={item.to}
                 to={item.to}
                 className={cn(
-                  'relative font-medium text-sm transition-colors duration-200 py-1 group',
-                  isActive
-                    ? 'text-primary font-bold'
+                  'group relative py-1 text-sm font-medium transition-colors duration-200',
+                  active
+                    ? 'font-bold text-primary'
                     : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
                 )}
               >
-                <span>{item.label}</span>
-                {isActive ? (
-                  <span className="absolute -bottom-1 left-0 w-full h-[2px] rounded-full bg-primary" />
-                ) : (
-                  <span className="absolute -bottom-1 left-0 w-0 h-[2px] rounded-full bg-primary transition-all duration-300 group-hover:w-full opacity-60" />
-                )}
-              </Link>
+                {item.label}
+                <span
+                  className={cn(
+                    'absolute -bottom-1 left-0 h-[2px] rounded-full bg-primary transition-all duration-200',
+                    active ? 'w-full' : 'w-0 opacity-60 group-hover:w-full'
+                  )}
+                />
+              </NavLink>
             )
           })}
         </nav>
 
-        {/* ── Right Side: User Profile & Logout ── */}
-        <div className="hidden md:flex items-center gap-3">
-          <div
-            onClick={() => navigate('/profile')}
-            className="flex items-center gap-2 p-1 hover:bg-secondary-bg/60 rounded-xl transition-all cursor-pointer group"
+        {/* Desktop account details and logout */}
+        <div className="hidden items-center gap-3 md:flex">
+          <button
+            type="button"
+            onClick={goToProfile}
+            className="group flex items-center gap-2 rounded-xl p-1 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+            aria-label="View profile"
           >
-            <div className="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs uppercase shadow-xs border border-primary/20">
-              {user?.username?.slice(0, 2) || 'US'}
-            </div>
-            <div className="flex flex-col text-left">
-              <span className="text-xs font-bold text-gray-900 dark:text-white leading-tight group-hover:text-primary transition-colors">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full border border-primary/20 bg-primary/10 text-xs font-bold uppercase text-primary">
+              {userInitial}
+            </span>
+
+            <span className="flex flex-col text-left">
+              <span className="text-xs font-bold leading-tight text-gray-900 group-hover:text-primary dark:text-white">
                 {user?.username || 'User'}
               </span>
-              <span className="text-[10px] font-medium text-muted-foreground">{user?.email || ''}</span>
-            </div>
-          </div>
+              <span className="text-[10px] text-muted-foreground">
+                {user?.email || ''}
+              </span>
+            </span>
+          </button>
 
-          <div className="h-4 w-[1px] bg-border" />
+          <span className="h-5 w-px bg-border" />
 
           <button
+            type="button"
             onClick={handleLogout}
             disabled={isLoggingOut}
-            className="font-medium text-sm text-gray-500 hover:text-danger hover:bg-gray-50 dark:hover:bg-slate-800 disabled:text-muted-foreground disabled:cursor-not-allowed transition-colors px-2.5 py-1 rounded-lg cursor-pointer flex items-center gap-1.5"
-            title="Logout"
+            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-sm font-medium text-gray-500 transition-colors hover:bg-gray-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-60 dark:hover:bg-slate-800"
           >
             {isLoggingOut ? (
-              <div className="w-3.5 h-3.5 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin flex-shrink-0" />
+              <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
             ) : (
-              <LogOut className="w-3.5 h-3.5" />
+              <LogOut className="h-3.5 w-3.5" />
             )}
-            <span>{isLoggingOut ? 'Logging out...' : 'Logout'}</span>
+            {isLoggingOut ? 'Logging out...' : 'Logout'}
           </button>
         </div>
-
-        {/* ── Mobile Hamburger Toggle ── */}
+        {/* 
+        Mobile profile avatar
         <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="md:hidden p-2 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-secondary-bg"
-          aria-label="Toggle Navigation"
+          type="button"
+          onClick={goToProfile}
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-primary/20 bg-primary/10 text-xs font-bold uppercase text-primary transition-colors hover:bg-primary/15 md:hidden"
+          aria-label="View user profile"
         >
-          {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
+          {userInitial}
+        </button> */}
       </div>
 
-      {/* ── Mobile Menu Drawer ── */}
-      {mobileMenuOpen && (
-        <div className="md:hidden border-b border-border bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl px-4 pt-2 pb-6 space-y-3 shadow-lg">
-          <div className="space-y-1">
-            {navItems.map((item) => {
-              const isActive = item.activePattern(location.pathname)
-              return (
-                <Link
-                  key={item.label}
-                  to={item.to}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={cn(
-                    'block px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors',
-                    isActive
-                      ? 'text-primary bg-primary/5 font-bold'
-                      : 'text-gray-700 dark:text-gray-200 hover:bg-secondary-bg'
-                  )}
-                >
-                  {item.label}
-                </Link>
-              )
-            })}
-          </div>
+      {/* Mobile-only primary workspace navigation */}
+      <nav
+        aria-label="Primary workspace navigation"
+        className="grid grid-cols-4 gap-1 border-t border-slate-100 bg-white px-2 py-1.5 md:hidden dark:border-slate-800 dark:bg-slate-900"
+      >
+        {mobilePrimaryNav.map((item) => {
+          const active = item.match(location.pathname)
+          const Icon = item.icon
 
-          <div className="pt-4 border-t border-border flex items-center justify-between px-2">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs uppercase">
-                {user?.username?.slice(0, 2) || 'US'}
-              </div>
-              <div className="flex flex-col text-left">
-                <span className="text-xs font-bold text-gray-900 dark:text-white leading-tight">{user?.username || 'User'}</span>
-                <span className="text-[10px] text-muted-foreground">{user?.email || ''}</span>
-              </div>
-            </div>
+          return (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={cn(
+                'flex h-12 min-w-0 flex-col items-center justify-center gap-1 rounded-xl border px-0.5 text-center transition-colors',
+                active
+                  ? 'border-blue-200/60 bg-blue-50 font-semibold text-blue-600 dark:border-blue-900/50 dark:bg-blue-950/60 dark:text-blue-400'
+                  : 'border-transparent text-slate-600 hover:bg-slate-100/70 dark:text-slate-400 dark:hover:bg-slate-800/60'
+              )}
+            >
+              <Icon className="h-4 w-4 shrink-0" />
+              <span className="max-w-full truncate text-[11px] font-medium leading-none tracking-tight">
+                {item.label}
+              </span>
+            </NavLink>
+          )
+        })}
+      </nav>
+
+      {/* Mobile-only account menu: no public landing-page links */}
+      {menuOpen && (
+        <div
+          className="fixed inset-0 z-50 md:hidden"
+          onClick={() => setMenuOpen(false)}
+        >
+          <div className="absolute inset-0 bg-black/20" />
+
+          <section
+            id="authenticated-mobile-account-menu"
+            aria-label="Account menu"
+            className="absolute left-3 top-16 w-64 max-w-[calc(100vw-24px)] overflow-hidden rounded-xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={goToProfile}
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+            >
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+                {userInitial}
+              </span>
+
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-semibold text-slate-900 dark:text-white">
+                  {user?.username || 'User'}
+                </span>
+                <span className="block truncate text-xs text-muted-foreground">
+                  {user?.email || 'View profile'}
+                </span>
+              </span>
+
+              <UserRound className="h-4 w-4 shrink-0 text-muted-foreground" />
+            </button>
+
+            <div className="my-1 border-t border-slate-100 dark:border-slate-800" />
 
             <button
-              onClick={() => {
-                handleLogout()
-              }}
+              type="button"
+              onClick={handleLogout}
               disabled={isLoggingOut}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-danger bg-danger/10 hover:bg-danger/20 disabled:bg-secondary-bg disabled:text-muted-foreground disabled:border-border disabled:cursor-not-allowed rounded-xl transition-colors cursor-pointer"
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60 dark:hover:bg-red-950/30"
             >
               {isLoggingOut ? (
-                <div className="w-3.5 h-3.5 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin flex-shrink-0" />
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
               ) : (
-                <LogOut className="w-3.5 h-3.5" />
+                <LogOut className="h-4 w-4" />
               )}
-              <span>{isLoggingOut ? 'Logging out...' : 'Logout'}</span>
+              {isLoggingOut ? 'Logging out...' : 'Logout'}
             </button>
-          </div>
+          </section>
         </div>
       )}
     </header>

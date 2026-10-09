@@ -18,8 +18,8 @@ import { cn } from '@/lib/utils'
 const workspaceNav = [
   { to: '/home', label: 'Home', icon: Home, match: (p: string) => p === '/home' },
   { to: '/resume', label: 'Resume', icon: FileText, match: (p: string) => p.startsWith('/resume') },
-  { to: '/agent', label: 'AI Career Agent', icon: Sparkles, match: (p: string) => p.startsWith('/agent') },
   { to: '/jobs', label: 'Jobs', icon: Briefcase, match: (p: string) => p.startsWith('/jobs') },
+  { to: '/agent', label: 'AI Career Agent', icon: Sparkles, match: (p: string) => p.startsWith('/agent') },
 ]
 
 const accountNav = [

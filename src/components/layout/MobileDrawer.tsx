@@ -2,12 +2,11 @@ import { useEffect, useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Home,
-  FileText,
-  Sparkles,
-  Briefcase,
   User,
   Settings,
+  HelpCircle,
+  FileCheck,
+  ShieldCheck,
   LogOut,
   X,
 } from 'lucide-react'
@@ -15,16 +14,15 @@ import { useAuth } from '@/services/authService'
 import TalentPrepLogo from '@/components/common/TalentPrepLogo'
 import { cn } from '@/lib/utils'
 
-const workspaceNav = [
-  { to: '/home', label: 'Home', icon: Home, match: (p: string) => p === '/home' },
-  { to: '/resume', label: 'Resume', icon: FileText, match: (p: string) => p.startsWith('/resume') },
-  { to: '/agent', label: 'AI Career Agent', icon: Sparkles, match: (p: string) => p.startsWith('/agent') },
-  { to: '/jobs', label: 'Jobs', icon: Briefcase, match: (p: string) => p.startsWith('/jobs') },
-]
-
 const accountNav = [
   { to: '/profile', label: 'Profile', icon: User, match: (p: string) => p === '/profile' },
   { to: '/settings', label: 'Settings', icon: Settings, match: (p: string) => p === '/settings' },
+]
+
+const infoNav = [
+  { to: '/help', label: 'Help & Support', icon: HelpCircle, match: (p: string) => p === '/help' || p === '/faq' },
+  { to: '/terms-and-conditions', label: 'Terms & Conditions', icon: FileCheck, match: (p: string) => p === '/terms-and-conditions' },
+  { to: '/privacy-policy', label: 'Privacy Policy', icon: ShieldCheck, match: (p: string) => p === '/privacy-policy' },
 ]
 
 interface MobileDrawerProps {
@@ -102,35 +100,11 @@ export default function MobileDrawer({ open, onClose }: MobileDrawerProps) {
               </button>
             </div>
 
-            {/* Navigation */}
+            {/* Navigation Body */}
             <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto overscroll-contain">
               <div className="px-2 mb-2">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                  Workspace
-                </span>
-              </div>
-              {workspaceNav.map((item) => {
-                const isActive = item.match(location.pathname)
-                return (
-                  <NavLink
-                    key={item.to}
-                    to={item.to}
-                    className={cn(
-                      'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors',
-                      isActive
-                        ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 font-bold border border-blue-200/60 dark:border-blue-900/50'
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-secondary-bg'
-                    )}
-                  >
-                    <item.icon className="w-4.5 h-4.5 flex-shrink-0" />
-                    <span>{item.label}</span>
-                  </NavLink>
-                )
-              })}
-
-              <div className="pt-4 pb-2 px-2">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                  Account
+                  Account & Preferences
                 </span>
               </div>
               {accountNav.map((item) => {
@@ -152,7 +126,31 @@ export default function MobileDrawer({ open, onClose }: MobileDrawerProps) {
                 )
               })}
 
-              <div className="pt-2">
+              <div className="pt-4 pb-2 px-2">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                  Support & Legal
+                </span>
+              </div>
+              {infoNav.map((item) => {
+                const isActive = item.match(location.pathname)
+                return (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    className={cn(
+                      'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors',
+                      isActive
+                        ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 font-bold border border-blue-200/60 dark:border-blue-900/50'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-secondary-bg'
+                    )}
+                  >
+                    <item.icon className="w-4.5 h-4.5 flex-shrink-0" />
+                    <span>{item.label}</span>
+                  </NavLink>
+                )
+              })}
+
+              <div className="pt-4 border-t border-border mt-3">
                 <button
                   onClick={handleLogout}
                   disabled={isLoggingOut}
