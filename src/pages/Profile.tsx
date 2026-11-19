@@ -90,8 +90,10 @@ export default function Profile() {
               <span className="font-bold text-success">Active</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">User ID</span>
-              <span className="font-mono text-foreground font-semibold">#{user?.userId || 'N/A'}</span>
+              <span className="text-muted-foreground">Session Identity</span>
+              <span className="font-mono text-foreground font-semibold">
+                {user?.userId ? `#${user.userId}` : 'Gateway-Verified'}
+              </span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Auth Method</span>

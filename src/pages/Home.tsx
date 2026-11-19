@@ -1,7 +1,7 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
-import { FileText, Briefcase, ArrowRight, Sparkles, Upload } from 'lucide-react'
+import { FileText, Briefcase, ArrowRight, Sparkles, Upload, Video } from 'lucide-react'
 import { useAuth } from '@/services/authService'
 import { useResume, useResumeEvaluation } from '@/features/resume/hooks/useResume'
 import homeIllustration from '@/assets/home-illustration.png'
@@ -125,36 +125,35 @@ export default function Home() {
           </svg>
         </div>
 
-        {/* 2. Interview Action Card — hidden until interview backend is implemented. Source kept for future re-enable. */}
-      <div className="hidden">
+        {/* 2. Interview Action Card */}
         <div
           onClick={() => navigate('/interview')}
-          className="bg-gradient-to-br from-purple-50/70 via-purple-50/30 to-indigo-50/40 dark:from-slate-900 dark:to-purple-950/30 border border-purple-100/90 dark:border-purple-900/40 rounded-2xl p-4 sm:p-5 relative overflow-hidden group hover:border-purple-300 dark:hover:border-purple-700 hover:shadow-xs hover:-translate-y-0.5 transition-all duration-200 cursor-pointer flex flex-col justify-between min-h-[120px]"
+          className="bg-gradient-to-br from-blue-50/70 via-blue-50/30 to-indigo-50/40 dark:from-slate-900 dark:to-blue-950/30 border border-blue-100/90 dark:border-blue-900/40 rounded-2xl p-4 sm:p-5 relative overflow-hidden group hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-xs hover:-translate-y-0.5 transition-all duration-200 cursor-pointer flex flex-col justify-between min-h-[120px]"
         >
           <div className="flex items-center justify-between gap-3.5 z-10 relative">
             <div className="flex items-center gap-3.5">
-              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-purple-100/90 dark:bg-purple-900/60 text-purple-600 dark:text-purple-400 flex items-center justify-center flex-shrink-0 border border-purple-200/50 dark:border-purple-800/50 shadow-2xs">
-                <Briefcase className="w-5 h-5 sm:w-5.5 sm:h-5.5" />
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-blue-100/90 dark:bg-blue-900/60 text-blue-600 dark:text-blue-400 flex items-center justify-center flex-shrink-0 border border-blue-200/50 dark:border-blue-800/50 shadow-2xs">
+                <Video className="w-5 h-5 sm:w-5.5 sm:h-5.5" />
               </div>
 
               <div>
                 <h3 className="font-heading font-extrabold text-base sm:text-lg text-slate-900 dark:text-white leading-tight">
-                  Interview
+                  AI Interview Studio
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed max-w-xs">
-                  Practice interviews with AI, improve your answers, and build confidence.
+                  Practice live technical, coding, and behavioral interviews with instant AI feedback.
                 </p>
               </div>
             </div>
 
-            <div className="w-8 h-8 rounded-full bg-white dark:bg-slate-800 text-purple-600 dark:text-purple-400 shadow-2xs border border-slate-200/80 dark:border-slate-700 flex items-center justify-center group-hover:scale-105 group-hover:bg-purple-600 group-hover:text-white group-hover:border-purple-600 transition-all duration-150 flex-shrink-0">
+            <div className="w-8 h-8 rounded-full bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-2xs border border-slate-200/80 dark:border-slate-700 flex items-center justify-center group-hover:scale-105 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all duration-150 flex-shrink-0">
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </div>
           </div>
 
           {/* Decorative wave graphic at card bottom */}
           <svg
-            className="absolute bottom-0 left-0 right-0 w-full h-8 text-purple-200/35 dark:text-purple-900/20 pointer-events-none"
+            className="absolute bottom-0 left-0 right-0 w-full h-8 text-blue-200/35 dark:text-blue-900/20 pointer-events-none"
             viewBox="0 0 500 80"
             preserveAspectRatio="none"
             fill="none"
@@ -165,7 +164,6 @@ export default function Home() {
             <path d="M0,55 Q125,25 250,55 T500,50" opacity="0.6" />
           </svg>
         </div>
-      </div>
       </motion.div>
 
       {/* ── Recent Activity Section ── */}

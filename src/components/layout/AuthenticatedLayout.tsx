@@ -6,6 +6,7 @@ import {
   FileText,
   Briefcase,
   Sparkles,
+  Video,
   X,
   LogOut,
   UserRound,
@@ -32,6 +33,12 @@ const primaryNavItems = [
     label: 'Resume',
     icon: FileText,
     match: (p: string) => p.startsWith('/resume'),
+  },
+  {
+    to: '/interview',
+    label: 'Interview',
+    icon: Video,
+    match: (p: string) => p.startsWith('/interview'),
   },
   {
     to: '/jobs',
@@ -168,7 +175,7 @@ export default function AuthenticatedLayout({
         {/* Row 2: Primary workspace navigation */}
         <nav
           aria-label="Primary workspace navigation"
-          className="grid grid-cols-4 gap-1 bg-white px-2 py-1.5 dark:bg-slate-900"
+          className="grid grid-cols-5 gap-1 bg-white px-2 py-1.5 dark:bg-slate-900"
         >
           {primaryNavItems.map((item) => {
             const isActive = item.match(location.pathname)

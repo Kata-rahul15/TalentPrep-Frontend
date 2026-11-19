@@ -24,28 +24,28 @@ export default function Landing() {
     <div className="min-h-screen bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary">
       {/* Sticky Top Navigation Bar */}
       <Navbar />
-      
+
       {/* Main Landing Page Sections */}
       <main>
         {/* 1. Hero Section */}
         <Hero />
-        
+
         {/* 2. AI Job Search Section */}
         <JobSearchSection />
-        
+
         {/* 3. AI Career Agent Section */}
         <AIAgentSection />
-        
+
         {/* 4. How It Works Section */}
         <HowItWorks />
-        
+
         {/* 5. Frequently Asked Questions */}
         <FAQ />
-        
+
         {/* 6. Final Call to Action */}
         <CTA />
       </main>
-      
+
       {/* Footer */}
       <Footer />
     </div>

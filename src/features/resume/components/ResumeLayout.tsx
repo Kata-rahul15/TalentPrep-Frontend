@@ -8,7 +8,6 @@ import {
   Plus,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { ResumeProvider } from '../context/ResumeContext'
 import ResumeProcessingModal from './ResumeProcessingModal'
 
 const resumeNavItems = [
@@ -95,9 +94,5 @@ function ResumeLayoutContent({ children }: ResumeLayoutContentProps) {
 }
 
 export default function ResumeLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <ResumeProvider>
-      <ResumeLayoutContent>{children}</ResumeLayoutContent>
-    </ResumeProvider>
-  )
+  return <ResumeLayoutContent>{children}</ResumeLayoutContent>
 }

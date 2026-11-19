@@ -15,7 +15,7 @@ import {
   XCircle,
 } from 'lucide-react'
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom'
-import { ResumeProvider, useResumeContext } from '@/features/resume/context/ResumeContext'
+import { useResumeContext } from '@/features/resume/context/ResumeContext'
 import { useResume, useResumeDetails, useResumeChat, useJobMatch, useJobMatchStatus } from '@/features/resume/hooks/useResume'
 import { ScoreRingContainer } from '@/features/resume/components/ScoreRing'
 import { resumeApi } from '@/features/resume/api/resumeApi'
@@ -1210,11 +1210,9 @@ function AIAgentInner() {
 
 export default function AIAgent() {
   return (
-    <ResumeProvider>
-      <div className="flex-1 flex flex-col h-[calc(100dvh-0px)] overflow-hidden bg-[#FAFBFC] dark:bg-slate-950">
-        <AIAgentInner />
-      </div>
-    </ResumeProvider>
+    <div className="flex-1 flex flex-col h-[calc(100dvh-0px)] overflow-hidden bg-[#FAFBFC] dark:bg-slate-950">
+      <AIAgentInner />
+    </div>
   )
 }
 

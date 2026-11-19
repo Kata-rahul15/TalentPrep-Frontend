@@ -12,6 +12,8 @@ import AIAgent from '@/pages/AIAgent'
 import Jobs from '@/pages/Jobs'
 import { AuthProvider, useAuth } from '@/services/authService'
 import AuthenticatedLayout from '@/components/layout/AuthenticatedLayout'
+import { ResumeProvider } from '@/features/resume/context/ResumeContext'
+import ErrorBoundary from '@/components/common/ErrorBoundary'
 
 // Resume module
 import ResumeLayout from '@/features/resume/components/ResumeLayout'
@@ -23,6 +25,13 @@ import ResumeEvaluation from '@/features/resume/pages/ResumeEvaluation'
 import JobMatch from '@/features/resume/pages/JobMatch'
 import ResumeChat from '@/features/resume/pages/ResumeChat'
 
+// Interview module
+import InterviewLandingPage from '@/features/interview/pages/InterviewLandingPage'
+import InterviewSetupPage from '@/features/interview/pages/InterviewSetupPage'
+import InterviewRoomPage from '@/features/interview/pages/InterviewRoomPage'
+import InterviewReportPage from '@/features/interview/pages/InterviewReportPage'
+import InterviewTranscriptPage from '@/features/interview/pages/InterviewTranscriptPage'
+
 import OAuthCallback from '@/pages/OAuthCallback'
 import PrivacyPolicy from '@/pages/PrivacyPolicy'
 import TermsAndConditions from '@/pages/TermsAndConditions'
@@ -33,42 +42,67 @@ import ServiceWakeupScreen from '@/components/ServiceWakeupScreen'
 
 // Guard for authenticated screens
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth()
+  const { user, loading, authStatus, authError, retrySessionCheck } = useAuth()
 
-  console.log(`[RouteGuard:ProtectedRoute] loading=${loading}, user=${user ? user.email || user.username : 'null'}`)
-
-  if (loading) {
+  if (loading || authStatus === 'loading') {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center gap-3">
         <div className="w-8 h-8 border-4 border-brand-600 border-t-transparent rounded-full animate-spin" />
+        <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+          Restoring your session...
+        </p>
       </div>
     )
   }
 
-  if (!user) {
-    console.log('[RouteGuard:ProtectedRoute] Unauthenticated access to protected route. Redirecting to /login...')
+  if (authStatus === 'service_unavailable' && !user) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-4">
+        <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 text-center space-y-4 shadow-sm">
+          <h2 className="font-heading font-bold text-lg text-slate-900 dark:text-white">
+            Service Temporarily Unavailable
+          </h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+            {authError || 'We could not reach the authentication gateway right now. Your session has not been logged out.'}
+          </p>
+          <button
+            type="button"
+            onClick={() => retrySessionCheck()}
+            className="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-colors cursor-pointer"
+          >
+            Retry Connection
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  if (!user || authStatus === 'unauthenticated') {
     return <Navigate to="/login" replace />
   }
 
-  return <AuthenticatedLayout>{children}</AuthenticatedLayout>
+  return (
+    <ResumeProvider>
+      <AuthenticatedLayout>
+        <ErrorBoundary>{children}</ErrorBoundary>
+      </AuthenticatedLayout>
+    </ResumeProvider>
+  )
 }
 
 // Guard for guest-only screens (Login, Signup, etc.)
 function PublicRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth()
+  const { user, loading, authStatus } = useAuth()
 
-  console.log(`[RouteGuard:PublicRoute] loading=${loading}, user=${user ? user.email || user.username : 'null'}`)
-
-  if (loading) {
+  if (loading || authStatus === 'loading') {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-brand-600 border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
 
   if (user) {
-    console.log('[RouteGuard:PublicRoute] Authenticated user on guest route. Redirecting to /home...')
     return <Navigate to="/home" replace />
   }
 
@@ -126,6 +160,13 @@ export default function AppRoutes() {
           <Route path="/jobs" element={<ProtectedRoute><Jobs /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+
+          {/* Interview Module Routes */}
+          <Route path="/interview" element={<ProtectedRoute><InterviewLandingPage /></ProtectedRoute>} />
+          <Route path="/interview/setup" element={<ProtectedRoute><InterviewSetupPage /></ProtectedRoute>} />
+          <Route path="/interview/:sessionId" element={<ProtectedRoute><InterviewRoomPage /></ProtectedRoute>} />
+          <Route path="/interview/:sessionId/report" element={<ProtectedRoute><InterviewReportPage /></ProtectedRoute>} />
+          <Route path="/interview/:sessionId/transcript" element={<ProtectedRoute><InterviewTranscriptPage /></ProtectedRoute>} />
 
           {/* Resume Module Routes */}
           <Route

@@ -6,6 +6,7 @@ import {
   FileText,
   Sparkles,
   Briefcase,
+  Video,
   User,
   Settings,
   LogOut,
@@ -18,6 +19,7 @@ import { cn } from '@/lib/utils'
 const workspaceNav = [
   { to: '/home', label: 'Home', icon: Home, match: (p: string) => p === '/home' },
   { to: '/resume', label: 'Resume', icon: FileText, match: (p: string) => p.startsWith('/resume') },
+  { to: '/interview', label: 'AI Interview', icon: Video, match: (p: string) => p.startsWith('/interview') },
   { to: '/jobs', label: 'Jobs', icon: Briefcase, match: (p: string) => p.startsWith('/jobs') },
   { to: '/agent', label: 'AI Career Agent', icon: Sparkles, match: (p: string) => p.startsWith('/agent') },
 ]

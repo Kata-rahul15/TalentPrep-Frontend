@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
+import axios from 'axios'
 import {
   Briefcase,
   Search,
@@ -10,8 +11,8 @@ import {
   AlertCircle,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { useResumeDetails } from '@/features/resume/hooks/useResume'
-import { useResumeContext, ResumeProvider } from '@/features/resume/context/ResumeContext'
+import { useResume, useResumeDetails } from '@/features/resume/hooks/useResume'
+import { useResumeContext } from '@/features/resume/context/ResumeContext'
 import { resumeApi } from '@/features/resume/api/resumeApi'
 import { SkeletonJobList } from '@/features/resume/components/ResumeSkeletons'
 import { cn } from '@/lib/utils'
@@ -30,10 +31,22 @@ interface JobListing {
   skills_required?: string[]
 }
 
+interface SearchParams {
+  q: string
+  location: string
+  days: number
+}
+
+interface ActiveSearch {
+  params: SearchParams
+  controller: AbortController
+}
+
 function JobsExplorerInner() {
   const navigate = useNavigate()
   const { selectedResumeId } = useResumeContext()
-  const { data: resumeDetails } = useResumeDetails(selectedResumeId)
+  const { data: selectedResume, isLoading: isResumeLoading } = useResume(selectedResumeId)
+  const { data: resumeDetails, isLoading: isResumeDetailsLoading } = useResumeDetails(selectedResumeId)
 
   // Candidate parsed skills for instant match calculation
   const candidateSkills = useMemo(() => {
@@ -49,46 +62,78 @@ function JobsExplorerInner() {
   const [location, setLocation] = useState('')
   const [days, setDays] = useState(30)
   const [workModelFilter, setWorkModelFilter] = useState<'ALL' | 'Remote' | 'Hybrid' | 'On-site'>('ALL')
-  
+
   // Results & Loading
   const [jobs, setJobs] = useState<JobListing[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [hasSearched, setHasSearched] = useState(false)
+
+  // Track active in-flight search request and AbortController
+  const inFlightRef = useRef<ActiveSearch | null>(null)
 
   // Selected job for detailed inspection
   const [selectedJob, setSelectedJob] = useState<JobListing | null>(null)
 
-  // Initial automatic search based on resume skills or default Software Engineer query
-  useEffect(() => {
-    const defaultQuery = resumeDetails?.summary
-      ? 'Software Engineer Developer'
-      : candidateSkills.slice(0, 3).join(' ') || 'Software Engineer'
-
-    if (!hasSearched) {
-      setQuery(defaultQuery)
-      setLocation('India')
-      executeSearch(defaultQuery, 'India', 30)
+  const performSearch = useCallback(async (searchParams: SearchParams) => {
+    const normalizedParams: SearchParams = {
+      q: searchParams.q.trim(),
+      location: searchParams.location.trim(),
+      days: searchParams.days,
     }
-  }, [resumeDetails, candidateSkills, hasSearched])
 
-  const executeSearch = async (qText: string, locText: string, daysFilter: number) => {
+    // Prevent duplicate request if an identical search is currently running
+    if (
+      inFlightRef.current &&
+      inFlightRef.current.params.q === normalizedParams.q &&
+      inFlightRef.current.params.location === normalizedParams.location &&
+      inFlightRef.current.params.days === normalizedParams.days
+    ) {
+      return
+    }
+
+    // Cancel obsolete in-flight request when a newer search replaces it
+    if (inFlightRef.current) {
+      inFlightRef.current.controller.abort()
+      inFlightRef.current = null
+    }
+
+    const controller = new AbortController()
+    inFlightRef.current = {
+      params: normalizedParams,
+      controller,
+    }
+
     setIsLoading(true)
     setError(null)
-    setHasSearched(true)
+
     try {
-      const data = await resumeApi.searchJobs({
-        q: qText.trim() || undefined,
-        location: locText.trim() || undefined,
-        days: daysFilter,
-        limit: 20,
-      })
-      const fetchedJobs = data?.jobs || []
-      setJobs(fetchedJobs)
-      if (fetchedJobs.length > 0 && !selectedJob) {
-        setSelectedJob(fetchedJobs[0])
+      const data = await resumeApi.searchJobs(
+        {
+          q: normalizedParams.q || undefined,
+          location: normalizedParams.location || undefined,
+          days: normalizedParams.days,
+          limit: 20,
+        },
+        controller.signal
+      )
+
+      if (controller.signal.aborted) {
+        return
       }
+
+      const fetchedJobs: JobListing[] = data?.jobs || []
+      setJobs(fetchedJobs)
+      setSelectedJob((prev) => {
+        if (prev && fetchedJobs.some((j) => j.job_id === prev.job_id)) {
+          return prev
+        }
+        return fetchedJobs[0] || null
+      })
     } catch (err: any) {
+      if (axios.isCancel(err) || err?.name === 'CanceledError' || controller.signal.aborted) {
+        // Request was replaced or aborted; ignore without setting error state
+        return
+      }
       console.error('[JobsExplorer] Search failed:', err)
       setError(
         err?.response?.data?.message ||
@@ -97,13 +142,66 @@ function JobsExplorerInner() {
       )
       setJobs([])
     } finally {
-      setIsLoading(false)
+      // Only clear loading state if this specific controller is still the active one
+      if (inFlightRef.current?.controller === controller) {
+        inFlightRef.current = null
+        setIsLoading(false)
+      }
     }
-  }
+  }, [])
+
+  // Initial automatic search on component mount with proper AbortController cleanup
+  useEffect(() => {
+    if (isResumeLoading) return
+    if (selectedResume?.status === 'ready' && isResumeDetailsLoading) return
+
+    const defaultQuery = resumeDetails?.summary
+      ? 'Software Engineer Developer'
+      : candidateSkills.slice(0, 3).join(' ') || 'Software Engineer'
+
+    const initialParams: SearchParams = {
+      q: defaultQuery,
+      location: 'India',
+      days: 30,
+    }
+
+    setQuery(initialParams.q)
+    setLocation(initialParams.location)
+    setDays(initialParams.days)
+
+    performSearch(initialParams)
+
+    return () => {
+      if (inFlightRef.current) {
+        inFlightRef.current.controller.abort()
+        inFlightRef.current = null
+      }
+    }
+  }, [
+    isResumeLoading,
+    selectedResume?.status,
+    isResumeDetailsLoading,
+    resumeDetails?.summary,
+    candidateSkills,
+    performSearch,
+  ])
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    executeSearch(query, location, days)
+    performSearch({
+      q: query,
+      location,
+      days,
+    })
+  }
+
+  const handleDaysChange = (newDays: number) => {
+    setDays(newDays)
+    performSearch({
+      q: query,
+      location,
+      days: newDays,
+    })
   }
 
   // Filtered jobs by work model
@@ -123,7 +221,7 @@ function JobsExplorerInner() {
     if (candidateSkills.length === 0) return { score: 75, matched: [], missing: [] }
 
     const jobText = `${job.title} ${job.description || ''} ${(job.skills_required || []).join(' ')}`.toLowerCase()
-    
+
     const matched: string[] = []
     const missing: string[] = []
 
@@ -199,7 +297,7 @@ function JobsExplorerInner() {
           <div className="md:col-span-2 relative">
             <select
               value={days}
-              onChange={(e) => setDays(Number(e.target.value))}
+              onChange={(e) => handleDaysChange(Number(e.target.value))}
               className="w-full px-2.5 py-2 text-xs bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-900 dark:text-white cursor-pointer"
             >
               <option value={7}>Last 7 Days</option>
@@ -455,10 +553,8 @@ function JobsExplorerInner() {
 
 export default function Jobs() {
   return (
-    <ResumeProvider>
-      <div className="w-full max-w-[1400px] px-4 sm:px-6 lg:px-8 py-5">
-        <JobsExplorerInner />
-      </div>
-    </ResumeProvider>
+    <div className="w-full max-w-[1400px] px-4 sm:px-6 lg:px-8 py-5">
+      <JobsExplorerInner />
+    </div>
   )
 }

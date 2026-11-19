@@ -7,6 +7,7 @@ import {
   FileText,
   Briefcase,
   Sparkles,
+  Video,
   UserRound,
   LogOut,
 } from 'lucide-react'
@@ -26,6 +27,12 @@ const mobilePrimaryNav = [
     label: 'Resume',
     icon: FileText,
     match: (path: string) => path.startsWith('/resume'),
+  },
+  {
+    to: '/interview',
+    label: 'Interview',
+    icon: Video,
+    match: (path: string) => path.startsWith('/interview'),
   },
   {
     to: '/jobs',
@@ -51,6 +58,11 @@ const desktopNavItems = [
     label: 'Resume',
     to: '/resume',
     match: (path: string) => path.startsWith('/resume'),
+  },
+  {
+    label: 'Interview Studio',
+    to: '/interview',
+    match: (path: string) => path.startsWith('/interview'),
   },
   {
     label: 'Jobs',
@@ -238,7 +250,7 @@ export default function AuthenticatedNavbar() {
       {/* Mobile-only primary workspace navigation */}
       <nav
         aria-label="Primary workspace navigation"
-        className="grid grid-cols-4 gap-1 border-t border-slate-100 bg-white px-2 py-1.5 md:hidden dark:border-slate-800 dark:bg-slate-900"
+        className="grid grid-cols-5 gap-1 border-t border-slate-100 bg-white px-2 py-1.5 md:hidden dark:border-slate-800 dark:bg-slate-900"
       >
         {mobilePrimaryNav.map((item) => {
           const active = item.match(location.pathname)

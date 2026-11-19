@@ -295,9 +295,6 @@ export const resumeApi = {
         '/api/resumes/upload',
         formData,
         {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
           onUploadProgress: (progressEvent) => {
             if (progressEvent.total && onProgress) {
               const percentCompleted = Math.round(
@@ -920,8 +917,14 @@ export const resumeApi = {
     return response.data?.content ?? response.data
   },
 
-  searchJobs: async (params: { q?: string; location?: string; days?: number; limit?: number }) => {
-    const response = await api.get('/api/resumes/jobs/search', { params })
+  searchJobs: async (
+    params: { q?: string; location?: string; days?: number; limit?: number },
+    signal?: AbortSignal
+  ) => {
+    const response = await api.get('/api/resumes/jobs/search', {
+      params,
+      signal,
+    })
     return response.data
   },
   findJobsForMe: async (params?: {

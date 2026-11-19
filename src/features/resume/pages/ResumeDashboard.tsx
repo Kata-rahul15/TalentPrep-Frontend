@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
@@ -55,7 +55,8 @@ export default function ResumeDashboard() {
   const isReady = resume?.status === 'ready'
   const { data: evaluation } = useResumeEvaluation(resume?.id, isReady)
   const { data: overview } = useResumeOverview(resume?.id, isReady)
-  const { data: details } = useResumeDetails(resume?.id)
+  const { data: details, isLoading: isDetailsLoading } = useResumeDetails(resume?.id)
+  const recommendedSearchResumeRef = useRef<string | null>(null)
 
   // Quick Agent Question Input
   const [quickQuestion, setQuickQuestion] = useState('')
@@ -66,30 +67,30 @@ export default function ResumeDashboard() {
 
   // Fetch Recommended Jobs based on resume
   useEffect(() => {
-    if (isReady && resume?.id) {
-      let isMounted = true
-      const fetchRecommended = async () => {
-        setIsLoadingJobs(true)
-        try {
-          const skillTerms = details?.skills
-            ? details.skills.split(/[,|\n]+/).slice(0, 3).map((s: string) => s.trim()).join(' ')
-            : 'Software Engineer'
-          const data = await resumeApi.searchJobs({ q: skillTerms || 'Developer', limit: 3 })
-          if (isMounted) {
-            setRecommendedJobs(data?.jobs || [])
-          }
-        } catch (e) {
-          console.warn('[ResumeDashboard] Recommended jobs fetch error:', e)
-        } finally {
-          if (isMounted) setIsLoadingJobs(false)
-        }
-      }
-      fetchRecommended()
-      return () => {
-        isMounted = false
+    if (!isReady || !resume?.id || isDetailsLoading) return
+    if (recommendedSearchResumeRef.current === resume.id) return
+
+    recommendedSearchResumeRef.current = resume.id
+    let isMounted = true
+    const fetchRecommended = async () => {
+      setIsLoadingJobs(true)
+      try {
+        const skillTerms = details?.skills
+          ? details.skills.split(/[,|\n]+/).slice(0, 3).map((s: string) => s.trim()).join(' ')
+          : 'Software Engineer'
+        const data = await resumeApi.searchJobs({ q: skillTerms || 'Developer', limit: 3 })
+        if (isMounted) setRecommendedJobs(data?.jobs || [])
+      } catch (e) {
+        console.warn('[ResumeDashboard] Recommended jobs fetch error:', e)
+      } finally {
+        if (isMounted) setIsLoadingJobs(false)
       }
     }
-  }, [isReady, resume?.id, details?.skills])
+    void fetchRecommended()
+    return () => {
+      isMounted = false
+    }
+  }, [isReady, resume?.id, isDetailsLoading, details?.skills])
 
   // Quick prompt handler for AI Career Agent widget
   const handleQuickPrompt = (promptText: string) => {
